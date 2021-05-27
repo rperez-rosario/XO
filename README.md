@@ -1,20 +1,26 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
-
+This project repository houses source code and project documents for the XO Skin project.
+TODO: PJ, please write something nice about the project here, goals, etc.
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
 1.	Installation process
+TODO: To be detailed as the project progresses.
 2.	Software dependencies
+ASP.NET MVC
+C#
+Javascript
+Bootstrap
+Razor
 3.	Latest releases
+0.1 Visual Studio project created, repository initiated with seed project files.
 4.	API references
-
+https://docs.microsoft.com/en-us/dotnet/csharp/
+https://getbootstrap.com/
+https://dotnet.microsoft.com/apps/aspnet/mvc
+https://www.microsoft.com/en-us/sql-server/sql-server-2019
+https://www.iis.net/
+https://azure.microsoft.com/en-us/
 # Build and Test
-TODO: Describe and show how to build your code and run the tests. 
-
+TODO: To be detailed as the project progresses. 
 # Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
-
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+You can review the existing codebase at any time and point out any discrepancies to rperezrosario@outlook.com.
+There is a ProjectDocuments folder that can be used as a general private repository for project documents accessible to all team members.
