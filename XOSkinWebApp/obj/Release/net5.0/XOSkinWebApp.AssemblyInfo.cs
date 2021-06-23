@@ -11,6 +11,7 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.AspNetCore.Identity.UI.UIFrameworkAttribute("Bootstrap4")]
 [assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("aspnet-XOSkinWebApp-28325F0B-31B7-4969-B47E-DDCBCE25EEFD")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("XOSkinWebApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
