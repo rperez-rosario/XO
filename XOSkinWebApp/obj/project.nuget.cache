@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "zbhCsTV9nvwYSUcBSWWUEen9njZQDRjDmUAh65CZy2izPH9YAD4yR4WaASg10lAnKKzzAhEtN7aYIwBhtDANzA==",
+  "dgSpecHash": "qs8YSyciGflNklfPrpiEsTPHyYR41ClfvzMOIABYvwJw02mkGfVOJAiZrmgSZ4EB/yNpaU4RhMKcIbbazsFUCQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\Rafael\\source\\repos\\XO\\XOSkinWebApp\\XOSkinWebApp.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Rafael\\.nuget\\packages\\adaptivecomputingframeworkcore\\1.0.0\\adaptivecomputingframeworkcore.1.0.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\5.0.6\\microsoft.aspnetcore.cryptography.internal.5.0.6.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\5.0.6\\microsoft.aspnetcore.cryptography.keyderivation.5.0.6.nupkg.sha512",

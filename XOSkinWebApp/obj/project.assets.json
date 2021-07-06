@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     "net5.0": {
+      "AdaptiveComputingFrameworkCore/1.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0/AdaptiveComputingFrameworkCore.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/AdaptiveComputingFrameworkCore.dll": {}
+        }
+      },
       "Humanizer.Core/2.8.26": {
         "type": "package",
         "compile": {
@@ -1857,10 +1866,37 @@
         "runtime": {
           "lib/netstandard1.3/System.Xml.XmlSerializer.dll": {}
         }
+      },
+      "AdaptiveProductRecommendationEngine/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "dependencies": {
+          "AdaptiveComputingFrameworkCore": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/AdaptiveProductRecommendationEngine.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/AdaptiveProductRecommendationEngine.dll": {}
+        }
       }
     }
   },
   "libraries": {
+    "AdaptiveComputingFrameworkCore/1.0.0": {
+      "sha512": "U3fCw0dHlyzRWl5MaIP1+f8Y7c1eJ/wvSKc89C6mv2txN7yqlHx+O8SHA6LH9sjKBh2299bVTT5fEJN7emux8Q==",
+      "type": "package",
+      "path": "adaptivecomputingframeworkcore/1.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "555dc273-5364-403f-b0f2-cf2a1cb9963b.png",
+        "MIT.txt",
+        "adaptivecomputingframeworkcore.1.0.0.nupkg.sha512",
+        "adaptivecomputingframeworkcore.nuspec",
+        "lib/net5.0/AdaptiveComputingFrameworkCore.dll"
+      ]
+    },
     "Humanizer.Core/2.8.26": {
       "sha512": "OiKusGL20vby4uDEswj2IgkdchC1yQ6rwbIkZDVBPIR6al2b7n3pC91elBul9q33KaBgRKhbZH3+2Ur4fnWx2A==",
       "type": "package",
@@ -6707,10 +6743,16 @@
         "system.xml.xmlserializer.4.3.0.nupkg.sha512",
         "system.xml.xmlserializer.nuspec"
       ]
+    },
+    "AdaptiveProductRecommendationEngine/1.0.0": {
+      "type": "project",
+      "path": "../AdaptiveProductRecommendationEngine/AdaptiveProductRecommendationEngine.csproj",
+      "msbuildProject": "../AdaptiveProductRecommendationEngine/AdaptiveProductRecommendationEngine.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net5.0": [
+      "AdaptiveProductRecommendationEngine >= 1.0.0",
       "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore >= 5.0.6",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 5.0.6",
       "Microsoft.AspNetCore.Identity.UI >= 5.0.6",
@@ -6750,7 +6792,11 @@
       "frameworks": {
         "net5.0": {
           "targetAlias": "net5.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\Rafael\\source\\repos\\XO\\AdaptiveProductRecommendationEngine\\AdaptiveProductRecommendationEngine.csproj": {
+              "projectPath": "C:\\Users\\Rafael\\source\\repos\\XO\\AdaptiveProductRecommendationEngine\\AdaptiveProductRecommendationEngine.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

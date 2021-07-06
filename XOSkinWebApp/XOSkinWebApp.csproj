@@ -15,4 +15,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AdaptiveProductRecommendationEngine\AdaptiveProductRecommendationEngine.csproj" />
+  </ItemGroup>
+
 </Project>
