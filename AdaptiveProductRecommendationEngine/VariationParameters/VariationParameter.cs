@@ -7,7 +7,7 @@ using AdaptiveComputingFramework.Interfaces;
 
 namespace AdaptiveProductRecommendationEngine.VariationParameters
 {
-  class VariationParameter : IVariationParameter
+  public class VariationParameter : IVariationParameter
   {
     public object Parameter { get ; set; }
   }

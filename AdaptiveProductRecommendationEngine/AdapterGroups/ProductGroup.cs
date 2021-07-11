@@ -7,14 +7,14 @@ using AdaptiveComputingFramework.Interfaces;
 
 namespace AdaptiveProductRecommendationEngine.AdapterGroups
 {
-  class ProductGroup : IAdapterGroup
+  public class ProductGroup : IAdapterGroup
   {
     public List<IAdapter> Adapter { get; set; }
     public List<IAdapterAppropriatenessFunction> AdapterAppropriatenessFunction { get; set; }
     public IVariationParameter VariationParameter { get; set; }
     public decimal AdapterGroupAppropriateness { get; set; }
 
-    ProductGroup()
+    public ProductGroup()
     {
       Adapter = new List<IAdapter>();
       AdapterAppropriatenessFunction = new List<IAdapterAppropriatenessFunction>();
