@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AdaptiveComputingFramework.Interfaces;
 using AdaptiveComputingFramework.Processors;
 using AdaptiveProductRecommendationEngine.AdapterGroups;
 using AdaptiveProductRecommendationEngine.Adapters;
@@ -21,6 +22,11 @@ namespace XOSkinWebApp.Controllers
       int numberOfIterations = 10;
       int variationProbabilityPercentage = 8;
       int maxProcessedAdapterGroupCount = 10;
+
+      List<IAdapterGroup> seed = new List<IAdapterGroup>();
+      // TODO: Randomly populate seed.
+
+      bool logProcessor = false;
 
       ProductAdapter product1 = new ProductAdapter();
       ProductAdapter product2 = new ProductAdapter();
@@ -73,9 +79,18 @@ namespace XOSkinWebApp.Controllers
       product.Adapter.Add(product3);
       product.Adapter.Add(product4);
       product.Adapter.Add(product5);
-      
+
       // TODO: Define Variation Parameter for the application.
+      // TODO: Implement Combine, ComputeGroupAppropriateness and Variate on
+      //       ProductGroup.cs.
       // TODO: Implement appropriateness function for the application.
+
+      processor.Log = logProcessor;
+      processor.Seed = seed;
+      processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
+        maxProcessedAdapterGroupCount);
+
+      // TODO: Populate View with top result.
 
       // END TEST CODE (Data to be populated from DB in Production.)
 

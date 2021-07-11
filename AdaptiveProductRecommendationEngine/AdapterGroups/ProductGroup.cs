@@ -20,6 +20,8 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
       AdapterAppropriatenessFunction = new List<IAdapterAppropriatenessFunction>();
       VariationParameter = (IVariationParameter)new object();
       AdapterGroupAppropriateness = 0.0M;
+
+      AdapterAppropriatenessFunction.Add(new QuestionnaireIngredientMatrix());
     }
 
     public IAdapterGroup Combine(IAdapterGroup AdapterGroup)
