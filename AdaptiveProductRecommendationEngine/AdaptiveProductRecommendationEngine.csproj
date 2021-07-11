@@ -5,10 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="AdapterGroups\" />
-    <Folder Include="Adapters\" />
     <Folder Include="Common\" />
-    <Folder Include="VariationParameters\" />
   </ItemGroup>
 
   <ItemGroup>
