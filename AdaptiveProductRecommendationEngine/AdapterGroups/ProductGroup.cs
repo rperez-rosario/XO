@@ -9,10 +9,18 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
 {
   class ProductGroup : IAdapterGroup
   {
-    public List<IAdapter> Adapter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public List<IAdapterAppropriatenessFunction> AdapterAppropriatenessFunction { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public IVariationParameter VariationParameter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public decimal AdapterGroupAppropriateness { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public List<IAdapter> Adapter { get; set; }
+    public List<IAdapterAppropriatenessFunction> AdapterAppropriatenessFunction { get; set; }
+    public IVariationParameter VariationParameter { get; set; }
+    public decimal AdapterGroupAppropriateness { get; set; }
+
+    ProductGroup()
+    {
+      Adapter = new List<IAdapter>();
+      AdapterAppropriatenessFunction = new List<IAdapterAppropriatenessFunction>();
+      VariationParameter = (IVariationParameter)new object();
+      AdapterGroupAppropriateness = 0.0M;
+    }
 
     public IAdapterGroup Combine(IAdapterGroup AdapterGroup)
     {
