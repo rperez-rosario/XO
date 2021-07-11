@@ -9,6 +9,6 @@ namespace AdaptiveProductRecommendationEngine.VariationParameters
 {
   class VariationParameter : IVariationParameter
   {
-    public object Parameter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public object Parameter { get ; set; }
   }
 }

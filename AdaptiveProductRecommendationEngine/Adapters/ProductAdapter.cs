@@ -9,12 +9,16 @@ namespace AdaptiveProductRecommendationEngine.Adapters
 {
   class ProductAdapter : IAdapter
   {
-    public decimal Appropriateness { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public IVariationParameter VariationParameter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public decimal Appropriateness { get ; set; }
+    public IVariationParameter VariationParameter { get; set; }
+
+    public uint ProductId { get; set; }
+    public long QuantityAvailableInStock { get; set; }
+    public List<uint> IngredientId { get; set; }
 
     public void Variate(IAdapterGroup AdapterGroup)
     {
-      throw new NotImplementedException();
+      // Nothing to variate at this level. Do nothing.
     }
   }
 }
