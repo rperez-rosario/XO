@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Common\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AdaptiveComputingFrameworkCore" Version="1.0.0" />
   </ItemGroup>
 
