@@ -7,7 +7,7 @@ using AdaptiveComputingFramework.Interfaces;
 
 namespace AdaptiveProductRecommendationEngine.VariationParameters
 {
-  class VariationParameter : IVariationParameter;
+  class VariationParameter : IVariationParameter
   {
     public object Parameter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
   }
