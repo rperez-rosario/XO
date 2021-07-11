@@ -16,21 +16,24 @@ namespace XOSkinWebApp.Controllers
     {
       HollandProcessor processor = new HollandProcessor();
       ProductGroup product = new ProductGroup();
+
+      // TEST CODE (Data to be populated from DB in Production.)
       int numberOfIterations = 10;
       int variationProbabilityPercentage = 8;
       int maxProcessedAdapterGroupCount = 10;
 
-      // TEST CODE (Data to be populated from DB in Production.)
       ProductAdapter product1 = new ProductAdapter();
       ProductAdapter product2 = new ProductAdapter();
       ProductAdapter product3 = new ProductAdapter();
       ProductAdapter product4 = new ProductAdapter();
       ProductAdapter product5 = new ProductAdapter();
+      
       uint ingredientApple = 1;
       uint ingredientCoconut = 2;
       uint ingredientCarrot = 3;
       uint ingredientOliveOil = 4;
       uint ingredientCoriander = 6;
+
       List<uint> requiredIngredientsDerivedFromQuestionnaire = new List<uint>();
       List<uint> allergenicIngredientsDerivedFromQuestionnaire = new List<uint>();
 
