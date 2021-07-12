@@ -24,7 +24,6 @@ namespace XOSkinWebApp.Controllers
       int maxProcessedAdapterGroupCount = 10;
 
       List<IAdapterGroup> seed = new List<IAdapterGroup>();
-      // TODO: Randomly populate seed.
 
       bool logProcessor = false;
 
@@ -91,6 +90,8 @@ namespace XOSkinWebApp.Controllers
       //       ProductGroup.cs.
       // TODO: Implement appropriateness function for the application.
 
+      Seed(ref seed, product);
+
       processor.Log = logProcessor;
       processor.Seed = seed;
       processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
@@ -101,6 +102,11 @@ namespace XOSkinWebApp.Controllers
       // END TEST CODE (Data to be populated from DB in Production.)
 
       return View();
+    }
+
+    private void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product)
+    {
+      // TODO: Implement.
     }
   }
 }
