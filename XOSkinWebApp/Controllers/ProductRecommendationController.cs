@@ -22,6 +22,7 @@ namespace XOSkinWebApp.Controllers
       int numberOfIterations = 10;
       int variationProbabilityPercentage = 8;
       int maxProcessedAdapterGroupCount = 10;
+      int maxAdapterGroupAdapterCount = 3; // Max number of product to recommend.
 
       List<IAdapterGroup> seed = new List<IAdapterGroup>();
 
@@ -85,12 +86,16 @@ namespace XOSkinWebApp.Controllers
       product.Adapter.Add(product4);
       product.Adapter.Add(product5);
 
+      // Make sure we're not recommending more products than we have.
+      maxAdapterGroupAdapterCount = product.Adapter.Count < maxAdapterGroupAdapterCount ? 
+        product.Adapter.Count : maxAdapterGroupAdapterCount;
+
       // TODO: Define Variation Parameter for the application.
       // TODO: Implement Combine, ComputeGroupAppropriateness and Variate on
       //       ProductGroup.cs.
       // TODO: Implement appropriateness function for the application.
 
-      Seed(ref seed, product);
+      Seed(ref seed, product, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount);
 
       processor.Log = logProcessor;
       processor.Seed = seed;
@@ -104,9 +109,63 @@ namespace XOSkinWebApp.Controllers
       return View();
     }
 
-    private void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product)
+    private void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
+      int MaxProcessedAdapterGroupCount, int maxAdapterGroupAdapterCount)
     {
-      // TODO: Implement.
+      Random prng = new Random();
+      int i = 0;
+      int j = 0;
+      int k = 0;
+      ProductAdapter currentProduct = null;
+      ProductAdapter productToAdd = null;
+      ProductGroup productGroup = null;
+      bool productFoundInSeed = false;
+
+      for (; i < MaxProcessedAdapterGroupCount; i++)
+      {
+        productGroup = new ProductGroup();
+        for (j = 0; j < maxAdapterGroupAdapterCount; j++)
+        {
+          if (productGroup.Adapter.Count == 0)
+          {
+            productToAdd = 
+              (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count - 1)];
+            if (productToAdd.QuantityAvailableInStock > 0)
+            {
+              productGroup.Adapter.Add(productToAdd);
+            }
+            else
+            {
+              j--;
+              continue;
+            }
+          }
+          else
+          {
+            for (k = 0; k < productGroup.Adapter.Count; k++)
+            {
+              productToAdd =
+                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count - 1)];
+              currentProduct = (ProductAdapter)productGroup.Adapter[k];
+              productFoundInSeed = false;
+              if (productToAdd.ProductId == currentProduct.ProductId)
+              {
+                productFoundInSeed = true;
+                continue;
+              }
+            }
+            if (!productFoundInSeed && productToAdd.QuantityAvailableInStock > 0)
+            {
+              productGroup.Adapter.Add((IAdapter)productToAdd);
+            }
+            else
+            {
+              j--;
+            }
+          }
+        }
+        Seed.Add(productGroup);
+      }
     }
   }
 }
