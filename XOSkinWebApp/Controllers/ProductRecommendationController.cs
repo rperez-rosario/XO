@@ -41,11 +41,17 @@ namespace XOSkinWebApp.Controllers
       uint ingredientCoriander = 6;
 
       List<uint> requiredIngredientsDerivedFromQuestionnaire = new List<uint>();
+      List<uint> requiredSpecificProductsDerivedFromQuestionnaire = new List<uint>();
       List<uint> allergenicIngredientsDerivedFromQuestionnaire = new List<uint>();
+      List<Dictionary<uint, uint>> ingredientsThatCounteractEachOther =
+        new List<Dictionary<uint, uint>>();
 
       requiredIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
       requiredIngredientsDerivedFromQuestionnaire.Add(ingredientCoconut);
       requiredIngredientsDerivedFromQuestionnaire.Add(ingredientCoriander);
+
+      requiredSpecificProductsDerivedFromQuestionnaire.Add(1);
+      requiredSpecificProductsDerivedFromQuestionnaire.Add(3);
       
       allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientCarrot);
 
