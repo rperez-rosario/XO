@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XOSkinWebApp", "XOSkinWebApp.csproj", "{F493F155-7323-45C2-93A1-9F3B4B858EA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdaptiveProductRecommendationEngine", "..\AdaptiveProductRecommendationEngine\AdaptiveProductRecommendationEngine.csproj", "{1657806F-1752-4435-9C9A-01DDFC220BDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdaptiveProductRecommendationEngine", "..\AdaptiveProductRecommendationEngine\AdaptiveProductRecommendationEngine.csproj", "{1657806F-1752-4435-9C9A-01DDFC220BDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terminal", "..\Terminal\Terminal.csproj", "{DFEB1CB3-9F46-4007-995B-B36487B757C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{1657806F-1752-4435-9C9A-01DDFC220BDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1657806F-1752-4435-9C9A-01DDFC220BDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1657806F-1752-4435-9C9A-01DDFC220BDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFEB1CB3-9F46-4007-995B-B36487B757C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFEB1CB3-9F46-4007-995B-B36487B757C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFEB1CB3-9F46-4007-995B-B36487B757C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFEB1CB3-9F46-4007-995B-B36487B757C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -18,7 +18,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
     {
       Adapter = new List<IAdapter>();
       AdapterAppropriatenessFunction = new List<IAdapterAppropriatenessFunction>();
-      VariationParameter = (IVariationParameter)new object();
+      VariationParameter = null;
       AdapterGroupAppropriateness = 0.0M;
 
       AdapterAppropriatenessFunction.Add(new QuestionnaireIngredientMatrix());

@@ -1,26 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AdaptiveComputingFramework.Interfaces;
 using AdaptiveComputingFramework.Processors;
 using AdaptiveProductRecommendationEngine.AdapterGroups;
 using AdaptiveProductRecommendationEngine.Adapters;
 using AdaptiveProductRecommendationEngine.VariationParameters;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace XOSkinWebApp.Controllers
+namespace Terminal
 {
-  public class ProductRecommendationController : Controller
+  class Program
   {
-    public IActionResult Index()
+    static void Main(string[] args)
     {
-      View().ViewData = TestProductRecommendations();
-      return View();
+      TestProductRecommendations();
     }
 
-    private ViewDataDictionary TestProductRecommendations()
+    private static void TestProductRecommendations()
     {
       HollandProcessor processor = new HollandProcessor();
       ProductGroup product = new ProductGroup();
@@ -31,7 +26,7 @@ namespace XOSkinWebApp.Controllers
       int maxProcessedAdapterGroupCount = 10;
       int maxAdapterGroupAdapterCount = 3; // Max number of product to recommend.
 
-      List<IAdapterGroup> seed = new List<IAdapterGroup>();
+      System.Collections.Generic.List<IAdapterGroup> seed = new List<IAdapterGroup>();
 
       bool logProcessor = false;
 
@@ -112,7 +107,6 @@ namespace XOSkinWebApp.Controllers
       // TODO: Populate View with top result.
 
       // END TEST CODE (Data to be populated from DB in Production.)
-      return null;
     }
 
     private static void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
