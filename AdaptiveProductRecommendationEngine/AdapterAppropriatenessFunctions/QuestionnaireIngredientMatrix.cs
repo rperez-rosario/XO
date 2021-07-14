@@ -1,7 +1,7 @@
 ﻿using System;
 using AdaptiveComputingFramework.Interfaces;
 
-namespace AdaptiveProductRecommendationEngine
+namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
 {
   public class QuestionnaireIngredientMatrix : IAdapterAppropriatenessFunction
   {

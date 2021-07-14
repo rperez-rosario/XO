@@ -7,7 +7,7 @@ using AdaptiveComputingFramework.Interfaces;
 
 namespace AdaptiveProductRecommendationEngine.Adapters
 {
-  public class ProductAdapter : IAdapter
+  public struct ProductAdapter : IAdapter
   {
     public decimal Appropriateness { get ; set; }
     public IVariationParameter VariationParameter { get; set; }
@@ -17,18 +17,13 @@ namespace AdaptiveProductRecommendationEngine.Adapters
     public List<uint> IngredientId { get; set; }
 
     public ProductAdapter(uint ProductId, long QuantityAvailableInStock, 
-      List<uint> IngredientId)
+      List<uint> IngredientId, IVariationParameter VariationParameter)
     {
       this.ProductId = ProductId;
       this.QuantityAvailableInStock = QuantityAvailableInStock;
       this.IngredientId = IngredientId;
-    }
-
-    public ProductAdapter()
-    {
-      this.ProductId = 0;
-      this.QuantityAvailableInStock = 0;
-      this.IngredientId = new List<uint>();
+      this.VariationParameter = VariationParameter;
+      this.Appropriateness = 0.0M;
     }
     
     public void Variate(IAdapterGroup AdapterGroup)

@@ -41,6 +41,7 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\XOSki
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\XOSkinWebApp.deps.json
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\XOSkinWebApp.runtimeconfig.json
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\XOSkinWebApp.pdb
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\AdaptiveComputingFrameworkCore.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Humanizer.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Microsoft.AspNetCore.Cryptography.Internal.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
@@ -115,6 +116,8 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\runti
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.pdb
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\runtimes\win\lib\netstandard2.0\System.Runtime.Caching.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\AdaptiveProductRecommendationEngine.dll
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\AdaptiveProductRecommendationEngine.pdb
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\Identity\css\site.css
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\Identity\favicon.ico
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\Identity\js\site.js

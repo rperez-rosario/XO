@@ -4,39 +4,72 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AdaptiveComputingFramework.Interfaces;
+using AdaptiveProductRecommendationEngine.Adapters;
+using AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions;
 
 namespace AdaptiveProductRecommendationEngine.AdapterGroups
 {
-  public class ProductGroup : IAdapterGroup
+  public struct ProductGroup : IAdapterGroup
   {
     public List<IAdapter> Adapter { get; set; }
     public List<IAdapterAppropriatenessFunction> AdapterAppropriatenessFunction { get; set; }
+    public int EsporadicVariationProbability { get; set; }
     public IVariationParameter VariationParameter { get; set; }
     public decimal AdapterGroupAppropriateness { get; set; }
 
-    public ProductGroup()
+    public ProductGroup(List<IAdapter> Adapter)
     {
-      Adapter = new List<IAdapter>();
-      AdapterAppropriatenessFunction = new List<IAdapterAppropriatenessFunction>();
-      VariationParameter = null;
       AdapterGroupAppropriateness = 0.0M;
+      this.Adapter = Adapter;
+      AdapterAppropriatenessFunction = new List<IAdapterAppropriatenessFunction>();
+      EsporadicVariationProbability = 0;
+      VariationParameter = null;
 
       AdapterAppropriatenessFunction.Add(new QuestionnaireIngredientMatrix());
     }
 
     public IAdapterGroup Combine(IAdapterGroup AdapterGroup)
     {
-      throw new NotImplementedException();
+      ProductGroup combination = new ProductGroup(new List<IAdapter>());
+      ProductAdapter product;
+      Random prng = new Random();
+      int largestAdapterGroupCount = AdapterGroup.Adapter.Count > this.Adapter.Count ?
+        AdapterGroup.Adapter.Count : this.Adapter.Count;
+      int i = 0;
+
+      for (; i < largestAdapterGroupCount; i++)
+        if (this.Adapter[i] != null && AdapterGroup.Adapter[i] != null)
+          combination.Adapter.Add(prng.Next(0, 2) == 0 ?
+            this.Adapter[i] : AdapterGroup.Adapter[i]);
+        else if (this.Adapter[i] != null || AdapterGroup.Adapter[i] != null)
+          combination.Adapter.Add(this.Adapter[i] == null ?
+            AdapterGroup.Adapter[i] : this.Adapter[i]);
+        else
+        {
+          product = new ProductAdapter();
+          product.Variate(this);
+          combination.Adapter.Add(product);
+        }
+      return combination;
     }
 
     public void ComputeGroupAppropriateness()
     {
-      throw new NotImplementedException();
+      // TODO: Implement.
     }
 
     public void Variate()
     {
-      throw new NotImplementedException();
+      int i = 0;
+      Random prng = new Random();
+      
+      for (; i < Adapter.Count; i++)
+      {
+        if (prng.Next(0, 2) == 1)
+        {
+          Adapter[i].Variate(this);
+        }
+      }
     }
   }
 }

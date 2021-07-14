@@ -98,8 +98,7 @@ namespace XOSkinWebApp.Controllers
         product.Adapter.Count : maxAdapterGroupAdapterCount;
 
       // TODO: Define Variation Parameter for the application.
-      // TODO: Implement Combine, ComputeGroupAppropriateness and Variate on
-      //       ProductGroup.cs.
+      // TODO: Implement ComputeGroupAppropriateness on ProductGroup.cs.
       // TODO: Implement appropriateness function for the application.
 
       Seed(ref seed, product, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount);
@@ -122,9 +121,9 @@ namespace XOSkinWebApp.Controllers
       int i = 0;
       int j = 0;
       int k = 0;
-      ProductAdapter currentProduct = null;
-      ProductAdapter productToAdd = null;
-      ProductGroup productGroup = null;
+      ProductAdapter currentProduct;
+      ProductAdapter productToAdd;
+      ProductGroup productGroup;
       bool productFoundInSeed = false;
 
       if (IsThereStockOnMinimumNumberOfSku(maxAdapterGroupAdapterCount, Product))

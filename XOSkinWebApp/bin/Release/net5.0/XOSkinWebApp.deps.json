@@ -33,6 +33,7 @@
     ".NETCoreApp,Version=v5.0": {
       "XOSkinWebApp/1.0.0": {
         "dependencies": {
+          "AdaptiveProductRecommendationEngine": "1.0.0",
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "5.0.6",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "5.0.6",
           "Microsoft.AspNetCore.Identity.UI": "5.0.6",
@@ -321,6 +322,17 @@
         },
         "compile": {
           "XOSkinWebApp.dll": {}
+        }
+      },
+      "AdaptiveComputingFrameworkCore/1.0.0": {
+        "runtime": {
+          "lib/net5.0/AdaptiveComputingFrameworkCore.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        },
+        "compile": {
+          "lib/net5.0/AdaptiveComputingFrameworkCore.dll": {}
         }
       },
       "Humanizer.Core/2.8.26": {
@@ -1635,6 +1647,17 @@
           "System.Threading": "4.3.0",
           "System.Xml.ReaderWriter": "4.3.0",
           "System.Xml.XmlDocument": "4.3.0"
+        }
+      },
+      "AdaptiveProductRecommendationEngine/1.0.0": {
+        "dependencies": {
+          "AdaptiveComputingFrameworkCore": "1.0.0"
+        },
+        "runtime": {
+          "AdaptiveProductRecommendationEngine.dll": {}
+        },
+        "compile": {
+          "AdaptiveProductRecommendationEngine.dll": {}
         }
       },
       "Microsoft.AspNetCore.Antiforgery/5.0.0.0": {
@@ -3301,6 +3324,13 @@
       "serviceable": false,
       "sha512": ""
     },
+    "AdaptiveComputingFrameworkCore/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-U3fCw0dHlyzRWl5MaIP1+f8Y7c1eJ/wvSKc89C6mv2txN7yqlHx+O8SHA6LH9sjKBh2299bVTT5fEJN7emux8Q==",
+      "path": "adaptivecomputingframeworkcore/1.0.0",
+      "hashPath": "adaptivecomputingframeworkcore.1.0.0.nupkg.sha512"
+    },
     "Humanizer.Core/2.8.26": {
       "type": "package",
       "serviceable": true,
@@ -4119,6 +4149,11 @@
       "sha512": "sha512-MYoTCP7EZ98RrANESW05J5ZwskKDoN0AuZ06ZflnowE50LTpbR5yRg3tHckTVm5j/m47stuGgCrCHWePyHS70Q==",
       "path": "system.xml.xmlserializer/4.3.0",
       "hashPath": "system.xml.xmlserializer.4.3.0.nupkg.sha512"
+    },
+    "AdaptiveProductRecommendationEngine/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "Microsoft.AspNetCore.Antiforgery/5.0.0.0": {
       "type": "referenceassembly",

@@ -116,9 +116,9 @@ namespace Terminal
       int i = 0;
       int j = 0;
       int k = 0;
-      ProductAdapter currentProduct = null;
-      ProductAdapter productToAdd = null;
-      ProductGroup productGroup = null;
+      ProductAdapter currentProduct;
+      ProductAdapter productToAdd;
+      ProductGroup productGroup;
       bool productFoundInSeed = false;
 
       if (IsThereStockOnMinimumNumberOfSku(maxAdapterGroupAdapterCount, Product))
