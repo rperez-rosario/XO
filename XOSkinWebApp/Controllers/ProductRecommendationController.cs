@@ -98,7 +98,6 @@ namespace XOSkinWebApp.Controllers
         product.Adapter.Count : maxAdapterGroupAdapterCount;
 
       // TODO: Define Variation Parameter for the application.
-      // TODO: Implement ComputeGroupAppropriateness on ProductGroup.cs.
       // TODO: Implement appropriateness function for the application.
 
       Seed(ref seed, product, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount);

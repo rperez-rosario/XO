@@ -55,7 +55,31 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
 
     public void ComputeGroupAppropriateness()
     {
-      // TODO: Implement.
+      IAdapter product = null;
+      IAdapterGroup productGroup = null;
+      decimal productAppropiateness = 0.0M;
+      int i = 0;
+
+      for (; i < Adapter.Count; i++)
+        foreach (IAdapterAppropriatenessFunction appropriatenessFunction in 
+          AdapterAppropriatenessFunction)
+        {
+          appropriatenessFunction.ComputeAppropriateness(ref product);
+          productAppropiateness -= product.Appropriateness;
+        }
+      productAppropiateness = productAppropiateness / Adapter.Count;
+      productAppropiateness = productAppropiateness / AdapterAppropriatenessFunction.Count;
+
+      productGroup = this;
+
+      foreach (IAdapterAppropriatenessFunction appropriatenessFunction in
+        AdapterAppropriatenessFunction)
+        appropriatenessFunction.ComputeAppropriateness(ref productGroup);
+
+      AdapterGroupAppropriateness = AdapterGroupAppropriateness / Adapter.Count;
+      AdapterGroupAppropriateness =
+        AdapterGroupAppropriateness / AdapterAppropriatenessFunction.Count;
+      AdapterGroupAppropriateness -= productAppropiateness;
     }
 
     public void Variate()
