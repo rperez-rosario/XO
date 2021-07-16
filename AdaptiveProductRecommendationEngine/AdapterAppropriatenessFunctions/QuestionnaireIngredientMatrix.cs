@@ -10,7 +10,9 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
     {
       // 1 point for each ingredient that also appears as recommended by the questionnaire.
       // Decimal.Max - 1000 for product marked as required by the questionnaire.
-      // Decimal.Min - + 1000 for product marked as an allergen by the questionnaire.
+      // Decimal.Min + 1000 for product marked as an allergen by the questionnaire.
+      // Decimal.Min + 1000 for product marked as out of stock.
+      // 1 point for product whose stock is high (define high.)
       throw new NotImplementedException();
     }
 
