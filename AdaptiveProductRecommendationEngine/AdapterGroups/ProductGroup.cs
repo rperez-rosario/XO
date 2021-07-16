@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AdaptiveComputingFramework.Interfaces;
 using AdaptiveProductRecommendationEngine.Adapters;
 using AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions;
+using AdaptiveProductRecommendationEngine.Common;
 
 namespace AdaptiveProductRecommendationEngine.AdapterGroups
 {
@@ -33,9 +34,12 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
       ProductGroup combination = new ProductGroup(new List<IAdapter>());
       ProductAdapter product;
       Random prng = new Random();
+
       int largestAdapterGroupCount = AdapterGroup.Adapter.Count > this.Adapter.Count ?
         AdapterGroup.Adapter.Count : this.Adapter.Count;
       int i = 0;
+
+      combination.VariationParameter.Parameter = VariationParameter.Parameter;
 
       for (; i < largestAdapterGroupCount; i++)
         if (this.Adapter[i] != null && AdapterGroup.Adapter[i] != null)
@@ -47,28 +51,31 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
         else
         {
           product = new ProductAdapter();
-          product.Variate(this);
           combination.Adapter.Add(product);
         }
       return combination;
     }
 
+    public void Variate()
+    {
+      int i = 0;
+      Random prng = new Random();
+      List<object> parameter = (List<object>)VariationParameter.Parameter;
+      List<ProductAdapter> product = 
+        (List<ProductAdapter>)parameter[(int)EnumAdapterGroupVariationParameter.ProductGroup];
+      
+      for (; i < Adapter.Count; i++)
+      {
+        if (prng.Next(0, 2) == 1)
+        {
+          Adapter[i] = product[prng.Next(0, product.Count - 1)];
+        }
+      }
+    }
+
     public void ComputeGroupAppropriateness()
     {
-      IAdapter product = null;
       IAdapterGroup productGroup = null;
-      decimal productAppropiateness = 0.0M;
-      int i = 0;
-
-      for (; i < Adapter.Count; i++)
-        foreach (IAdapterAppropriatenessFunction appropriatenessFunction in 
-          AdapterAppropriatenessFunction)
-        {
-          appropriatenessFunction.ComputeAppropriateness(ref product);
-          productAppropiateness -= product.Appropriateness;
-        }
-      productAppropiateness = productAppropiateness / Adapter.Count;
-      productAppropiateness = productAppropiateness / AdapterAppropriatenessFunction.Count;
 
       productGroup = this;
 
@@ -79,21 +86,6 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
       AdapterGroupAppropriateness = AdapterGroupAppropriateness / Adapter.Count;
       AdapterGroupAppropriateness =
         AdapterGroupAppropriateness / AdapterAppropriatenessFunction.Count;
-      AdapterGroupAppropriateness -= productAppropiateness;
-    }
-
-    public void Variate()
-    {
-      int i = 0;
-      Random prng = new Random();
-      
-      for (; i < Adapter.Count; i++)
-      {
-        if (prng.Next(0, 2) == 1)
-        {
-          Adapter[i].Variate(this);
-        }
-      }
     }
   }
 }

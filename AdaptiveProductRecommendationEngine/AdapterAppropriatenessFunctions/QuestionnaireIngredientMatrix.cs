@@ -1,5 +1,6 @@
 ﻿using System;
 using AdaptiveComputingFramework.Interfaces;
+using AdaptiveProductRecommendationEngine.Common;
 
 namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
 {

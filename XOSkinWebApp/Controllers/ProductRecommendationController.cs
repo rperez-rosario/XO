@@ -23,7 +23,11 @@ namespace XOSkinWebApp.Controllers
     private ViewDataDictionary TestProductRecommendations()
     {
       HollandProcessor processor = new HollandProcessor();
-      ProductGroup product = new ProductGroup();
+      ProductGroup productGroup = new ProductGroup();
+      IVariationParameter adapterGroupVariationParameter = null;
+      List<object> variationParameter = null;
+
+      adapterGroupVariationParameter = new VariationParameter();
 
       // TEST CODE (Data to be populated from DB in Production.)
       int numberOfIterations = 10;
@@ -52,6 +56,13 @@ namespace XOSkinWebApp.Controllers
       List<uint> allergenicIngredientsDerivedFromQuestionnaire = new List<uint>();
       List<Dictionary<uint, uint>> ingredientsThatCounteractEachOther =
         new List<Dictionary<uint, uint>>();
+
+      adapterGroupVariationParameter.Parameter = new List<Object>();
+      variationParameter = (List<object>)adapterGroupVariationParameter.Parameter;
+      variationParameter.Add(requiredIngredientsDerivedFromQuestionnaire);
+      variationParameter.Add(requiredSpecificProductsDerivedFromQuestionnaire);
+      variationParameter.Add(allergenicIngredientsDerivedFromQuestionnaire);
+      variationParameter.Add(productGroup);
 
       requiredIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
       requiredIngredientsDerivedFromQuestionnaire.Add(ingredientCoconut);
@@ -87,20 +98,22 @@ namespace XOSkinWebApp.Controllers
       product5.IngredientId.Add(ingredientApple);
       product5.IngredientId.Add(ingredientCoconut);
 
-      product.Adapter.Add(product1);
-      product.Adapter.Add(product2);
-      product.Adapter.Add(product3);
-      product.Adapter.Add(product4);
-      product.Adapter.Add(product5);
+      productGroup.Adapter.Add(product1);
+      productGroup.Adapter.Add(product2);
+      productGroup.Adapter.Add(product3);
+      productGroup.Adapter.Add(product4);
+      productGroup.Adapter.Add(product5);
+
+      productGroup.VariationParameter.Parameter = adapterGroupVariationParameter;
 
       // Make sure we're not recommending more products than we have.
-      maxAdapterGroupAdapterCount = product.Adapter.Count < maxAdapterGroupAdapterCount ?
-        product.Adapter.Count : maxAdapterGroupAdapterCount;
+      maxAdapterGroupAdapterCount = productGroup.Adapter.Count < maxAdapterGroupAdapterCount ?
+        productGroup.Adapter.Count : maxAdapterGroupAdapterCount;
 
-      // TODO: Define Variation Parameter for the application.
       // TODO: Implement appropriateness function for the application.
 
-      Seed(ref seed, product, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount);
+      Seed(ref seed, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
+        adapterGroupVariationParameter);
 
       processor.Log = logProcessor;
       processor.Seed = seed;
@@ -114,7 +127,8 @@ namespace XOSkinWebApp.Controllers
     }
 
     private static void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
-      int MaxProcessedAdapterGroupCount, int maxAdapterGroupAdapterCount)
+      int MaxProcessedAdapterGroupCount, int maxAdapterGroupAdapterCount,
+      object AdapterGroupVariationParameter)
     {
       Random prng = new Random();
       int i = 0;
@@ -130,6 +144,7 @@ namespace XOSkinWebApp.Controllers
         for (; i < MaxProcessedAdapterGroupCount; i++)
         {
           productGroup = new ProductGroup();
+          productGroup.VariationParameter.Parameter = AdapterGroupVariationParameter;
           for (j = 0; j < maxAdapterGroupAdapterCount; j++)
           {
             if (productGroup.Adapter.Count == 0)
