@@ -15,15 +15,18 @@ namespace AdaptiveProductRecommendationEngine.Adapters
     public uint ProductId { get; set; }
     public long QuantityAvailableInStock { get; set; }
     public List<uint> IngredientId { get; set; }
+    public String ProductName { get; set; }
 
     public ProductAdapter(uint ProductId, long QuantityAvailableInStock, 
-      List<uint> IngredientId, IVariationParameter VariationParameter)
+      List<uint> IngredientId, IVariationParameter VariationParameter, 
+      String ProductName)
     {
       this.ProductId = ProductId;
       this.QuantityAvailableInStock = QuantityAvailableInStock;
       this.IngredientId = IngredientId;
       this.VariationParameter = VariationParameter;
       this.Appropriateness = 0.0M;
+      this.ProductName = ProductName;
     }
     
     public void Variate(IAdapterGroup AdapterGroup)

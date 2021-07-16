@@ -85,29 +85,34 @@ namespace XOSkinWebApp.Controllers
       product1.IngredientId.Add(ingredientCarrot);
       product1.IngredientId.Add(ingredientCoriander);
       product1.VariationParameter.Parameter = variationParameter;
+      product1.ProductName = "Apple Carrot Coriander Mask";
 
       product2.ProductId = 2;
       product2.QuantityAvailableInStock = 100;
       product2.IngredientId.Add(ingredientApple);
       product2.VariationParameter.Parameter = variationParameter;
+      product2.ProductName = "Apple Cleanser";
 
       product3.ProductId = 3;
       product3.QuantityAvailableInStock = 5;
       product3.IngredientId.Add(ingredientOliveOil);
       product3.IngredientId.Add(ingredientCoriander);
       product3.VariationParameter.Parameter = variationParameter;
+      product3.ProductName = "Olive Oil Coriander Lip Balm";
 
       product4.ProductId = 4;
-      product4.QuantityAvailableInStock = 20;
+      product4.QuantityAvailableInStock = 0;
       product4.IngredientId.Add(ingredientCarrot);
       product4.IngredientId.Add(ingredientApple);
       product4.VariationParameter.Parameter = variationParameter;
+      product4.ProductName = "Carrot Apple Scrub";
 
       product5.ProductId = 5;
       product5.QuantityAvailableInStock = 7;
       product5.IngredientId.Add(ingredientApple);
       product5.IngredientId.Add(ingredientCoconut);
       product5.VariationParameter.Parameter = variationParameter;
+      product5.ProductName = "Apple Coconut Scrub";
 
       productGroup.Adapter.Add(product1);
       productGroup.Adapter.Add(product2);
@@ -115,7 +120,6 @@ namespace XOSkinWebApp.Controllers
       productGroup.Adapter.Add(product4);
       productGroup.Adapter.Add(product5);
 
-      requiredSpecificProductsDerivedFromQuestionnaire.Add(product1.ProductId);
       requiredSpecificProductsDerivedFromQuestionnaire.Add(product3.ProductId);
 
       productGroup.VariationParameter.Parameter = adapterVariationParameter;
