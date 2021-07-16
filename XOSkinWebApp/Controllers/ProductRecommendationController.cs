@@ -24,16 +24,17 @@ namespace XOSkinWebApp.Controllers
     {
       HollandProcessor processor = new HollandProcessor();
       ProductGroup productGroup = new ProductGroup();
-      IVariationParameter adapterGroupVariationParameter = null;
+      IVariationParameter adapterVariationParameter = null;
       List<object> variationParameter = null;
 
-      adapterGroupVariationParameter = new VariationParameter();
+      adapterVariationParameter = new VariationParameter();
 
       // TEST CODE (Data to be populated from DB in Production.)
       int numberOfIterations = 10;
       int variationProbabilityPercentage = 8;
       int maxProcessedAdapterGroupCount = 10;
       int maxAdapterGroupAdapterCount = 3; // Max number of product to recommend.
+      long numberToBeConsideredAsOnHighStock = 10000;
 
       List<IAdapterGroup> seed = new List<IAdapterGroup>();
 
@@ -59,14 +60,15 @@ namespace XOSkinWebApp.Controllers
       Dictionary<uint, uint> ingredientsThatCounteractEachOther =
         new Dictionary<uint, uint>();
 
-      adapterGroupVariationParameter.Parameter = new List<Object>();
-      variationParameter = (List<object>)adapterGroupVariationParameter.Parameter;
+      adapterVariationParameter.Parameter = new List<Object>();
+      variationParameter = (List<object>)adapterVariationParameter.Parameter;
       variationParameter.Add(recommendedIngredientsDerivedFromQuestionnaire);
       variationParameter.Add(requiredSpecificProductsDerivedFromQuestionnaire);
       variationParameter.Add(allergenicIngredientsDerivedFromQuestionnaire);
       variationParameter.Add(ingredientsThatWorkWellWithEachOther);
       variationParameter.Add(ingredientsThatCounteractEachOther);
       variationParameter.Add(productGroup);
+      variationParameter.Add(numberToBeConsideredAsOnHighStock);
 
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoconut);
@@ -82,25 +84,30 @@ namespace XOSkinWebApp.Controllers
       product1.IngredientId.Add(ingredientApple);
       product1.IngredientId.Add(ingredientCarrot);
       product1.IngredientId.Add(ingredientCoriander);
+      product1.VariationParameter.Parameter = variationParameter;
 
       product2.ProductId = 2;
       product2.QuantityAvailableInStock = 100;
       product2.IngredientId.Add(ingredientApple);
+      product2.VariationParameter.Parameter = variationParameter;
 
       product3.ProductId = 3;
       product3.QuantityAvailableInStock = 5;
       product3.IngredientId.Add(ingredientOliveOil);
       product3.IngredientId.Add(ingredientCoriander);
+      product3.VariationParameter.Parameter = variationParameter;
 
       product4.ProductId = 4;
       product4.QuantityAvailableInStock = 20;
       product4.IngredientId.Add(ingredientCarrot);
       product4.IngredientId.Add(ingredientApple);
+      product4.VariationParameter.Parameter = variationParameter;
 
       product5.ProductId = 5;
       product5.QuantityAvailableInStock = 7;
       product5.IngredientId.Add(ingredientApple);
       product5.IngredientId.Add(ingredientCoconut);
+      product5.VariationParameter.Parameter = variationParameter;
 
       productGroup.Adapter.Add(product1);
       productGroup.Adapter.Add(product2);
@@ -111,7 +118,7 @@ namespace XOSkinWebApp.Controllers
       requiredSpecificProductsDerivedFromQuestionnaire.Add(product1.ProductId);
       requiredSpecificProductsDerivedFromQuestionnaire.Add(product3.ProductId);
 
-      productGroup.VariationParameter.Parameter = adapterGroupVariationParameter;
+      productGroup.VariationParameter.Parameter = adapterVariationParameter;
 
       // Make sure we're not recommending more products than we have.
       maxAdapterGroupAdapterCount = productGroup.Adapter.Count < maxAdapterGroupAdapterCount ?
@@ -120,7 +127,7 @@ namespace XOSkinWebApp.Controllers
       // TODO: Implement appropriateness function for the application.
 
       Seed(ref seed, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
-        adapterGroupVariationParameter);
+        adapterVariationParameter);
 
       processor.Log = logProcessor;
       processor.Seed = seed;
