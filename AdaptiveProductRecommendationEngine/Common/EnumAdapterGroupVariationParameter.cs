@@ -13,7 +13,7 @@ namespace AdaptiveProductRecommendationEngine.Common
     AllergenicIngredientsDerivedFromQuestionnaire = 2,
     ingredientsThatWorkWellWithEachOther = 3,
     IngredientsThatCounteractEachOther = 4,
-    ProductGroup = 5,
-    NumberToBeConsideredAsOnHighStock = 6
+    NumberToBeConsideredAsOnHighStock = 5,
+    ProductGroup = 6
   }
 }

@@ -140,20 +140,19 @@ namespace XOSkinWebApp.Controllers
       maxAdapterGroupAdapterCount = productGroup.Adapter.Count < maxAdapterGroupAdapterCount ?
         productGroup.Adapter.Count : maxAdapterGroupAdapterCount;
 
-      Seed(ref seed, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
+      Seed(ref processor, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
         adapterVariationParameter);
 
       processor.Log = logProcessor;
-      processor.Seed = seed;
       processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
         maxProcessedAdapterGroupCount);
 
       // TODO: Populate View with top result.
-
+      return null;
       // END TEST CODE (Data to be populated from DB in Production.)
     }
 
-    private static void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
+    private static void Seed(ref HollandProcessor Hp, ProductGroup Product,
       int MaxProcessedAdapterGroupCount, int maxAdapterGroupAdapterCount,
       object AdapterGroupVariationParameter)
     {
@@ -215,10 +214,11 @@ namespace XOSkinWebApp.Controllers
               }
             }
           }
-          Seed.Add(productGroup);
+          Hp.AdapterGroup.Add(productGroup);
         }
       }
     }
+
     private static bool IsThereStockOnMinimumNumberOfSku(int MaxAdapterGroupAdapterCount,
       ProductGroup Product)
     {

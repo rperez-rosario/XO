@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AdaptiveComputingFramework.Interfaces;
 using AdaptiveProductRecommendationEngine.Adapters;
 using AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions;
+using AdaptiveProductRecommendationEngine.VariationParameters;
 using AdaptiveProductRecommendationEngine.Common;
 
 namespace AdaptiveProductRecommendationEngine.AdapterGroups
@@ -38,6 +39,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
       int largestAdapterGroupCount = AdapterGroup.Adapter.Count > this.Adapter.Count ?
         AdapterGroup.Adapter.Count : this.Adapter.Count;
       int i = 0;
+      combination.VariationParameter = new VariationParameter();
 
       combination.VariationParameter.Parameter = VariationParameter.Parameter;
 
@@ -61,14 +63,14 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
       int i = 0;
       Random prng = new Random();
       List<object> parameter = (List<object>)VariationParameter.Parameter;
-      List<ProductAdapter> product = 
-        (List<ProductAdapter>)parameter[(int)EnumAdapterGroupVariationParameter.ProductGroup];
+      ProductGroup product = 
+        (ProductGroup)parameter[(int)EnumAdapterGroupVariationParameter.ProductGroup];
       
       for (; i < Adapter.Count; i++)
       {
         if (prng.Next(0, 2) == 1)
         {
-          Adapter[i] = product[prng.Next(0, product.Count - 1)];
+          Adapter[i] = product.Adapter[prng.Next(0, product.Adapter.Count - 1)];
         }
       }
     }

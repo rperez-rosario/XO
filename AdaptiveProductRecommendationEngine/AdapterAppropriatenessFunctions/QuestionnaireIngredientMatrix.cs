@@ -66,7 +66,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
 
     public void ComputeAppropriateness(ref IAdapterGroup Adapter)
     {
-      List<object> variationParameter = (List<object>)Adapter.VariationParameter;
+      List<object> variationParameter = (List<object>)Adapter.VariationParameter.Parameter;
       Dictionary<uint, uint> ingredientsThatCounteractEachOther =
        (Dictionary<uint, uint>)variationParameter[(int)EnumAdapterGroupVariationParameter.IngredientsThatCounteractEachOther];
       Dictionary<uint, uint> ingredientsThatWorkWellWithEachOther =

@@ -62,7 +62,7 @@ namespace Terminal
       variationParameter.Add(allergenicIngredientsDerivedFromQuestionnaire);
       variationParameter.Add(ingredientsThatWorkWellWithEachOther);
       variationParameter.Add(ingredientsThatCounteractEachOther);
-      variationParameter.Add(productGroup);
+      
       variationParameter.Add(numberToBeConsideredAsOnHighStock);
 
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
@@ -125,6 +125,7 @@ namespace Terminal
       productGroup.Adapter.Add(product3);
       productGroup.Adapter.Add(product4);
       productGroup.Adapter.Add(product5);
+      variationParameter.Add(productGroup);
 
       requiredSpecificProductsDerivedFromQuestionnaire.Add(product3.ProductId);
 
@@ -135,11 +136,10 @@ namespace Terminal
       maxAdapterGroupAdapterCount = productGroup.Adapter.Count < maxAdapterGroupAdapterCount ?
         productGroup.Adapter.Count : maxAdapterGroupAdapterCount;
 
-      Seed(ref seed, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
-        adapterVariationParameter);
+      Seed(ref processor, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
+        adapterVariationParameter.Parameter);
 
       processor.Log = logProcessor;
-      processor.Seed = seed;
       processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
         maxProcessedAdapterGroupCount);
 
@@ -148,7 +148,7 @@ namespace Terminal
       // END TEST CODE (Data to be populated from DB in Production.)
     }
 
-    private static void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
+    private static void Seed(ref HollandProcessor Hp, ProductGroup Product,
       int MaxProcessedAdapterGroupCount, int maxAdapterGroupAdapterCount,
       object AdapterGroupVariationParameter)
     {
@@ -210,7 +210,7 @@ namespace Terminal
               }
             }
           }
-          Seed.Add(productGroup);
+          Hp.AdapterGroup.Add(productGroup);
         }
       }
     }
