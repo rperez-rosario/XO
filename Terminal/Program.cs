@@ -143,7 +143,10 @@ namespace Terminal
       processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
         maxProcessedAdapterGroupCount);
 
-      // TODO: Populate View with top result.
+      foreach (ProductAdapter product in processor.TopAdapterGroup.Adapter)
+      {
+        Console.WriteLine(product.ProductName);
+      }
 
       // END TEST CODE (Data to be populated from DB in Production.)
     }
