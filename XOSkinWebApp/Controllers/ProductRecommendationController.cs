@@ -138,7 +138,7 @@ namespace XOSkinWebApp.Controllers
       return null;
     }
 
-    private static void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
+    private void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
       int MaxProcessedAdapterGroupCount, int maxAdapterGroupAdapterCount,
       object AdapterGroupVariationParameter)
     {
@@ -203,7 +203,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private static bool IsThereStockOnMinimumNumberOfSku(int MaxAdapterGroupAdapterCount,
+    private bool IsThereStockOnMinimumNumberOfSku(int MaxAdapterGroupAdapterCount,
       ProductGroup Product)
     {
       int numberOfSku = 0;
