@@ -51,27 +51,27 @@ namespace XOSkinWebApp.Controllers
       uint ingredientOliveOil = 4;
       uint ingredientCoriander = 6;
 
-      List<uint> requiredIngredientsDerivedFromQuestionnaire = new List<uint>();
+      List<uint> recommendedIngredientsDerivedFromQuestionnaire = new List<uint>();
       List<uint> requiredSpecificProductsDerivedFromQuestionnaire = new List<uint>();
       List<uint> allergenicIngredientsDerivedFromQuestionnaire = new List<uint>();
-      List<Dictionary<uint, uint>> ingredientsThatCounteractEachOther =
-        new List<Dictionary<uint, uint>>();
+      Dictionary<uint, uint> ingredientsThatCounteractEachOther =
+        new Dictionary<uint, uint>();
 
       adapterGroupVariationParameter.Parameter = new List<Object>();
       variationParameter = (List<object>)adapterGroupVariationParameter.Parameter;
-      variationParameter.Add(requiredIngredientsDerivedFromQuestionnaire);
+      variationParameter.Add(recommendedIngredientsDerivedFromQuestionnaire);
       variationParameter.Add(requiredSpecificProductsDerivedFromQuestionnaire);
       variationParameter.Add(allergenicIngredientsDerivedFromQuestionnaire);
+      variationParameter.Add(ingredientsThatCounteractEachOther);
       variationParameter.Add(productGroup);
 
-      requiredIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
-      requiredIngredientsDerivedFromQuestionnaire.Add(ingredientCoconut);
-      requiredIngredientsDerivedFromQuestionnaire.Add(ingredientCoriander);
-
-      requiredSpecificProductsDerivedFromQuestionnaire.Add(1);
-      requiredSpecificProductsDerivedFromQuestionnaire.Add(3);
+      recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
+      recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoconut);
+      recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoriander);
 
       allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientCarrot);
+
+      ingredientsThatCounteractEachOther.Add(ingredientCarrot, ingredientApple);
 
       product1.ProductId = 1;
       product1.QuantityAvailableInStock = 10;
@@ -103,6 +103,9 @@ namespace XOSkinWebApp.Controllers
       productGroup.Adapter.Add(product3);
       productGroup.Adapter.Add(product4);
       productGroup.Adapter.Add(product5);
+
+      requiredSpecificProductsDerivedFromQuestionnaire.Add(product1.ProductId);
+      requiredSpecificProductsDerivedFromQuestionnaire.Add(product3.ProductId);
 
       productGroup.VariationParameter.Parameter = adapterGroupVariationParameter;
 

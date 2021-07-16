@@ -8,9 +8,10 @@ namespace AdaptiveProductRecommendationEngine.Common
 {
   public enum EnumAdapterGroupVariationParameter : int
   {
-    RequiredIngredientsDerivedFromQuestionnaire = 0,
+    RecommendedIngredientsDerivedFromQuestionnaire = 0,
     RequiredSpecificProductsDerivedFromQuestionnaire = 1,
     AllergenicIngredientsDerivedFromQuestionnaire = 2,
-    ProductGroup = 3
+    IngredientsThatCounteractEachOther = 3,
+    ProductGroup = 4
   }
 }
