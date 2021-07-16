@@ -79,6 +79,8 @@ namespace XOSkinWebApp.Controllers
       ingredientsThatCounteractEachOther.Add(ingredientCarrot, ingredientApple);
       ingredientsThatWorkWellWithEachOther.Add(ingredientOliveOil, ingredientCoriander);
 
+      product1.IngredientId = new List<uint>();
+      product1.VariationParameter = new VariationParameter();
       product1.ProductId = 1;
       product1.QuantityAvailableInStock = 10;
       product1.IngredientId.Add(ingredientApple);
@@ -87,12 +89,16 @@ namespace XOSkinWebApp.Controllers
       product1.VariationParameter.Parameter = variationParameter;
       product1.ProductName = "Apple Carrot Coriander Mask";
 
+      product2.IngredientId = new List<uint>();
+      product2.VariationParameter = new VariationParameter();
       product2.ProductId = 2;
       product2.QuantityAvailableInStock = 100;
       product2.IngredientId.Add(ingredientApple);
       product2.VariationParameter.Parameter = variationParameter;
       product2.ProductName = "Apple Cleanser";
 
+      product3.IngredientId = new List<uint>();
+      product3.VariationParameter = new VariationParameter();
       product3.ProductId = 3;
       product3.QuantityAvailableInStock = 5;
       product3.IngredientId.Add(ingredientOliveOil);
@@ -100,6 +106,8 @@ namespace XOSkinWebApp.Controllers
       product3.VariationParameter.Parameter = variationParameter;
       product3.ProductName = "Olive Oil Coriander Lip Balm";
 
+      product4.IngredientId = new List<uint>();
+      product4.VariationParameter = new VariationParameter();
       product4.ProductId = 4;
       product4.QuantityAvailableInStock = 0;
       product4.IngredientId.Add(ingredientCarrot);
@@ -107,6 +115,8 @@ namespace XOSkinWebApp.Controllers
       product4.VariationParameter.Parameter = variationParameter;
       product4.ProductName = "Carrot Apple Scrub";
 
+      product5.IngredientId = new List<uint>();
+      product5.VariationParameter = new VariationParameter();
       product5.ProductId = 5;
       product5.QuantityAvailableInStock = 7;
       product5.IngredientId.Add(ingredientApple);
@@ -114,6 +124,7 @@ namespace XOSkinWebApp.Controllers
       product5.VariationParameter.Parameter = variationParameter;
       product5.ProductName = "Apple Coconut Scrub";
 
+      productGroup.Adapter = new List<IAdapter>();
       productGroup.Adapter.Add(product1);
       productGroup.Adapter.Add(product2);
       productGroup.Adapter.Add(product3);
@@ -122,6 +133,7 @@ namespace XOSkinWebApp.Controllers
 
       requiredSpecificProductsDerivedFromQuestionnaire.Add(product3.ProductId);
 
+      productGroup.VariationParameter = new VariationParameter();
       productGroup.VariationParameter.Parameter = adapterVariationParameter;
 
       // Make sure we're not recommending more products than we have.
@@ -139,10 +151,9 @@ namespace XOSkinWebApp.Controllers
       // TODO: Populate View with top result.
 
       // END TEST CODE (Data to be populated from DB in Production.)
-      return null;
     }
 
-    private void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
+    private static void Seed(ref List<IAdapterGroup> Seed, ProductGroup Product,
       int MaxProcessedAdapterGroupCount, int maxAdapterGroupAdapterCount,
       object AdapterGroupVariationParameter)
     {
@@ -160,7 +171,9 @@ namespace XOSkinWebApp.Controllers
         for (; i < MaxProcessedAdapterGroupCount; i++)
         {
           productGroup = new ProductGroup();
+          productGroup.VariationParameter = new VariationParameter();
           productGroup.VariationParameter.Parameter = AdapterGroupVariationParameter;
+          productGroup.Adapter = new List<IAdapter>();
           for (j = 0; j < maxAdapterGroupAdapterCount; j++)
           {
             if (productGroup.Adapter.Count == 0)
@@ -174,7 +187,7 @@ namespace XOSkinWebApp.Controllers
               else
               {
                 j--;
-                break;
+                //break;
               }
             }
             else
@@ -206,8 +219,7 @@ namespace XOSkinWebApp.Controllers
         }
       }
     }
-
-    private bool IsThereStockOnMinimumNumberOfSku(int MaxAdapterGroupAdapterCount,
+    private static bool IsThereStockOnMinimumNumberOfSku(int MaxAdapterGroupAdapterCount,
       ProductGroup Product)
     {
       int numberOfSku = 0;
@@ -218,5 +230,6 @@ namespace XOSkinWebApp.Controllers
       }
       return MaxAdapterGroupAdapterCount <= numberOfSku;
     }
+
   }
 }
