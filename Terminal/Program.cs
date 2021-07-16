@@ -168,9 +168,9 @@ namespace Terminal
           productGroup = new ProductGroup();
           productGroup.VariationParameter = new VariationParameter();
           productGroup.VariationParameter.Parameter = AdapterGroupVariationParameter;
+          productGroup.Adapter = new List<IAdapter>();
           for (j = 0; j < maxAdapterGroupAdapterCount; j++)
           {
-            productGroup.Adapter = new List<IAdapter>();
             if (productGroup.Adapter.Count == 0)
             {
               productToAdd =
@@ -182,7 +182,7 @@ namespace Terminal
               else
               {
                 j--;
-                break;
+                //break;
               }
             }
             else
