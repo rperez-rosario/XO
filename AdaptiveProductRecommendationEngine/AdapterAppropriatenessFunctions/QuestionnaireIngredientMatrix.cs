@@ -30,7 +30,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
         foreach (uint ingredient in product.IngredientId)
           if (allergenicIngredient == ingredient)
           {
-            Adapter.Appropriateness = decimal.MinValue + 1000;
+            Adapter.Appropriateness = decimal.MinValue + 10000.0M;
             allergenFound = true;
           }
             
@@ -42,7 +42,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
           {
             if (product.ProductId == requiredProductId)
             {
-              Adapter.Appropriateness = decimal.MaxValue - 1000.0M;
+              Adapter.Appropriateness = decimal.MaxValue - 10000.0M;
               break;
             }
             else
@@ -54,15 +54,12 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
               
               if (product.QuantityAvailableInStock >= numberToBeConsideredAsOnHighStock)
                 Adapter.Appropriateness += 1.0M;
-              
-              
-
             }
           }
         }
         else
         {
-          Adapter.Appropriateness = decimal.MinValue + 1000.0M;
+          Adapter.Appropriateness = decimal.MinValue + 10000.0M;
         }
       }
     }
@@ -74,11 +71,63 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
        (Dictionary<uint, uint>)variationParameter[(int)EnumAdapterGroupVariationParameter.IngredientsThatCounteractEachOther];
       Dictionary<uint, uint> ingredientsThatWorkWellWithEachOther =
         (Dictionary<uint, uint>)variationParameter[(int)EnumAdapterGroupVariationParameter.ingredientsThatWorkWellWithEachOther];
+      ProductGroup productGroup = (ProductGroup)Adapter;
+      List<uint> globalListOfIngredientsUsedInThisAdapterGroup = new List<uint>();
+      bool ingredientFound = false;
+      bool ingredientsCounteractEachOther = false;
+
+      foreach(ProductAdapter product in productGroup.Adapter)
+      {
+        foreach (uint ingredient in product.IngredientId)
+        {
+          ingredientFound = false;
+          foreach (uint ingredientAdded in globalListOfIngredientsUsedInThisAdapterGroup)
+          {
+            if (ingredient == ingredientAdded)
+            {
+              ingredientFound = true;
+              break;
+            }
+          }
+          if (!ingredientFound)
+          {
+            globalListOfIngredientsUsedInThisAdapterGroup.Add(ingredient);
+          }
+        }
+      }
       
-      
-      // Loop through all product ingredients in group, Decimal.Min + 1000 and exit loop for 
-      // any pair that counteract each other.
-      throw new NotImplementedException();
+      foreach (uint ingredientA in globalListOfIngredientsUsedInThisAdapterGroup)
+      {
+        foreach (uint ingredientB in globalListOfIngredientsUsedInThisAdapterGroup)
+        {
+          if (ingredientsThatCounteractEachOther.ContainsKey(ingredientA) &&
+            ingredientB == ingredientsThatCounteractEachOther[ingredientA])
+          {
+            Adapter.AdapterGroupAppropriateness = decimal.MinValue + 10000.0M;
+            ingredientsCounteractEachOther = true;
+            break;
+          }
+        }
+        if (ingredientsCounteractEachOther)
+        {
+          break;
+        }
+      }
+
+      if (!ingredientsCounteractEachOther)
+      {
+        foreach (uint ingredientA in globalListOfIngredientsUsedInThisAdapterGroup)
+        {
+          foreach (uint ingredientB in globalListOfIngredientsUsedInThisAdapterGroup)
+          {
+            if (ingredientsThatWorkWellWithEachOther.ContainsKey(ingredientA) &&
+              ingredientB == ingredientsThatWorkWellWithEachOther[ingredientA])
+            {
+              Adapter.AdapterGroupAppropriateness += 1.0M;
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -124,8 +124,6 @@ namespace XOSkinWebApp.Controllers
       maxAdapterGroupAdapterCount = productGroup.Adapter.Count < maxAdapterGroupAdapterCount ?
         productGroup.Adapter.Count : maxAdapterGroupAdapterCount;
 
-      // TODO: Implement appropriateness function for the application.
-
       Seed(ref seed, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
         adapterVariationParameter);
 
