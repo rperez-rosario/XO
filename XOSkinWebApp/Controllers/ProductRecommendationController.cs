@@ -54,6 +54,8 @@ namespace XOSkinWebApp.Controllers
       List<uint> recommendedIngredientsDerivedFromQuestionnaire = new List<uint>();
       List<uint> requiredSpecificProductsDerivedFromQuestionnaire = new List<uint>();
       List<uint> allergenicIngredientsDerivedFromQuestionnaire = new List<uint>();
+      Dictionary<uint, uint> ingredientsThatWorkWellWithEachOther =
+        new Dictionary<uint, uint>();
       Dictionary<uint, uint> ingredientsThatCounteractEachOther =
         new Dictionary<uint, uint>();
 
@@ -62,6 +64,7 @@ namespace XOSkinWebApp.Controllers
       variationParameter.Add(recommendedIngredientsDerivedFromQuestionnaire);
       variationParameter.Add(requiredSpecificProductsDerivedFromQuestionnaire);
       variationParameter.Add(allergenicIngredientsDerivedFromQuestionnaire);
+      variationParameter.Add(ingredientsThatWorkWellWithEachOther);
       variationParameter.Add(ingredientsThatCounteractEachOther);
       variationParameter.Add(productGroup);
 
@@ -72,6 +75,7 @@ namespace XOSkinWebApp.Controllers
       allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientCarrot);
 
       ingredientsThatCounteractEachOther.Add(ingredientCarrot, ingredientApple);
+      ingredientsThatWorkWellWithEachOther.Add(ingredientOliveOil, ingredientCoriander);
 
       product1.ProductId = 1;
       product1.QuantityAvailableInStock = 10;

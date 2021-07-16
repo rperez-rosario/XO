@@ -11,7 +11,8 @@ namespace AdaptiveProductRecommendationEngine.Common
     RecommendedIngredientsDerivedFromQuestionnaire = 0,
     RequiredSpecificProductsDerivedFromQuestionnaire = 1,
     AllergenicIngredientsDerivedFromQuestionnaire = 2,
-    IngredientsThatCounteractEachOther = 3,
-    ProductGroup = 4
+    ingredientsThatWorkWellWithEachOther = 3,
+    IngredientsThatCounteractEachOther = 4,
+    ProductGroup = 5
   }
 }
