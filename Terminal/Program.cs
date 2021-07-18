@@ -25,8 +25,8 @@ namespace Terminal
       adapterVariationParameter = new VariationParameter();
 
       // TEST CODE (Data to be populated from DB in Production.)
-      int numberOfIterations = 10;
-      int variationProbabilityPercentage = 8;
+      int numberOfIterations = 100;
+      int variationProbabilityPercentage = 25;
       int maxProcessedAdapterGroupCount = 10;
       int maxAdapterGroupAdapterCount = 3; // Max number of product to recommend.
       long numberToBeConsideredAsOnHighStock = 10000;
@@ -143,11 +143,15 @@ namespace Terminal
       processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
         maxProcessedAdapterGroupCount);
 
-      foreach (ProductAdapter product in processor.TopAdapterGroup.Adapter)
-      {
-        Console.WriteLine(product.ProductName);
-      }
+      // Prune negative appropriateness.
+      foreach (IAdapterGroup group in processor.AdapterGroup)
+        group.Adapter.RemoveAll(x => x.Appropriateness < 0);
 
+      foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
+        {
+          Console.Write(adapter.ProductName + ", ");
+          Console.WriteLine();
+        }
       // END TEST CODE (Data to be populated from DB in Production.)
     }
 
@@ -177,7 +181,7 @@ namespace Terminal
             if (productGroup.Adapter.Count == 0)
             {
               productToAdd =
-                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count - 1)];
+                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count)];
               if (productToAdd.QuantityAvailableInStock > 0)
               {
                 productGroup.Adapter.Add(productToAdd);
@@ -191,7 +195,7 @@ namespace Terminal
             else
             {
               productToAdd =
-                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count - 1)];
+                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count)];
               for (k = 0; k < productGroup.Adapter.Count; k++)
               {
                 currentProduct = (ProductAdapter)productGroup.Adapter[k];

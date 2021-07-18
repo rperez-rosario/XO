@@ -149,7 +149,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterGroups
           else
           {
             productToAdd = 
-              (ProductAdapter)product.Adapter[prng.Next(0, product.Adapter.Count - 1)];
+              (ProductAdapter)product.Adapter[prng.Next(0, product.Adapter.Count)];
 
             for (k = 0; k < variation.Adapter.Count; k++)
             {
