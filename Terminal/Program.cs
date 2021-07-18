@@ -25,10 +25,12 @@ namespace Terminal
       adapterVariationParameter = new VariationParameter();
 
       // TEST CODE (Data to be populated from DB in Production.)
-      int numberOfIterations = 100;
-      int variationProbabilityPercentage = 25;
+      int numberOfIterations = 77;
+      int variationProbabilityPercentage = 18;
       int maxProcessedAdapterGroupCount = 10;
-      int maxAdapterGroupAdapterCount = 3; // Max number of product to recommend.
+      int maxAdapterGroupAdapterCount = 6; // Max number of product to recommend.
+      int testRuns = 1;
+      
       long numberToBeConsideredAsOnHighStock = 10000;
 
       List<IAdapterGroup> seed = new List<IAdapterGroup>();
@@ -40,12 +42,20 @@ namespace Terminal
       ProductAdapter product3 = new ProductAdapter();
       ProductAdapter product4 = new ProductAdapter();
       ProductAdapter product5 = new ProductAdapter();
+      ProductAdapter product6 = new ProductAdapter();
+      ProductAdapter product7 = new ProductAdapter();
+      ProductAdapter product8 = new ProductAdapter();
+      ProductAdapter product9 = new ProductAdapter();
+      ProductAdapter product10 = new ProductAdapter();
 
       uint ingredientApple = 1;
       uint ingredientCoconut = 2;
       uint ingredientCarrot = 3;
       uint ingredientOliveOil = 4;
       uint ingredientCoriander = 6;
+      uint ingredientPeppermint = 7;
+      uint ingredientEucalyptus = 9;
+      uint ingredientBalsamicVinegar = 10;
 
       List<uint> recommendedIngredientsDerivedFromQuestionnaire = new List<uint>();
       List<uint> requiredSpecificProductsDerivedFromQuestionnaire = new List<uint>();
@@ -62,12 +72,12 @@ namespace Terminal
       variationParameter.Add(allergenicIngredientsDerivedFromQuestionnaire);
       variationParameter.Add(ingredientsThatWorkWellWithEachOther);
       variationParameter.Add(ingredientsThatCounteractEachOther);
-      
       variationParameter.Add(numberToBeConsideredAsOnHighStock);
 
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoconut);
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoriander);
+      recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientEucalyptus);
 
       allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientCarrot);
 
@@ -119,15 +129,65 @@ namespace Terminal
       product5.VariationParameter.Parameter = variationParameter;
       product5.ProductName = "Apple Coconut Scrub";
 
+      product6.IngredientId = new List<uint>();
+      product6.VariationParameter = new VariationParameter();
+      product6.ProductId = 6;
+      product6.QuantityAvailableInStock = 12;
+      product6.IngredientId.Add(ingredientOliveOil);
+      product6.IngredientId.Add(ingredientApple);
+      product6.VariationParameter.Parameter = variationParameter;
+      product6.ProductName = "Olive Oil Apple Resurfactant";
+
+      product7.IngredientId = new List<uint>();
+      product7.VariationParameter = new VariationParameter();
+      product7.ProductId = 7;
+      product7.QuantityAvailableInStock = 30;
+      product7.IngredientId.Add(ingredientCarrot);
+      product7.IngredientId.Add(ingredientCoriander);
+      product7.VariationParameter.Parameter = variationParameter;
+      product7.ProductName = "Carrot Coriander Paste";
+
+      product8.IngredientId = new List<uint>();
+      product8.VariationParameter = new VariationParameter();
+      product8.ProductId = 8;
+      product8.QuantityAvailableInStock = 7;
+      product8.IngredientId.Add(ingredientEucalyptus);
+      product8.VariationParameter.Parameter = variationParameter;
+      product8.ProductName = "Eucalyptus Night Rub";
+
+      product9.IngredientId = new List<uint>();
+      product9.VariationParameter = new VariationParameter();
+      product9.ProductId = 9;
+      product9.QuantityAvailableInStock = 22;
+      product9.IngredientId.Add(ingredientCarrot);
+      product9.IngredientId.Add(ingredientPeppermint);
+      product9.VariationParameter.Parameter = variationParameter;
+      product9.ProductName = "Carrot Peppermint Mask";
+
+      product10.IngredientId = new List<uint>();
+      product10.VariationParameter = new VariationParameter();
+      product10.ProductId = 10;
+      product10.QuantityAvailableInStock = 30;
+      product10.IngredientId.Add(ingredientApple);
+      product10.IngredientId.Add(ingredientBalsamicVinegar);
+      product10.VariationParameter.Parameter = variationParameter;
+      product10.ProductName = "Balsamic Apple Rub";
+
       productGroup.Adapter = new List<IAdapter>();
       productGroup.Adapter.Add(product1);
       productGroup.Adapter.Add(product2);
       productGroup.Adapter.Add(product3);
       productGroup.Adapter.Add(product4);
       productGroup.Adapter.Add(product5);
+      productGroup.Adapter.Add(product6);
+      productGroup.Adapter.Add(product7);
+      productGroup.Adapter.Add(product8);
+      productGroup.Adapter.Add(product9);
+      productGroup.Adapter.Add(product10);
       variationParameter.Add(productGroup);
 
       requiredSpecificProductsDerivedFromQuestionnaire.Add(product3.ProductId);
+      requiredSpecificProductsDerivedFromQuestionnaire.Add(product10.ProductId);
 
       productGroup.VariationParameter = new VariationParameter();
       productGroup.VariationParameter.Parameter = adapterVariationParameter;
@@ -139,19 +199,25 @@ namespace Terminal
       Seed(ref processor, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
         adapterVariationParameter.Parameter);
 
-      processor.Log = logProcessor;
-      processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
-        maxProcessedAdapterGroupCount);
+      for (int z = 0; z < testRuns; z++)
+      {
+        processor.Log = logProcessor;
+        processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
+          maxProcessedAdapterGroupCount);
 
-      // Prune negative appropriateness.
-      foreach (IAdapterGroup group in processor.AdapterGroup)
-        group.Adapter.RemoveAll(x => x.Appropriateness < 0);
+        // Prune negative appropriateness.
+        foreach (IAdapterGroup group in processor.AdapterGroup)
+          group.Adapter.RemoveAll(x => x.Appropriateness < 0);
 
-      foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
+        Console.WriteLine("XO Skin Recommendation Engine (XSRE) Recommends for your " +
+          "skin and climate:");
+        foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
         {
           Console.Write(adapter.ProductName + ", ");
           Console.WriteLine();
         }
+      }
+      //_ = Console.ReadKey();
       // END TEST CODE (Data to be populated from DB in Production.)
     }
 

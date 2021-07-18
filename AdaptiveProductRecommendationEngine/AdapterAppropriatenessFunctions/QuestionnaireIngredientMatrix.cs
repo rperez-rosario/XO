@@ -32,7 +32,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
         {
           if (allergenicIngredient == ingredient)
           {
-            Adapter.Appropriateness = decimal.MinValue + 10000.0M;
+            Adapter.Appropriateness = decimal.MinValue / 10;
             allergenFound = true;
             break;
           }
@@ -49,7 +49,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
           {
             if (product.ProductId == requiredProductId)
             {
-              Adapter.Appropriateness = decimal.MaxValue - 10000.0M;
+              Adapter.Appropriateness = decimal.MaxValue / 10;
             }
             else
             {
@@ -65,7 +65,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
         }
         else
         {
-          Adapter.Appropriateness = decimal.MinValue + 10000.0M;
+          Adapter.Appropriateness = decimal.MinValue / 10;
         }
       }
     }
@@ -109,7 +109,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
           if (ingredientsThatCounteractEachOther.ContainsKey(ingredientA) &&
             ingredientB == ingredientsThatCounteractEachOther[ingredientA])
           {
-            Adapter.AdapterGroupAppropriateness = decimal.MinValue + 10000.0M;
+            Adapter.AdapterGroupAppropriateness = decimal.MinValue / 10;
             ingredientsCounteractEachOther = true;
             break;
           }

@@ -286,6 +286,7 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\refs\System.Xml.
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\refs\WindowsBase.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\XOSkinWebApp.Views.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\XOSkinWebApp.Views.pdb
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\AdaptiveComputingFrameworkCore.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\Humanizer.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\Microsoft.AspNetCore.Cryptography.Internal.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
@@ -360,6 +361,8 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\runtimes\win-x86
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.pdb
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\runtimes\win\lib\netstandard2.0\System.Runtime.Caching.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\AdaptiveProductRecommendationEngine.dll
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\AdaptiveProductRecommendationEngine.pdb
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.csproj.AssemblyReference.cache
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.AssemblyInfoInputs.cache
@@ -392,6 +395,3 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\ref\XOSkinWebApp.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.pdb
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.genruntimeconfig.cache
-C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\AdaptiveComputingFrameworkCore.dll
-C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\AdaptiveProductRecommendationEngine.dll
-C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\AdaptiveProductRecommendationEngine.pdb
