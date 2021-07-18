@@ -11,7 +11,7 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
   {
     public void ComputeAppropriateness(ref IAdapter Adapter)
     {
-      List<object> variationParameter = (List<object>)Adapter.VariationParameter;
+      List<object> variationParameter = (List<object>)Adapter.VariationParameter.Parameter;
       ProductGroup productGroup = 
         (ProductGroup)variationParameter[(int)EnumAdapterGroupVariationParameter.ProductGroup];
       List<uint> recommendedIngredientsDerivedFromQuestionnaire =
@@ -27,23 +27,29 @@ namespace AdaptiveProductRecommendationEngine.AdapterAppropriatenessFunctions
       bool allergenFound = false;
 
       foreach (uint allergenicIngredient in allergenicIngredientsDerivedFromQuestionnaire)
+      {
         foreach (uint ingredient in product.IngredientId)
+        {
           if (allergenicIngredient == ingredient)
           {
             Adapter.Appropriateness = decimal.MinValue + 10000.0M;
             allergenFound = true;
+            break;
           }
-            
+        }
+        if (allergenFound)
+          break;
+      }
+    
       if (!allergenFound)
       {
-        if (product.QuantityAvailableInStock <= 0)
+        if (product.QuantityAvailableInStock > 0)
         {
           foreach (uint requiredProductId in requiredSpecificProductsDerivedFromQuestionnaire)
           {
             if (product.ProductId == requiredProductId)
             {
               Adapter.Appropriateness = decimal.MaxValue - 10000.0M;
-              break;
             }
             else
             {
