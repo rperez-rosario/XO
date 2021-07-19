@@ -19,7 +19,6 @@ namespace Terminal
     {
       HollandProcessor processor = new HollandProcessor();
       ProductGroup productGroup = new ProductGroup();
-      List<ProductAdapter> productAdapter;
       IVariationParameter adapterVariationParameter = null;
       List<object> variationParameter = null;
       bool allergenFound = false;
@@ -35,7 +34,7 @@ namespace Terminal
       int numberOfIterations = 77;
       int variationProbabilityPercentage = 18;
       int maxProcessedAdapterGroupCount = 10;
-      int maxAdapterGroupAdapterCount = 6; // Max number of product to recommend.
+      int maxAdapterGroupAdapterCount = 5; // Max number of product to recommend.
       int testRuns = 1;
       
       long numberToBeConsideredAsOnHighStock = 10000;
@@ -81,17 +80,20 @@ namespace Terminal
       variationParameter.Add(ingredientsThatCounteractEachOther);
       variationParameter.Add(numberToBeConsideredAsOnHighStock);
 
+      //Recommended ingredients derived from questionnaire.
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoconut);
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoriander);
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientEucalyptus);
 
+      // Allergens.
       allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientCarrot);
-      allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
 
+      // Counteracting and collaborating ingredients.
       ingredientsThatCounteractEachOther.Add(ingredientCarrot, ingredientApple);
       ingredientsThatWorkWellWithEachOther.Add(ingredientOliveOil, ingredientCoriander);
 
+      // Full product list.
       product1.IngredientId = new List<uint>();
       product1.VariationParameter = new VariationParameter();
       product1.ProductId = 1;
