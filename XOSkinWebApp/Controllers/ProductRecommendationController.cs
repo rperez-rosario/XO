@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AdaptiveComputingFramework.Interfaces;
 using AdaptiveComputingFramework.Processors;
 using AdaptiveProductRecommendationEngine.AdapterGroups;
 using AdaptiveProductRecommendationEngine.Adapters;
 using AdaptiveProductRecommendationEngine.VariationParameters;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using XOSkinWebApp.Models;
 
 namespace XOSkinWebApp.Controllers
@@ -33,7 +30,6 @@ namespace XOSkinWebApp.Controllers
       int i = 0;
       int j = 0;
       int k = 0;
-      int z = 0;
 
       adapterVariationParameter = new VariationParameter();
 
@@ -42,7 +38,6 @@ namespace XOSkinWebApp.Controllers
       int variationProbabilityPercentage = 18;
       int maxProcessedAdapterGroupCount = 10;
       int maxAdapterGroupAdapterCount = 5; // Max number of product to recommend.
-      int testRuns = 1;
 
       long numberToBeConsideredAsOnHighStock = 10000;
 
@@ -242,30 +237,18 @@ namespace XOSkinWebApp.Controllers
       Seed(ref processor, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
         adapterVariationParameter.Parameter);
 
-      for (; z < testRuns; z++)
+      processor.Log = logProcessor;
+      processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
+        maxProcessedAdapterGroupCount);
+
+      // Prune negative appropriateness.
+      foreach (IAdapterGroup group in processor.AdapterGroup)
+        group.Adapter.RemoveAll(x => x.Appropriateness < 0);
+
+      foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
       {
-        processor.Log = logProcessor;
-        processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
-          maxProcessedAdapterGroupCount);
-
-        // Prune negative appropriateness.
-        foreach (IAdapterGroup group in processor.AdapterGroup)
-          group.Adapter.RemoveAll(x => x.Appropriateness < 0);
-
-        //Console.WriteLine("XO Skin Recommendation Engine (XSRE) Recommends for your " +
-        //  "skin and climate:");
-        //foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
-        //{
-        //  Console.Write(adapter.ProductName + ", ");
-        //  Console.WriteLine();
-        //}
-
-        foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
-        {
-          productView.Add(new ProductViewModel(adapter.ProductName));
-        }
+        productView.Add(new ProductViewModel(adapter.ProductName));
       }
-      //_ = Console.ReadKey();
       // END TEST CODE (Data to be populated from DB in Production.)
       return productView;
     }
