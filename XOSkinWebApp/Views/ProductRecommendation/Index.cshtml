@@ -13,8 +13,10 @@
     foreach (ProductViewModel product in Model)
     {
     <p>
-      @Html.DisplayFor(modelItem => product.ProductName)
+      <b>
+        @Html.DisplayFor(modelItem => product.ProductName)
+      </b>
     </p>
     }
   }
-  </div>
+</div>
