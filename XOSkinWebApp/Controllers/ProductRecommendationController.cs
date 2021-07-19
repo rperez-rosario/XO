@@ -9,6 +9,7 @@ using AdaptiveProductRecommendationEngine.AdapterGroups;
 using AdaptiveProductRecommendationEngine.Adapters;
 using AdaptiveProductRecommendationEngine.VariationParameters;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using XOSkinWebApp.Models;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -16,24 +17,33 @@ namespace XOSkinWebApp.Controllers
   {
     public IActionResult Index()
     {
-      View().ViewData = TestProductRecommendations();
-      return View();
+      List<ProductViewModel> product = TestProductRecommendations();
+      return View(product);
     }
 
-    private ViewDataDictionary TestProductRecommendations()
+    private List<ProductViewModel> TestProductRecommendations()
     {
       HollandProcessor processor = new HollandProcessor();
       ProductGroup productGroup = new ProductGroup();
       IVariationParameter adapterVariationParameter = null;
       List<object> variationParameter = null;
+      bool allergenFound = false;
+      ProductAdapter testProduct;
+      List<ProductViewModel> productView = new List<ProductViewModel>();
+      int i = 0;
+      int j = 0;
+      int k = 0;
+      int z = 0;
 
       adapterVariationParameter = new VariationParameter();
 
       // TEST CODE (Data to be populated from DB in Production.)
-      int numberOfIterations = 10;
-      int variationProbabilityPercentage = 8;
+      int numberOfIterations = 77;
+      int variationProbabilityPercentage = 18;
       int maxProcessedAdapterGroupCount = 10;
-      int maxAdapterGroupAdapterCount = 3; // Max number of product to recommend.
+      int maxAdapterGroupAdapterCount = 5; // Max number of product to recommend.
+      int testRuns = 1;
+
       long numberToBeConsideredAsOnHighStock = 10000;
 
       List<IAdapterGroup> seed = new List<IAdapterGroup>();
@@ -45,12 +55,20 @@ namespace XOSkinWebApp.Controllers
       ProductAdapter product3 = new ProductAdapter();
       ProductAdapter product4 = new ProductAdapter();
       ProductAdapter product5 = new ProductAdapter();
+      ProductAdapter product6 = new ProductAdapter();
+      ProductAdapter product7 = new ProductAdapter();
+      ProductAdapter product8 = new ProductAdapter();
+      ProductAdapter product9 = new ProductAdapter();
+      ProductAdapter product10 = new ProductAdapter();
 
       uint ingredientApple = 1;
       uint ingredientCoconut = 2;
       uint ingredientCarrot = 3;
       uint ingredientOliveOil = 4;
       uint ingredientCoriander = 6;
+      uint ingredientPeppermint = 7;
+      uint ingredientEucalyptus = 9;
+      uint ingredientBalsamicVinegar = 10;
 
       List<uint> recommendedIngredientsDerivedFromQuestionnaire = new List<uint>();
       List<uint> requiredSpecificProductsDerivedFromQuestionnaire = new List<uint>();
@@ -67,18 +85,22 @@ namespace XOSkinWebApp.Controllers
       variationParameter.Add(allergenicIngredientsDerivedFromQuestionnaire);
       variationParameter.Add(ingredientsThatWorkWellWithEachOther);
       variationParameter.Add(ingredientsThatCounteractEachOther);
-      variationParameter.Add(productGroup);
       variationParameter.Add(numberToBeConsideredAsOnHighStock);
 
+      //Recommended ingredients derived from questionnaire.
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoconut);
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientCoriander);
+      recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientEucalyptus);
 
+      // Allergens.
       allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientCarrot);
 
+      // Counteracting and collaborating ingredients.
       ingredientsThatCounteractEachOther.Add(ingredientCarrot, ingredientApple);
       ingredientsThatWorkWellWithEachOther.Add(ingredientOliveOil, ingredientCoriander);
 
+      // Full product list.
       product1.IngredientId = new List<uint>();
       product1.VariationParameter = new VariationParameter();
       product1.ProductId = 1;
@@ -124,14 +146,91 @@ namespace XOSkinWebApp.Controllers
       product5.VariationParameter.Parameter = variationParameter;
       product5.ProductName = "Apple Coconut Scrub";
 
+      product6.IngredientId = new List<uint>();
+      product6.VariationParameter = new VariationParameter();
+      product6.ProductId = 6;
+      product6.QuantityAvailableInStock = 12;
+      product6.IngredientId.Add(ingredientOliveOil);
+      product6.IngredientId.Add(ingredientApple);
+      product6.VariationParameter.Parameter = variationParameter;
+      product6.ProductName = "Olive Oil Apple Resurfactant";
+
+      product7.IngredientId = new List<uint>();
+      product7.VariationParameter = new VariationParameter();
+      product7.ProductId = 7;
+      product7.QuantityAvailableInStock = 30;
+      product7.IngredientId.Add(ingredientCarrot);
+      product7.IngredientId.Add(ingredientCoriander);
+      product7.VariationParameter.Parameter = variationParameter;
+      product7.ProductName = "Carrot Coriander Paste";
+
+      product8.IngredientId = new List<uint>();
+      product8.VariationParameter = new VariationParameter();
+      product8.ProductId = 8;
+      product8.QuantityAvailableInStock = 7;
+      product8.IngredientId.Add(ingredientEucalyptus);
+      product8.VariationParameter.Parameter = variationParameter;
+      product8.ProductName = "Eucalyptus Night Rub";
+
+      product9.IngredientId = new List<uint>();
+      product9.VariationParameter = new VariationParameter();
+      product9.ProductId = 9;
+      product9.QuantityAvailableInStock = 22;
+      product9.IngredientId.Add(ingredientCarrot);
+      product9.IngredientId.Add(ingredientPeppermint);
+      product9.VariationParameter.Parameter = variationParameter;
+      product9.ProductName = "Carrot Peppermint Mask";
+
+      product10.IngredientId = new List<uint>();
+      product10.VariationParameter = new VariationParameter();
+      product10.ProductId = 10;
+      product10.QuantityAvailableInStock = 30;
+      product10.IngredientId.Add(ingredientApple);
+      product10.IngredientId.Add(ingredientBalsamicVinegar);
+      product10.VariationParameter.Parameter = variationParameter;
+      product10.ProductName = "Balsamic Apple Rub";
+
       productGroup.Adapter = new List<IAdapter>();
       productGroup.Adapter.Add(product1);
       productGroup.Adapter.Add(product2);
       productGroup.Adapter.Add(product3);
       productGroup.Adapter.Add(product4);
       productGroup.Adapter.Add(product5);
+      productGroup.Adapter.Add(product6);
+      productGroup.Adapter.Add(product7);
+      productGroup.Adapter.Add(product8);
+      productGroup.Adapter.Add(product9);
+      productGroup.Adapter.Add(product10);
+
+      // Prune products with allergens according to questionnaire.
+      for (; i < productGroup.Adapter.Count; i++)
+      {
+        testProduct = (ProductAdapter)productGroup.Adapter[i];
+        allergenFound = false;
+        for (j = 0; j < allergenicIngredientsDerivedFromQuestionnaire.Count; j++)
+        {
+          for (k = 0; k < testProduct.IngredientId.Count; k++)
+          {
+            if (allergenicIngredientsDerivedFromQuestionnaire[j] ==
+              testProduct.IngredientId[k])
+            {
+              productGroup.Adapter.Remove((IAdapter)testProduct);
+              allergenFound = true;
+              i--;
+              break;
+            }
+          }
+          if (allergenFound)
+          {
+            break;
+          }
+        }
+      }
+
+      variationParameter.Add(productGroup);
 
       requiredSpecificProductsDerivedFromQuestionnaire.Add(product3.ProductId);
+      requiredSpecificProductsDerivedFromQuestionnaire.Add(product10.ProductId);
 
       productGroup.VariationParameter = new VariationParameter();
       productGroup.VariationParameter.Parameter = adapterVariationParameter;
@@ -141,18 +240,37 @@ namespace XOSkinWebApp.Controllers
         productGroup.Adapter.Count : maxAdapterGroupAdapterCount;
 
       Seed(ref processor, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
-        adapterVariationParameter);
+        adapterVariationParameter.Parameter);
 
-      processor.Log = logProcessor;
-      processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
-        maxProcessedAdapterGroupCount);
+      for (; z < testRuns; z++)
+      {
+        processor.Log = logProcessor;
+        processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
+          maxProcessedAdapterGroupCount);
 
-      // TODO: Populate View with top result.
-      return null;
+        // Prune negative appropriateness.
+        foreach (IAdapterGroup group in processor.AdapterGroup)
+          group.Adapter.RemoveAll(x => x.Appropriateness < 0);
+
+        //Console.WriteLine("XO Skin Recommendation Engine (XSRE) Recommends for your " +
+        //  "skin and climate:");
+        //foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
+        //{
+        //  Console.Write(adapter.ProductName + ", ");
+        //  Console.WriteLine();
+        //}
+
+        foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
+        {
+          productView.Add(new ProductViewModel(adapter.ProductName));
+        }
+      }
+      //_ = Console.ReadKey();
       // END TEST CODE (Data to be populated from DB in Production.)
+      return productView;
     }
 
-    private static void Seed(ref HollandProcessor Hp, ProductGroup Product,
+    private void Seed(ref HollandProcessor Hp, ProductGroup Product,
       int MaxProcessedAdapterGroupCount, int maxAdapterGroupAdapterCount,
       object AdapterGroupVariationParameter)
     {
@@ -178,7 +296,7 @@ namespace XOSkinWebApp.Controllers
             if (productGroup.Adapter.Count == 0)
             {
               productToAdd =
-                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count - 1)];
+                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count)];
               if (productToAdd.QuantityAvailableInStock > 0)
               {
                 productGroup.Adapter.Add(productToAdd);
@@ -192,7 +310,7 @@ namespace XOSkinWebApp.Controllers
             else
             {
               productToAdd =
-                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count - 1)];
+                (ProductAdapter)Product.Adapter[prng.Next(0, Product.Adapter.Count)];
               for (k = 0; k < productGroup.Adapter.Count; k++)
               {
                 currentProduct = (ProductAdapter)productGroup.Adapter[k];
@@ -219,7 +337,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private static bool IsThereStockOnMinimumNumberOfSku(int MaxAdapterGroupAdapterCount,
+    private bool IsThereStockOnMinimumNumberOfSku(int MaxAdapterGroupAdapterCount,
       ProductGroup Product)
     {
       int numberOfSku = 0;
@@ -230,6 +348,5 @@ namespace XOSkinWebApp.Controllers
       }
       return MaxAdapterGroupAdapterCount <= numberOfSku;
     }
-
   }
 }

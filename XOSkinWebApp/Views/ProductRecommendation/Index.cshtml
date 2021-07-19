@@ -1,0 +1,19 @@
+﻿@model IEnumerable<ProductViewModel>
+
+@{
+  ViewData["Title"] = "Product Recommendation";
+}
+
+<div class="text-center">
+  <h1 class="display-4">Product Recommendation</h1>
+  <p>XO Skin Recommendation Engine (XOSRE) Recommends for your skin and climate:
+  </p>
+  @{ 
+    foreach (ProductViewModel product in Model)
+    {
+    <p>
+      @Html.DisplayFor(modelItem => product.ProductName)
+    </p>
+    }
+  }
+  </div>
