@@ -19,8 +19,15 @@ namespace Terminal
     {
       HollandProcessor processor = new HollandProcessor();
       ProductGroup productGroup = new ProductGroup();
+      List<ProductAdapter> productAdapter;
       IVariationParameter adapterVariationParameter = null;
       List<object> variationParameter = null;
+      bool allergenFound = false;
+      ProductAdapter testProduct;
+      int i = 0;
+      int j = 0;
+      int k = 0;
+      int z = 0;
 
       adapterVariationParameter = new VariationParameter();
 
@@ -80,6 +87,7 @@ namespace Terminal
       recommendedIngredientsDerivedFromQuestionnaire.Add(ingredientEucalyptus);
 
       allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientCarrot);
+      allergenicIngredientsDerivedFromQuestionnaire.Add(ingredientApple);
 
       ingredientsThatCounteractEachOther.Add(ingredientCarrot, ingredientApple);
       ingredientsThatWorkWellWithEachOther.Add(ingredientOliveOil, ingredientCoriander);
@@ -184,6 +192,32 @@ namespace Terminal
       productGroup.Adapter.Add(product8);
       productGroup.Adapter.Add(product9);
       productGroup.Adapter.Add(product10);
+
+      // Prune products with allergens according to questionnaire.
+      for (; i < productGroup.Adapter.Count; i++)
+      {
+        testProduct = (ProductAdapter)productGroup.Adapter[i];
+        allergenFound = false;
+        for (j = 0; j < allergenicIngredientsDerivedFromQuestionnaire.Count; j++)
+        {
+          for (k = 0; k < testProduct.IngredientId.Count; k++)
+          {
+            if (allergenicIngredientsDerivedFromQuestionnaire[j] ==
+              testProduct.IngredientId[k])
+            {
+              productGroup.Adapter.Remove((IAdapter)testProduct);
+              allergenFound = true;
+              i--;
+              break;
+            }
+          }
+          if (allergenFound)
+          {
+            break;
+          }
+        }
+      }
+
       variationParameter.Add(productGroup);
 
       requiredSpecificProductsDerivedFromQuestionnaire.Add(product3.ProductId);
@@ -195,11 +229,11 @@ namespace Terminal
       // Make sure we're not recommending more products than we have.
       maxAdapterGroupAdapterCount = productGroup.Adapter.Count < maxAdapterGroupAdapterCount ?
         productGroup.Adapter.Count : maxAdapterGroupAdapterCount;
-
+     
       Seed(ref processor, productGroup, maxProcessedAdapterGroupCount, maxAdapterGroupAdapterCount,
         adapterVariationParameter.Parameter);
 
-      for (int z = 0; z < testRuns; z++)
+      for (; z < testRuns; z++)
       {
         processor.Log = logProcessor;
         processor.ProcessAdapterGroups(numberOfIterations, variationProbabilityPercentage,
