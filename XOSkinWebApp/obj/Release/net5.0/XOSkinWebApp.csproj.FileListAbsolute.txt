@@ -395,3 +395,4 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\ref\XOSkinWebApp.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.pdb
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\XOSkinWebApp.genruntimeconfig.cache
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\ProductRecommendation\Index.cshtml.g.cs
