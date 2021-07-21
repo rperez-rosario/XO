@@ -16,10 +16,11 @@ namespace AdaptiveProductRecommendationEngine.Adapters
     public long QuantityAvailableInStock { get; set; }
     public List<uint> IngredientId { get; set; }
     public String ProductName { get; set; }
+    public decimal ProductPrice { get; set; }
 
     public ProductAdapter(uint ProductId, long QuantityAvailableInStock, 
       List<uint> IngredientId, IVariationParameter VariationParameter, 
-      String ProductName)
+      String ProductName, decimal ProductPrice)
     {
       this.ProductId = ProductId;
       this.QuantityAvailableInStock = QuantityAvailableInStock;
@@ -27,6 +28,7 @@ namespace AdaptiveProductRecommendationEngine.Adapters
       this.VariationParameter = VariationParameter;
       this.Appropriateness = 0.0M;
       this.ProductName = ProductName;
+      this.ProductPrice = ProductPrice;
     }
     
     public void Variate(IAdapterGroup AdapterGroup)

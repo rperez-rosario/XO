@@ -105,6 +105,7 @@ namespace XOSkinWebApp.Controllers
       product1.IngredientId.Add(ingredientCoriander);
       product1.VariationParameter.Parameter = variationParameter;
       product1.ProductName = "Apple Carrot Coriander Mask";
+      product1.ProductPrice = 19.00M;
 
       product2.IngredientId = new List<uint>();
       product2.VariationParameter = new VariationParameter();
@@ -113,6 +114,7 @@ namespace XOSkinWebApp.Controllers
       product2.IngredientId.Add(ingredientApple);
       product2.VariationParameter.Parameter = variationParameter;
       product2.ProductName = "Apple Cleanser";
+      product2.ProductPrice = 15.00M;
 
       product3.IngredientId = new List<uint>();
       product3.VariationParameter = new VariationParameter();
@@ -122,6 +124,7 @@ namespace XOSkinWebApp.Controllers
       product3.IngredientId.Add(ingredientCoriander);
       product3.VariationParameter.Parameter = variationParameter;
       product3.ProductName = "Olive Oil Coriander Lip Balm";
+      product3.ProductPrice = 12.00M;
 
       product4.IngredientId = new List<uint>();
       product4.VariationParameter = new VariationParameter();
@@ -131,6 +134,7 @@ namespace XOSkinWebApp.Controllers
       product4.IngredientId.Add(ingredientApple);
       product4.VariationParameter.Parameter = variationParameter;
       product4.ProductName = "Carrot Apple Scrub";
+      product4.ProductPrice = 22.00M;
 
       product5.IngredientId = new List<uint>();
       product5.VariationParameter = new VariationParameter();
@@ -140,6 +144,7 @@ namespace XOSkinWebApp.Controllers
       product5.IngredientId.Add(ingredientCoconut);
       product5.VariationParameter.Parameter = variationParameter;
       product5.ProductName = "Apple Coconut Scrub";
+      product5.ProductPrice = 39.00M;
 
       product6.IngredientId = new List<uint>();
       product6.VariationParameter = new VariationParameter();
@@ -149,6 +154,7 @@ namespace XOSkinWebApp.Controllers
       product6.IngredientId.Add(ingredientApple);
       product6.VariationParameter.Parameter = variationParameter;
       product6.ProductName = "Olive Oil Apple Resurfactant";
+      product6.ProductPrice = 21.00M;
 
       product7.IngredientId = new List<uint>();
       product7.VariationParameter = new VariationParameter();
@@ -158,6 +164,7 @@ namespace XOSkinWebApp.Controllers
       product7.IngredientId.Add(ingredientCoriander);
       product7.VariationParameter.Parameter = variationParameter;
       product7.ProductName = "Carrot Coriander Paste";
+      product7.ProductPrice = 13.00M;
 
       product8.IngredientId = new List<uint>();
       product8.VariationParameter = new VariationParameter();
@@ -166,6 +173,7 @@ namespace XOSkinWebApp.Controllers
       product8.IngredientId.Add(ingredientEucalyptus);
       product8.VariationParameter.Parameter = variationParameter;
       product8.ProductName = "Eucalyptus Night Rub";
+      product8.ProductPrice = 38.00M;
 
       product9.IngredientId = new List<uint>();
       product9.VariationParameter = new VariationParameter();
@@ -175,6 +183,7 @@ namespace XOSkinWebApp.Controllers
       product9.IngredientId.Add(ingredientPeppermint);
       product9.VariationParameter.Parameter = variationParameter;
       product9.ProductName = "Carrot Peppermint Mask";
+      product9.ProductPrice = 19.00M;
 
       product10.IngredientId = new List<uint>();
       product10.VariationParameter = new VariationParameter();
@@ -184,6 +193,7 @@ namespace XOSkinWebApp.Controllers
       product10.IngredientId.Add(ingredientBalsamicVinegar);
       product10.VariationParameter.Parameter = variationParameter;
       product10.ProductName = "Balsamic Apple Rub";
+      product10.ProductPrice = 42.00M;
 
       productGroup.Adapter = new List<IAdapter>();
       productGroup.Adapter.Add(product1);
@@ -247,7 +257,7 @@ namespace XOSkinWebApp.Controllers
 
       foreach (ProductAdapter adapter in processor.TopAdapterGroup.Adapter)
       {
-        productView.Add(new ProductViewModel(adapter.ProductName));
+        productView.Add(new ProductViewModel(adapter.ProductName, adapter.ProductPrice));
       }
       // END TEST CODE (Data to be populated from DB in Production.)
       return productView;

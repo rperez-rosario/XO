@@ -7,16 +7,20 @@
 <div class="text-center">
   <h1 class="display-4">Product Recommendation</h1>
   <p>
-    XO Skin AI Recommendation Engine Recommends for your skin and climate:
+    XO Skin AI Recommendation Engine recommends for your skin and climate:
   </p>
+  <br />
   @{ 
     foreach (ProductViewModel product in Model)
     {
     <p>
-      <b>
-        @Html.DisplayFor(modelItem => product.ProductName)
-      </b>
+      <input type="checkbox" checked />
+      <b>@Html.DisplayFor(modelItem => product.ProductName)</b>, $@Html.DisplayFor(modelItem => product.ProductPrice)
     </p>
     }
   }
+  <br />
+<p>
+  <button type="submit" class="btn-outline-dark btn">Add to Shopping Basket</button>
+</p>
 </div>
