@@ -1,0 +1,47 @@
+"WBS #","Name / Title",Type,"Start Date","End Date","Estimated Hours","Actual Hours","Percent Complete",Resources,Predecessors,Notes,Comments,"Task Color"
+1,"XO Skin",project,2021-04-09,2021-11-02,0,0,50.35,,,,,
+1.1,"XO Business: George, PJ, Rafael",group,2021-04-09,2021-11-02,0,0,52.15,,,,,
+1.1.1,"Meeting Coordination",task,2021-04-09,2021-11-02,0,0,55,"PJ Gumbe",,,,green1
+1.1.2,"General Business & Tech Research",task,2021-04-09,2021-06-21,0,0,100,"Rafael Pérez, PJ Gumbe, George Meléndez",,,,orange1
+1.1.3,"NDA Document",task,2021-05-19,2021-05-26,0,0,100,"George Meléndez",1.2.1.2,,,green1
+1.1.4,"Supplier Qualification Document",task,2021-05-26,2021-06-02,0,0,100,"George Meléndez",1.2.1.2,,,green1
+1.1.5,"Brand Positioning Document",task,2021-06-01,2021-06-15,0,0,100,"George Meléndez",1.2.1.2,,,green1
+1.1.6,"SWOT Document",task,2021-06-24,2021-07-22,0,0,100,"George Meléndez",1.1.2,,,green1
+1.1.7,"Customer Skin Typology Questionnaire",task,2021-06-18,2021-06-25,0,0,100,"PJ Gumbe",1.2.1.2,,,green1
+1.1.8,"Online Shopping Dynamics 2021 Document",task,2021-06-23,2021-06-30,0,0,100,"George Meléndez",1.2.1.2,,,green1
+1.1.9,"By Laws Document",task,2021-06-22,2021-07-22,0,0,50,"George Meléndez",1.2.1.2,,,yellow1
+1.1.10,"Approved Sitemap & Azure Dev/Ops Configuration for Phase 1",task,2021-06-22,2021-07-22,0,0,100,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.2,1.2.1.2",,,green1
+1.1.11,"Azure Monthly Cost Estimate (Post-12 Month Grace Period)",task,2021-06-24,2021-07-01,0,0,100,"Rafael Pérez",1.2.1.2,,,green1
+1.1.12,"Approved Project Plan for Phase 1",task,2021-07-23,2021-07-27,0,0,75,"Rafael Pérez","1.1.10,1.2.1.2",,,green1
+1.1.13,"Milestone - Software Development Sitemap and Project Plan Completed",milestone,2021-07-28,2021-07-28,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez",,,,blue2
+1.1.14,"QA/Test Document",task,2021-08-05,2021-08-17,0,0,10,"Rafael Pérez",,,,green1
+1.1.15,"Change Management Document",task,2021-08-05,2021-08-17,0,0,10,"Rafael Pérez",,,,green1
+1.1.16,"Test/QA, Sprint 4, Fixes",task,2021-08-18,2021-08-20,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.14,1.2.1.7",,,purple1
+1.1.17,"Test/QA, Sprint 5, Fixes",task,2021-08-31,2021-09-02,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.14,1.2.1.9",,,purple1
+1.1.18,"Test/QA, Sprint 6, Fixes",task,2021-09-13,2021-09-15,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.14,1.2.1.10",,,purple1
+1.1.19,"Test/QA, Sprint  7, Fixes",task,2021-09-24,2021-09-28,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.14,1.2.1.12",,,purple1
+1.1.20,"Gather All Content for the Complete App (English)",task,2021-07-23,2021-09-28,0,0,10,"PJ Gumbe, George Meléndez",1.1.10,,,green1
+1.1.21,"Gather All Graphic Design Content",task,2021-07-23,2021-09-28,0,0,20,"PJ Gumbe, George Meléndez",1.1.10,,,red1
+1.1.22,"Test/QA, Sprint 8, Fixes",task,2021-10-06,2021-10-08,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.14,1.2.1.13",,,purple1
+1.1.23,"Gather All Data for Product Recommendation Engine",task,2021-06-29,2021-10-08,0,0,33,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.7,1.2.1.2",,,green1
+1.1.24,"Test/QA, Sprint 9, Fixes",task,2021-10-19,2021-10-21,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.14,1.2.1.14",,,purple1
+1.1.25,"Test/QA Integrated Product",task,2021-10-22,2021-10-27,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez","1.1.14,1.1.24",,,purple1
+1.1.26,"More or Less Formal Project Commence Date",milestone,2021-04-09,2021-04-09,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez",,,,blue2
+1.2,"XO Web Application: Rafael",group,2021-05-10,2021-11-01,0,0,37.8,,,,,
+1.2.1,"Epic - Integrated E-Commerce Web Application",subgroup,2021-05-10,2021-11-01,0,0,37.8,,,,,
+1.2.1.1,"Targeted Tech Research",task,2021-06-22,2021-07-08,0,0,100,"Rafael Pérez",1.1.2,,,blue2
+1.2.1.2,"Setup Azure DevOps Environment",task,2021-05-10,2021-05-12,0,0,100,"Rafael Pérez",,,,blue2
+1.2.1.3,"Milestone - Software Development Commences",milestone,2021-07-09,2021-07-09,0,0,0,"Rafael Pérez",,,,blue2
+1.2.1.4,"Sprint 1 - Develop and Integrate Recommendation Engine",task,2021-07-09,2021-07-22,0,0,100,"Rafael Pérez",1.2.1.1,,,blue2
+1.2.1.5,"Sprint 2 - Approved Database Design/Azure Cloud Env. Setup",task,2021-07-28,2021-08-04,0,0,5,"Rafael Pérez",1.1.12,,,blue2
+1.2.1.6,"Sprint 3 - Setup Site Skeleton",task,2021-08-05,2021-08-09,0,0,10,"Rafael Pérez",1.2.1.5,,,blue2
+1.2.1.7,"Sprint 4 - User Authentication and Validation",task,2021-08-10,2021-08-17,0,0,5,"Rafael Pérez",1.2.1.6,,,blue2
+1.2.1.8,"Milestone - Shopify Integration Commences",milestone,2021-08-23,2021-08-23,0,0,0,"Rafael Pérez",,,,blue2
+1.2.1.9,"Sprint 5 - Shopify Product Display Integration",task,2021-08-23,2021-08-30,0,0,5,"Rafael Pérez",1.1.16,,,blue2
+1.2.1.10,"Sprint 6 - Shopify Shopping Cart Integration",task,2021-09-03,2021-09-10,0,0,5,"Rafael Pérez",1.1.17,,,blue2
+1.2.1.11,"Milestone - Shopify Integration Complete",milestone,2021-09-29,2021-09-29,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez",,,,blue2
+1.2.1.12,"Sprint 7 - Shopify Payments and Shipping Integration (Incl. Address Correction)",task,2021-09-16,2021-09-23,0,0,5,"Rafael Pérez",1.1.18,,,blue2
+1.2.1.13,"Sprint 8 - Multilingual Content Integration/Graphic Design/Analytics/Accesibility",task,2021-09-29,2021-10-05,0,0,5,"Rafael Pérez","1.1.19,1.1.20,1.1.21",,,blue2
+1.2.1.14,"Sprint 9 - Real-Data Product Recommendation Engine Integration",task,2021-10-11,2021-10-18,0,0,5,"Rafael Pérez","1.1.22,1.1.23",,,blue2
+1.2.1.15,"Deploy to Production",task,2021-10-29,2021-10-29,0,0,0,"Rafael Pérez",1.1.25,,,blue2
+1.2.1.16,"Product Launch",milestone,2021-11-01,2021-11-01,0,0,0,"Rafael Pérez, PJ Gumbe, George Meléndez",1.2.1.15,,,blue2
