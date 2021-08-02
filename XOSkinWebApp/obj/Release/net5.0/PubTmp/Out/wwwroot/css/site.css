@@ -74,8 +74,3 @@ body {
 .nav-link {
   font-size: 14px;
 }
-
-.div.container {
-  overflow: hidden;
-  white-space: nowrap;
-}
