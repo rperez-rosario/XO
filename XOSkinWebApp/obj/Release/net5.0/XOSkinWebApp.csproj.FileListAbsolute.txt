@@ -449,3 +449,4 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\Admi
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\YourLipsAndSmile\Index.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\Orders\Index.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\ShoppingCart\Index.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\Lists\Index.cshtml.g.cs
