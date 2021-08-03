@@ -34,8 +34,4 @@
     <ProjectReference Include="..\AdaptiveProductRecommendationEngine\AdaptiveProductRecommendationEngine.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="wwwroot\img\navbarLeftLogoSm.png" />
-  </ItemGroup>
-
 </Project>
