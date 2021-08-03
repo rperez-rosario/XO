@@ -7,7 +7,6 @@ using AdaptiveProductRecommendationEngine.AdapterGroups;
 using AdaptiveProductRecommendationEngine.Adapters;
 using AdaptiveProductRecommendationEngine.VariationParameters;
 using XOSkinWebApp.Models;
-using XOSkinWebApp.ORM;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -21,7 +20,6 @@ namespace XOSkinWebApp.Controllers
 
     private List<ProductViewModel> TestProductRecommendations()
     {
-      XOSkinContext db = new XOSkinContext();
       HollandProcessor processor = new HollandProcessor();
       ProductGroup productGroup = new ProductGroup();
       IVariationParameter adapterVariationParameter = null;

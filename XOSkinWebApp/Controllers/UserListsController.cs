@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace XOSkinWebApp.Controllers
 {
-  public class ListController : Controller
+  public class UserListsController : Controller
   {
     public IActionResult Index()
     {

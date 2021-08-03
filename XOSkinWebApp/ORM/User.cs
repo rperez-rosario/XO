@@ -10,6 +10,10 @@ namespace XOSkinWebApp.ORM
         public User()
         {
             Addresses = new HashSet<Address>();
+            DiscountCodeCreatedByNavigations = new HashSet<DiscountCode>();
+            DiscountCodeLastUpdatedByNavigations = new HashSet<DiscountCode>();
+            DiscountCouponCreatedByNavigations = new HashSet<DiscountCoupon>();
+            DiscountCouponLastUpdatedByNavigations = new HashSet<DiscountCoupon>();
             PaymentPlanCreatedByNavigations = new HashSet<PaymentPlan>();
             PaymentPlanProductOrderCreatedByNavigations = new HashSet<PaymentPlanProductOrder>();
             PaymentPlanProductOrderLastUpdatedByNavigations = new HashSet<PaymentPlanProductOrder>();
@@ -18,16 +22,21 @@ namespace XOSkinWebApp.ORM
             PaymentPlanSchedulePaymentCreatedByNavigations = new HashSet<PaymentPlanSchedulePayment>();
             PaymentPlanSchedulePaymentLastUpdatedByNavigations = new HashSet<PaymentPlanSchedulePayment>();
             PaymentPlanUserNavigations = new HashSet<PaymentPlan>();
-            PriceCreatedByNavigations = new HashSet<Price>();
-            PriceLastEditedByNavigations = new HashSet<Price>();
+            Prices = new HashSet<Price>();
+            ProductCreatedByNavigations = new HashSet<Product>();
+            ProductLastUpdatedByNavigations = new HashSet<Product>();
             ProductOrders = new HashSet<ProductOrder>();
             ShoppingCarts = new HashSet<ShoppingCart>();
-            UserLedgerTransactions = new HashSet<UserLedgerTransaction>();
+            UserLedgerTransactionCreatedByNavigations = new HashSet<UserLedgerTransaction>();
+            UserLedgerTransactionUserNavigations = new HashSet<UserLedgerTransaction>();
             UserProductLists = new HashSet<UserProductList>();
         }
 
         public long Id { get; set; }
         public string EmailAddress { get; set; }
+        public string HomePhoneNumber { get; set; }
+        public string WorkPhoneNumber { get; set; }
+        public string AdditionalPhoneNumber { get; set; }
         public string PasswordHash { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -38,6 +47,10 @@ namespace XOSkinWebApp.ORM
         public virtual Language PreferredLanguageNavigation { get; set; }
         public virtual UserGroup UserGroupNavigation { get; set; }
         public virtual ICollection<Address> Addresses { get; set; }
+        public virtual ICollection<DiscountCode> DiscountCodeCreatedByNavigations { get; set; }
+        public virtual ICollection<DiscountCode> DiscountCodeLastUpdatedByNavigations { get; set; }
+        public virtual ICollection<DiscountCoupon> DiscountCouponCreatedByNavigations { get; set; }
+        public virtual ICollection<DiscountCoupon> DiscountCouponLastUpdatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlan> PaymentPlanCreatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlanProductOrder> PaymentPlanProductOrderCreatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlanProductOrder> PaymentPlanProductOrderLastUpdatedByNavigations { get; set; }
@@ -46,11 +59,13 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<PaymentPlanSchedulePayment> PaymentPlanSchedulePaymentCreatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlanSchedulePayment> PaymentPlanSchedulePaymentLastUpdatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlan> PaymentPlanUserNavigations { get; set; }
-        public virtual ICollection<Price> PriceCreatedByNavigations { get; set; }
-        public virtual ICollection<Price> PriceLastEditedByNavigations { get; set; }
+        public virtual ICollection<Price> Prices { get; set; }
+        public virtual ICollection<Product> ProductCreatedByNavigations { get; set; }
+        public virtual ICollection<Product> ProductLastUpdatedByNavigations { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
         public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
-        public virtual ICollection<UserLedgerTransaction> UserLedgerTransactions { get; set; }
+        public virtual ICollection<UserLedgerTransaction> UserLedgerTransactionCreatedByNavigations { get; set; }
+        public virtual ICollection<UserLedgerTransaction> UserLedgerTransactionUserNavigations { get; set; }
         public virtual ICollection<UserProductList> UserProductLists { get; set; }
     }
 }

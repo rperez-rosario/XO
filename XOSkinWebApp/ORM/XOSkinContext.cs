@@ -29,6 +29,8 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<KitProduct> KitProducts { get; set; }
         public virtual DbSet<KitType> KitTypes { get; set; }
         public virtual DbSet<Language> Languages { get; set; }
+        public virtual DbSet<LocalizedImage> LocalizedImages { get; set; }
+        public virtual DbSet<LocalizedText> LocalizedTexts { get; set; }
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
         public virtual DbSet<OrderShipTo> OrderShipTos { get; set; }
         public virtual DbSet<PaymentPlan> PaymentPlans { get; set; }
@@ -41,6 +43,8 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
         public virtual DbSet<ProductOrderDiscountCode> ProductOrderDiscountCodes { get; set; }
         public virtual DbSet<ProductOrderDiscountCoupon> ProductOrderDiscountCoupons { get; set; }
+        public virtual DbSet<ProductSubCategory> ProductSubCategories { get; set; }
+        public virtual DbSet<ProductSubUnderCategory> ProductSubUnderCategories { get; set; }
         public virtual DbSet<ProductType> ProductTypes { get; set; }
         public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public virtual DbSet<ShoppingCartDiscountCode> ShoppingCartDiscountCodes { get; set; }
@@ -51,7 +55,6 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<SubscriptionProduct> SubscriptionProducts { get; set; }
         public virtual DbSet<SubscriptionShipmentSchedule> SubscriptionShipmentSchedules { get; set; }
         public virtual DbSet<SubscriptionType> SubscriptionTypes { get; set; }
-        public virtual DbSet<Text> Texts { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserGroup> UserGroups { get; set; }
         public virtual DbSet<UserLedgerTransaction> UserLedgerTransactions { get; set; }
@@ -64,7 +67,7 @@ namespace XOSkinWebApp.ORM
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=SIR-GALAHAD;Initial Catalog=XOSkin;User Id=xoskinapp;Password=qu3rtY8085:;");
+                optionsBuilder.UseSqlServer("User ID=xoskinapp;Password=qu3rtY8085:;Initial Catalog=XOSkin;Server=SIR-GALAHAD");
             }
         }
 
@@ -210,6 +213,8 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Created).HasColumnType("datetime");
+
                 entity.Property(e => e.DiscountAsInNproductDollars).HasColumnName("DiscountAsInNProductDollars");
 
                 entity.Property(e => e.DiscountAsInNproductPercentage).HasColumnName("DiscountAsInNProductPercentage");
@@ -226,9 +231,22 @@ namespace XOSkinWebApp.ORM
                     .HasColumnType("decimal(18, 0)")
                     .HasColumnName("DiscountNProductPercentage");
 
+                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
+
                 entity.Property(e => e.ValidFrom).HasColumnType("datetime");
 
                 entity.Property(e => e.ValidTo).HasColumnType("datetime");
+
+                entity.HasOne(d => d.CreatedByNavigation)
+                    .WithMany(p => p.DiscountCodeCreatedByNavigations)
+                    .HasForeignKey(d => d.CreatedBy)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_DiscountCode_User");
+
+                entity.HasOne(d => d.LastUpdatedByNavigation)
+                    .WithMany(p => p.DiscountCodeLastUpdatedByNavigations)
+                    .HasForeignKey(d => d.LastUpdatedBy)
+                    .HasConstraintName("FK_DiscountCode_User1");
             });
 
             modelBuilder.Entity<DiscountCodeProduct>(entity =>
@@ -252,6 +270,8 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("DiscountCoupon");
 
+                entity.Property(e => e.Created).HasColumnType("datetime");
+
                 entity.Property(e => e.DiscountAsInNproductDollars).HasColumnName("DiscountAsInNProductDollars");
 
                 entity.Property(e => e.DiscountAsInNproductPercentage).HasColumnName("DiscountAsInNProductPercentage");
@@ -268,9 +288,22 @@ namespace XOSkinWebApp.ORM
                     .HasColumnType("decimal(18, 0)")
                     .HasColumnName("DiscountNProductPercentage");
 
+                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
+
                 entity.Property(e => e.ValidFrom).HasColumnType("datetime");
 
                 entity.Property(e => e.ValidTo).HasColumnType("datetime");
+
+                entity.HasOne(d => d.CreatedByNavigation)
+                    .WithMany(p => p.DiscountCouponCreatedByNavigations)
+                    .HasForeignKey(d => d.CreatedBy)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_DiscountCoupon_User");
+
+                entity.HasOne(d => d.LastUpdatedByNavigation)
+                    .WithMany(p => p.DiscountCouponLastUpdatedByNavigations)
+                    .HasForeignKey(d => d.LastUpdatedBy)
+                    .HasConstraintName("FK_DiscountCoupon_User1");
             });
 
             modelBuilder.Entity<DiscountCouponProduct>(entity =>
@@ -323,6 +356,48 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<LocalizedImage>(entity =>
+            {
+                entity.ToTable("LocalizedImage");
+
+                entity.Property(e => e.Path)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PlacementPointCode)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.LanguageNavigation)
+                    .WithMany(p => p.LocalizedImages)
+                    .HasForeignKey(d => d.Language)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_LocalizedImage_Language");
+            });
+
+            modelBuilder.Entity<LocalizedText>(entity =>
+            {
+                entity.ToTable("LocalizedText");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.PlacementPointCode)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Text)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.LanguageNavigation)
+                    .WithMany(p => p.LocalizedTexts)
+                    .HasForeignKey(d => d.Language)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Text_Language");
             });
 
             modelBuilder.Entity<OrderProduct>(entity =>
@@ -486,13 +561,13 @@ namespace XOSkinWebApp.ORM
                     .WithMany(p => p.PaymentPlanScheduleCreatedByNavigations)
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_PaymentPlanSchedule_User");
+                    .HasConstraintName("FK_PaymentPlanSchedule_User3");
 
                 entity.HasOne(d => d.LastUpdatedByNavigation)
                     .WithMany(p => p.PaymentPlanScheduleLastUpdatedByNavigations)
                     .HasForeignKey(d => d.LastUpdatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_PaymentPlanSchedule_User1");
+                    .HasConstraintName("FK_PaymentPlanSchedule_User4");
 
                 entity.HasOne(d => d.PaymentPlanNavigation)
                     .WithMany(p => p.PaymentPlanSchedules)
@@ -521,13 +596,13 @@ namespace XOSkinWebApp.ORM
                     .WithMany(p => p.PaymentPlanSchedulePaymentCreatedByNavigations)
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_PaymentPlanSchedulePayment_User");
+                    .HasConstraintName("FK_PaymentPlanSchedulePayment_User4");
 
                 entity.HasOne(d => d.LastUpdatedByNavigation)
                     .WithMany(p => p.PaymentPlanSchedulePaymentLastUpdatedByNavigations)
                     .HasForeignKey(d => d.LastUpdatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_PaymentPlanSchedulePayment_User1");
+                    .HasConstraintName("FK_PaymentPlanSchedulePayment_User5");
 
                 entity.HasOne(d => d.LedgerTransactionNavigation)
                     .WithMany(p => p.PaymentPlanSchedulePayments)
@@ -550,29 +625,32 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.CreatedOn).HasColumnType("datetime");
 
-                entity.Property(e => e.LastEdited).HasColumnType("datetime");
-
                 entity.Property(e => e.ValidFrom).HasColumnType("datetime");
 
                 entity.Property(e => e.ValidTo).HasColumnType("datetime");
 
                 entity.HasOne(d => d.CreatedByNavigation)
-                    .WithMany(p => p.PriceCreatedByNavigations)
+                    .WithMany(p => p.Prices)
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Price_User");
-
-                entity.HasOne(d => d.LastEditedByNavigation)
-                    .WithMany(p => p.PriceLastEditedByNavigations)
-                    .HasForeignKey(d => d.LastEditedBy)
-                    .HasConstraintName("FK_Price_User1");
             });
 
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.ToTable("Product");
 
+                entity.Property(e => e.Created).HasColumnType("datetime");
+
                 entity.Property(e => e.Description).IsUnicode(false);
+
+                entity.Property(e => e.ImagePathLarge).IsUnicode(false);
+
+                entity.Property(e => e.ImagePathMedium).IsUnicode(false);
+
+                entity.Property(e => e.ImagePathSmall).IsUnicode(false);
+
+                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -587,7 +665,13 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false)
                     .HasColumnName("SKU");
 
-                entity.Property(e => e.VolumeInOunces).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.VolumeInFluidOunces).HasColumnType("decimal(18, 0)");
+
+                entity.HasOne(d => d.CreatedByNavigation)
+                    .WithMany(p => p.ProductCreatedByNavigations)
+                    .HasForeignKey(d => d.CreatedBy)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Product_User");
 
                 entity.HasOne(d => d.CurrentPriceNavigation)
                     .WithMany(p => p.Products)
@@ -599,6 +683,11 @@ namespace XOSkinWebApp.ORM
                     .WithMany(p => p.Products)
                     .HasForeignKey(d => d.KitType)
                     .HasConstraintName("FK_Product_KitType");
+
+                entity.HasOne(d => d.LastUpdatedByNavigation)
+                    .WithMany(p => p.ProductLastUpdatedByNavigations)
+                    .HasForeignKey(d => d.LastUpdatedBy)
+                    .HasConstraintName("FK_Product_User1");
 
                 entity.HasOne(d => d.ProductCategoryNavigation)
                     .WithMany(p => p.Products)
@@ -638,6 +727,8 @@ namespace XOSkinWebApp.ORM
                 entity.Property(e => e.CouponDiscount).HasColumnType("decimal(18, 0)");
 
                 entity.Property(e => e.DatePlaced).HasColumnType("datetime");
+
+                entity.Property(e => e.ShippingCost).HasColumnType("decimal(18, 0)");
 
                 entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 0)");
 
@@ -682,6 +773,46 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.ProductOrder)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ProductOrderDiscountCoupon_ProductOrder");
+            });
+
+            modelBuilder.Entity<ProductSubCategory>(entity =>
+            {
+                entity.ToTable("ProductSubCategory");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.CategoryNavigation)
+                    .WithMany(p => p.ProductSubCategories)
+                    .HasForeignKey(d => d.Category)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProductSubCategory_ProductCategory");
+            });
+
+            modelBuilder.Entity<ProductSubUnderCategory>(entity =>
+            {
+                entity.ToTable("ProductSubUnderCategory");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.SubCategoryNavigation)
+                    .WithMany(p => p.ProductSubUnderCategories)
+                    .HasForeignKey(d => d.SubCategory)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProductSubUnderCategory_ProductSubCategory");
             });
 
             modelBuilder.Entity<ProductType>(entity =>
@@ -841,32 +972,13 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<Text>(entity =>
-            {
-                entity.ToTable("Text");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.PlacementPointCode)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Text1)
-                    .IsRequired()
-                    .IsUnicode(false)
-                    .HasColumnName("Text");
-
-                entity.HasOne(d => d.LanguageNavigation)
-                    .WithMany(p => p.Texts)
-                    .HasForeignKey(d => d.Language)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Text_Language");
-            });
-
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("User");
+
+                entity.Property(e => e.AdditionalPhoneNumber)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.EmailAddress)
                     .IsRequired()
@@ -876,11 +988,19 @@ namespace XOSkinWebApp.ORM
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
+                entity.Property(e => e.HomePhoneNumber)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.LastName)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
                 entity.Property(e => e.PasswordHash).IsUnicode(false);
+
+                entity.Property(e => e.WorkPhoneNumber)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.HasOne(d => d.PreferredLanguageNavigation)
                     .WithMany(p => p.Users)
@@ -925,16 +1045,22 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.CreatedByNavigation)
-                    .WithMany(p => p.UserLedgerTransactions)
+                    .WithMany(p => p.UserLedgerTransactionCreatedByNavigations)
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_UserLedgerTransaction_User");
+                    .HasConstraintName("FK_UserLedgerTransaction_User2");
 
                 entity.HasOne(d => d.TransactionTypeNavigation)
                     .WithMany(p => p.UserLedgerTransactions)
                     .HasForeignKey(d => d.TransactionType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserLedgerTransaction_UserLedgerTransactionType");
+
+                entity.HasOne(d => d.UserNavigation)
+                    .WithMany(p => p.UserLedgerTransactionUserNavigations)
+                    .HasForeignKey(d => d.User)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_UserLedgerTransaction_User3");
             });
 
             modelBuilder.Entity<UserLedgerTransactionType>(entity =>

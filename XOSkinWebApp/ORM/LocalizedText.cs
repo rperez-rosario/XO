@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 namespace XOSkinWebApp.ORM
 {
-    public partial class Text
+    public partial class LocalizedText
     {
         public long Id { get; set; }
-        public string Text1 { get; set; }
+        public string Text { get; set; }
         public int Language { get; set; }
         public string PlacementPointCode { get; set; }
 

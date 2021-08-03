@@ -18,11 +18,8 @@ namespace XOSkinWebApp.ORM
         public DateTime ValidTo { get; set; }
         public long CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
-        public long? LastEditedBy { get; set; }
-        public DateTime? LastEdited { get; set; }
 
         public virtual User CreatedByNavigation { get; set; }
-        public virtual User LastEditedByNavigation { get; set; }
         public virtual ICollection<Product> Products { get; set; }
     }
 }

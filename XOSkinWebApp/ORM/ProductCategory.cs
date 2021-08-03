@@ -9,6 +9,7 @@ namespace XOSkinWebApp.ORM
     {
         public ProductCategory()
         {
+            ProductSubCategories = new HashSet<ProductSubCategory>();
             Products = new HashSet<Product>();
         }
 
@@ -16,6 +17,7 @@ namespace XOSkinWebApp.ORM
         public string Name { get; set; }
         public string Description { get; set; }
 
+        public virtual ICollection<ProductSubCategory> ProductSubCategories { get; set; }
         public virtual ICollection<Product> Products { get; set; }
     }
 }

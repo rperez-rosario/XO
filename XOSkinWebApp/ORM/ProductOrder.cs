@@ -22,6 +22,7 @@ namespace XOSkinWebApp.ORM
         public decimal Subtotal { get; set; }
         public decimal CouponDiscount { get; set; }
         public decimal CodeDiscount { get; set; }
+        public decimal? ShippingCost { get; set; }
         public decimal ApplicableTaxes { get; set; }
         public decimal Total { get; set; }
         public bool GiftOrder { get; set; }

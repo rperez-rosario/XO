@@ -27,7 +27,13 @@ namespace XOSkinWebApp.ORM
         public decimal? DiscountGlobalOrderDollars { get; set; }
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
+        public long CreatedBy { get; set; }
+        public DateTime Created { get; set; }
+        public long? LastUpdatedBy { get; set; }
+        public DateTime? LastUpdated { get; set; }
 
+        public virtual User CreatedByNavigation { get; set; }
+        public virtual User LastUpdatedByNavigation { get; set; }
         public virtual ICollection<DiscountCodeProduct> DiscountCodeProducts { get; set; }
         public virtual ICollection<ProductOrderDiscountCode> ProductOrderDiscountCodes { get; set; }
         public virtual ICollection<ShoppingCartDiscountCode> ShoppingCartDiscountCodes { get; set; }

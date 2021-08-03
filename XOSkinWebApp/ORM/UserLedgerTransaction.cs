@@ -24,6 +24,7 @@ namespace XOSkinWebApp.ORM
 
         public virtual User CreatedByNavigation { get; set; }
         public virtual UserLedgerTransactionType TransactionTypeNavigation { get; set; }
+        public virtual User UserNavigation { get; set; }
         public virtual ICollection<PaymentPlanSchedulePayment> PaymentPlanSchedulePayments { get; set; }
     }
 }

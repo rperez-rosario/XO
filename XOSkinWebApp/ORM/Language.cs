@@ -9,14 +9,16 @@ namespace XOSkinWebApp.ORM
     {
         public Language()
         {
-            Texts = new HashSet<Text>();
+            LocalizedImages = new HashSet<LocalizedImage>();
+            LocalizedTexts = new HashSet<LocalizedText>();
             Users = new HashSet<User>();
         }
 
         public int Id { get; set; }
         public string LanguageName { get; set; }
 
-        public virtual ICollection<Text> Texts { get; set; }
+        public virtual ICollection<LocalizedImage> LocalizedImages { get; set; }
+        public virtual ICollection<LocalizedText> LocalizedTexts { get; set; }
         public virtual ICollection<User> Users { get; set; }
     }
 }
