@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "mQ6rqLbXZWXR/7JwkjsggyfIF2ZgkYUPr1Xu91QzOiE6o6gAhTKT5QkTN6x1u36HQKiojcOdjKnLJPR698KQcA==",
+  "dgSpecHash": "Ad9FCI+CO84I3/z3hHTJaVWh2WfxbSJ/kelJVfqjypjnqpOyE/HTfiweaG5BGQfp3PR15LQW86zDhAo1N7K5QA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Rafael\\source\\repos\\XO\\XOSkinWebApp\\XOSkinWebApp.csproj",
   "expectedPackageFiles": [
@@ -60,11 +60,14 @@
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.identitymodel.tokens\\5.6.0\\microsoft.identitymodel.tokens.5.6.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.netcore.targets\\1.1.3\\microsoft.netcore.targets.1.1.3.nupkg.sha512",
+    "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration\\5.0.2\\microsoft.visualstudio.web.codegeneration.5.0.2.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.contracts\\5.0.2\\microsoft.visualstudio.web.codegeneration.contracts.5.0.2.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.core\\5.0.2\\microsoft.visualstudio.web.codegeneration.core.5.0.2.nupkg.sha512",
+    "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.design\\5.0.2\\microsoft.visualstudio.web.codegeneration.design.5.0.2.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.entityframeworkcore\\5.0.2\\microsoft.visualstudio.web.codegeneration.entityframeworkcore.5.0.2.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.templating\\5.0.2\\microsoft.visualstudio.web.codegeneration.templating.5.0.2.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.visualstudio.web.codegeneration.utils\\5.0.2\\microsoft.visualstudio.web.codegeneration.utils.5.0.2.nupkg.sha512",
+    "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.visualstudio.web.codegenerators.mvc\\5.0.2\\microsoft.visualstudio.web.codegenerators.mvc.5.0.2.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",

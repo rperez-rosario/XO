@@ -32,6 +32,8 @@ namespace XOSkinWebApp
               Configuration.GetConnectionString("DefaultConnection")));
       services.AddDatabaseDeveloperPageExceptionFilter();
 
+      services.AddScoped<ORM.XOSkinContext, ORM.XOSkinContext>();
+
       services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
           .AddEntityFrameworkStores<ApplicationDbContext>();
       services.AddControllersWithViews();
@@ -61,6 +63,10 @@ namespace XOSkinWebApp
 
       app.UseEndpoints(endpoints =>
       {
+        endpoints.MapControllerRoute(
+          name: "Administration",
+          pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
         endpoints.MapControllerRoute(
                   name: "default",
                   pattern: "{controller=Home}/{action=Index}/{id?}");

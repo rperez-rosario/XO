@@ -352,10 +352,16 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("Language");
 
+                entity.HasIndex(e => e.LanguageName, "IX_Language")
+                    .IsUnique();
+
                 entity.Property(e => e.LanguageName)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Active)
+                  .IsRequired();
             });
 
             modelBuilder.Entity<LocalizedImage>(entity =>

@@ -66,8 +66,24 @@
                   (0)
                 </a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle nav-link text-dark text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                  <span class="nav-label">Administration</span><span class="caret text-dark"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Languages" asp-action="Index">Languages</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="" asp-action="Index">Language Localization</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="" asp-action="Index">Image Localization</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="" asp-action="Index">Users</a>
+                  </li>
+                </ul>
               </li>
             </ul>
             <partial name="_LoginPartial" />
@@ -82,9 +98,10 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2021 - XO Skin - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
+      <div class="container align-items-center text-dark">
+        &copy; 2021 - XO Skin&#8482;<br />
+        <a href="https://www.facebook.com/" target="_blank"><img src="~/img/facebookLogo.png" height="20" width="20" /></a>&nbsp;&nbsp;<a href="https://www.instagram.com/" target="_blank"><img src="~/img/instagramLogo.png" width="20" height="20"/></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/" target="_blank"><img src="~/img/linkedInLogo.svg" height="15" /></a> - <a asp-area="" asp-controller="Jobs" asp-action="Index" class="text-dark">XO Jobs</a> - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-dark">Privacy</a>
+      </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
