@@ -23,9 +23,9 @@ namespace XOSkinWebApp.ORM
 
         [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
         [Required(ErrorMessage = "Language name required.")]
-        [Remote("LanguageNameAvailable", "Languages", ErrorMessage = "Language name already registered.", AdditionalFields = "ActionCreate")]
+        [Remote("LanguageNameAvailable", "Languages", ErrorMessage = "Language name already registered.", AdditionalFields = "ActionCreate, OriginalLanguageName")]
         public string LanguageName { get; set; }
-
+ 
         public bool Active { get; set; }
 
         public virtual ICollection<LocalizedImage> LocalizedImages { get; set; }

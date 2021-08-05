@@ -459,3 +459,11 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Admi
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Languages\Index.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\_ViewImports.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\_ViewStart.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\LocalizedImages\Create.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\LocalizedImages\Delete.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\LocalizedImages\Edit.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\LocalizedImages\Index.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\LocalizedTexts\Create.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\LocalizedTexts\Delete.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\LocalizedTexts\Edit.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\LocalizedTexts\Index.cshtml.g.cs

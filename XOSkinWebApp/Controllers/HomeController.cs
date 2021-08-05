@@ -6,20 +6,26 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using XOSkinWebApp.Models;
+using XOSkinWebApp.ORM;
 
 namespace XOSkinWebApp.Controllers
 {
   public class HomeController : Controller
   {
     private readonly ILogger<HomeController> _logger;
+    private readonly XOSkinContext _context;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(XOSkinContext context, ILogger<HomeController> logger)
     {
       _logger = logger;
+      _context = context;
     }
 
     public IActionResult Index()
     {
+      ViewData.Add("Home.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Home.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("Home.PromotionalRibbon", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Home.PromotionalRibbon")).Select(x => x.Text).FirstOrDefault());
+      
       return View();
     }
 

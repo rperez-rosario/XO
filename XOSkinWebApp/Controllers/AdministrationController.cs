@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace XOSkinWebApp.Controllers
 {
-    public class AdministrationController : Controller
+  public class AdministrationController : Controller
     {
         public IActionResult Index()
         {

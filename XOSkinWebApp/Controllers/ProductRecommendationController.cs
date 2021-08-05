@@ -7,14 +7,27 @@ using AdaptiveProductRecommendationEngine.AdapterGroups;
 using AdaptiveProductRecommendationEngine.Adapters;
 using AdaptiveProductRecommendationEngine.VariationParameters;
 using XOSkinWebApp.Models;
+using XOSkinWebApp.ORM;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace XOSkinWebApp.Controllers
 {
   public class ProductRecommendationController : Controller
   {
+    private readonly XOSkinContext _context;
+
+    public ProductRecommendationController(XOSkinContext context)
+    {
+      _context = context;
+    }
+
     public IActionResult Index()
     {
+      ViewData.Add("ProductRecommendation.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("ProductRecommendation.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+
       List<ProductViewModel> product = TestProductRecommendations();
+
       return View(product);
     }
 

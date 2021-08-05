@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "Ad9FCI+CO84I3/z3hHTJaVWh2WfxbSJ/kelJVfqjypjnqpOyE/HTfiweaG5BGQfp3PR15LQW86zDhAo1N7K5QA==",
+  "dgSpecHash": "4NK5B560bwL1guLb4dnYC0N4/EaC/FaZTzd6H0TySQzDH/6UGH0XMi1FprtiICQn5PX6ls/SKCSxf4l+M5GjHA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Rafael\\source\\repos\\XO\\XOSkinWebApp\\XOSkinWebApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Rafael\\.nuget\\packages\\adaptivecomputingframeworkcore\\1.0.0\\adaptivecomputingframeworkcore.1.0.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\castle.core\\4.4.1\\castle.core.4.4.1.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
+    "C:\\Users\\Rafael\\.nuget\\packages\\jquery\\3.6.0\\jquery.3.6.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\5.0.8\\microsoft.aspnetcore.cryptography.internal.5.0.8.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\5.0.8\\microsoft.aspnetcore.cryptography.keyderivation.5.0.8.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.aspnetcore.diagnostics.entityframeworkcore\\5.0.8\\microsoft.aspnetcore.diagnostics.entityframeworkcore.5.0.8.nupkg.sha512",

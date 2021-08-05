@@ -145,9 +145,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public JsonResult LanguageNameAvailable(String LanguageName, bool ActionCreate)
+        public JsonResult LanguageNameAvailable(String LanguageName, bool ActionCreate, String OriginalLanguageName)
         {
-          if (ActionCreate)
+          if (ActionCreate || (!ActionCreate && !LanguageName.Equals(OriginalLanguageName)))
           {
             return Json(!_context.Languages.Any(x => x.LanguageName.Equals(LanguageName)));
           }

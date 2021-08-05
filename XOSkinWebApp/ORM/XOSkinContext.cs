@@ -33,6 +33,7 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<LocalizedText> LocalizedTexts { get; set; }
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
         public virtual DbSet<OrderShipTo> OrderShipTos { get; set; }
+        public virtual DbSet<Page> Pages { get; set; }
         public virtual DbSet<PaymentPlan> PaymentPlans { get; set; }
         public virtual DbSet<PaymentPlanProductOrder> PaymentPlanProductOrders { get; set; }
         public virtual DbSet<PaymentPlanSchedule> PaymentPlanSchedules { get; set; }
@@ -359,14 +360,14 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
-
-                entity.Property(e => e.Active)
-                  .IsRequired();
             });
 
             modelBuilder.Entity<LocalizedImage>(entity =>
             {
                 entity.ToTable("LocalizedImage");
+
+                entity.HasIndex(e => e.PlacementPointCode, "IX_LocalizedImage")
+                    .IsUnique();
 
                 entity.Property(e => e.Path)
                     .IsRequired()
@@ -374,7 +375,7 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.PlacementPointCode)
                     .IsRequired()
-                    .HasMaxLength(50)
+                    .HasMaxLength(500)
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.LanguageNavigation)
@@ -382,17 +383,24 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.Language)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_LocalizedImage_Language");
+
+                entity.HasOne(d => d.PageNavigation)
+                    .WithMany(p => p.LocalizedImages)
+                    .HasForeignKey(d => d.Page)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_LocalizedImage_Page");
             });
 
             modelBuilder.Entity<LocalizedText>(entity =>
             {
                 entity.ToTable("LocalizedText");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.HasIndex(e => e.PlacementPointCode, "IX_LocalizedText")
+                    .IsUnique();
 
                 entity.Property(e => e.PlacementPointCode)
                     .IsRequired()
-                    .HasMaxLength(50)
+                    .HasMaxLength(500)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Text)
@@ -404,6 +412,12 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.Language)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Text_Language");
+
+                entity.HasOne(d => d.PageNavigation)
+                    .WithMany(p => p.LocalizedTexts)
+                    .HasForeignKey(d => d.Page)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_LocalizedText_Page");
             });
 
             modelBuilder.Entity<OrderProduct>(entity =>
@@ -491,6 +505,19 @@ namespace XOSkinWebApp.ORM
                     .WithMany(p => p.OrderShipTos)
                     .HasForeignKey(d => d.Order)
                     .HasConstraintName("FK_OrderShipTo_ProductOrder");
+            });
+
+            modelBuilder.Entity<Page>(entity =>
+            {
+                entity.ToTable("Page");
+
+                entity.HasIndex(e => e.Name, "IX_Page")
+                    .IsUnique();
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<PaymentPlan>(entity =>

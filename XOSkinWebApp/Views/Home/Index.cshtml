@@ -1,11 +1,11 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+  ViewData["Title"] = "Home Page";
 }
 
 <div class="text-sm-center bg-light">
-  Promotional Ribbon (like a Ticker Tape) showcasing Offers, Discounts, Specials, Announcements, Good wishes, etc...
+  @Html.Raw(ViewData["Home.PromotionalRibbon"])
 </div>
 <div class="text-center">
   <h1 class="display-4">Welcome</h1>
-  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Venenatis tellus in metus vulputate eu scelerisque felis imperdiet. Cursus risus at ultrices mi tempus imperdiet. Sed augue lacus viverra vitae congue eu consequat.</p>  
+    @Html.Raw(ViewData["Home.WelcomeText"])
 </div>
