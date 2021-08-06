@@ -13,6 +13,7 @@ namespace XOSkinWebApp.ORM
             DiscountCouponProducts = new HashSet<DiscountCouponProduct>();
             KitProducts = new HashSet<KitProduct>();
             OrderProducts = new HashSet<OrderProduct>();
+            ProductIngredients = new HashSet<ProductIngredient>();
             ShoppingCartHistories = new HashSet<ShoppingCartHistory>();
             SubscriptionProducts = new HashSet<SubscriptionProduct>();
             UserProductListProducts = new HashSet<UserProductListProduct>();
@@ -48,6 +49,7 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<DiscountCouponProduct> DiscountCouponProducts { get; set; }
         public virtual ICollection<KitProduct> KitProducts { get; set; }
         public virtual ICollection<OrderProduct> OrderProducts { get; set; }
+        public virtual ICollection<ProductIngredient> ProductIngredients { get; set; }
         public virtual ICollection<ShoppingCartHistory> ShoppingCartHistories { get; set; }
         public virtual ICollection<SubscriptionProduct> SubscriptionProducts { get; set; }
         public virtual ICollection<UserProductListProduct> UserProductListProducts { get; set; }

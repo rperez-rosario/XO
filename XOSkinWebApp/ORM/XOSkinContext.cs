@@ -19,13 +19,17 @@ namespace XOSkinWebApp.ORM
 
         public virtual DbSet<Address> Addresses { get; set; }
         public virtual DbSet<AddressType> AddressTypes { get; set; }
+        public virtual DbSet<AnswerIngredient> AnswerIngredients { get; set; }
         public virtual DbSet<CityPr> CityPrs { get; set; }
         public virtual DbSet<CityStateCountryWorld> CityStateCountryWorlds { get; set; }
         public virtual DbSet<CityStateU> CityStateUs { get; set; }
+        public virtual DbSet<CommonAllergen> CommonAllergens { get; set; }
+        public virtual DbSet<ContradictingIngredient> ContradictingIngredients { get; set; }
         public virtual DbSet<DiscountCode> DiscountCodes { get; set; }
         public virtual DbSet<DiscountCodeProduct> DiscountCodeProducts { get; set; }
         public virtual DbSet<DiscountCoupon> DiscountCoupons { get; set; }
         public virtual DbSet<DiscountCouponProduct> DiscountCouponProducts { get; set; }
+        public virtual DbSet<Ingredient> Ingredients { get; set; }
         public virtual DbSet<KitProduct> KitProducts { get; set; }
         public virtual DbSet<KitType> KitTypes { get; set; }
         public virtual DbSet<Language> Languages { get; set; }
@@ -38,15 +42,19 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<PaymentPlanProductOrder> PaymentPlanProductOrders { get; set; }
         public virtual DbSet<PaymentPlanSchedule> PaymentPlanSchedules { get; set; }
         public virtual DbSet<PaymentPlanSchedulePayment> PaymentPlanSchedulePayments { get; set; }
+        public virtual DbSet<PossibleAnswer> PossibleAnswers { get; set; }
         public virtual DbSet<Price> Prices { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+        public virtual DbSet<ProductIngredient> ProductIngredients { get; set; }
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
         public virtual DbSet<ProductOrderDiscountCode> ProductOrderDiscountCodes { get; set; }
         public virtual DbSet<ProductOrderDiscountCoupon> ProductOrderDiscountCoupons { get; set; }
         public virtual DbSet<ProductSubCategory> ProductSubCategories { get; set; }
         public virtual DbSet<ProductSubUnderCategory> ProductSubUnderCategories { get; set; }
         public virtual DbSet<ProductType> ProductTypes { get; set; }
+        public virtual DbSet<Question> Questions { get; set; }
+        public virtual DbSet<Questionnaire> Questionnaires { get; set; }
         public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public virtual DbSet<ShoppingCartDiscountCode> ShoppingCartDiscountCodes { get; set; }
         public virtual DbSet<ShoppingCartDiscountCoupon> ShoppingCartDiscountCoupons { get; set; }
@@ -56,7 +64,10 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<SubscriptionProduct> SubscriptionProducts { get; set; }
         public virtual DbSet<SubscriptionShipmentSchedule> SubscriptionShipmentSchedules { get; set; }
         public virtual DbSet<SubscriptionType> SubscriptionTypes { get; set; }
+        public virtual DbSet<SynergeticIngredient> SynergeticIngredients { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<UserAnswer> UserAnswers { get; set; }
+        public virtual DbSet<UserCommonAllergen> UserCommonAllergens { get; set; }
         public virtual DbSet<UserGroup> UserGroups { get; set; }
         public virtual DbSet<UserLedgerTransaction> UserLedgerTransactions { get; set; }
         public virtual DbSet<UserLedgerTransactionType> UserLedgerTransactionTypes { get; set; }
@@ -68,8 +79,8 @@ namespace XOSkinWebApp.ORM
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                //optionsBuilder.UseSqlServer("Server=tcp:xoskin.database.windows.net,1433;Initial Catalog=XOSkinQATest;Persist Security Info=False;User ID=xoskin;Password=qu3rtY8085:;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
-                optionsBuilder.UseSqlServer("User ID=xoskinapp;Password=qu3rtY8085:;Initial Catalog=XOSkin;Server=SIR-GALAHAD");
+                //optionsBuilder.UseSqlServer("User ID=xoskinapp;Password=qu3rtY8085:;Initial Catalog=XOSkin;Server=SIR-GALAHAD");
+                optionsBuilder.UseSqlServer("Server=tcp:xoskin.database.windows.net,1433;Initial Catalog=XOSkinQATest;Persist Security Info=False;User ID=xoskin;Password=qu3rtY8085:;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
       }
         }
 
@@ -156,6 +167,17 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<AnswerIngredient>(entity =>
+            {
+                entity.ToTable("AnswerIngredient");
+
+                entity.HasOne(d => d.AnswerNavigation)
+                    .WithMany(p => p.AnswerIngredients)
+                    .HasForeignKey(d => d.Answer)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_AnswerIngredient_PossibleAnswer");
+            });
+
             modelBuilder.Entity<CityPr>(entity =>
             {
                 entity.ToTable("CityPR");
@@ -207,6 +229,32 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<CommonAllergen>(entity =>
+            {
+                entity.ToTable("CommonAllergen");
+
+                entity.Property(e => e.AlergenName)
+                    .IsRequired()
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<ContradictingIngredient>(entity =>
+            {
+                entity.ToTable("ContradictingIngredient");
+
+                entity.HasOne(d => d.IngredientANavigation)
+                    .WithMany(p => p.ContradictingIngredientIngredientANavigations)
+                    .HasForeignKey(d => d.IngredientA)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ContradictingIngredient_Ingredient");
+
+                entity.HasOne(d => d.IngredientBNavigation)
+                    .WithMany(p => p.ContradictingIngredientIngredientBNavigations)
+                    .HasForeignKey(d => d.IngredientB)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ContradictingIngredient_Ingredient1");
             });
 
             modelBuilder.Entity<DiscountCode>(entity =>
@@ -327,6 +375,15 @@ namespace XOSkinWebApp.ORM
                     .HasConstraintName("FK_DiscountCouponProduct_Product");
             });
 
+            modelBuilder.Entity<Ingredient>(entity =>
+            {
+                entity.ToTable("Ingredient");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<KitProduct>(entity =>
             {
                 entity.ToTable("KitProduct");
@@ -367,8 +424,7 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("LocalizedImage");
 
-                entity.HasIndex(e => e.PlacementPointCode, "IX_LocalizedImage")
-                    .IsUnique();
+                entity.HasIndex(e => new { e.PlacementPointCode, e.Language }, "IX_LocalizedImage");
 
                 entity.Property(e => e.Path)
                     .IsRequired()
@@ -396,8 +452,7 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("LocalizedText");
 
-                entity.HasIndex(e => e.PlacementPointCode, "IX_LocalizedText")
-                    .IsUnique();
+                entity.HasIndex(e => new { e.PlacementPointCode, e.Language }, "IX_LocalizedText");
 
                 entity.Property(e => e.PlacementPointCode)
                     .IsRequired()
@@ -651,6 +706,21 @@ namespace XOSkinWebApp.ORM
                     .HasConstraintName("FK_PaymentPlanSchedulePayment_PaymentPlanSchedule");
             });
 
+            modelBuilder.Entity<PossibleAnswer>(entity =>
+            {
+                entity.ToTable("PossibleAnswer");
+
+                entity.Property(e => e.Answer)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.QuestionNavigation)
+                    .WithMany(p => p.PossibleAnswers)
+                    .HasForeignKey(d => d.Question)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Answer_Question1");
+            });
+
             modelBuilder.Entity<Price>(entity =>
             {
                 entity.ToTable("Price");
@@ -748,6 +818,23 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<ProductIngredient>(entity =>
+            {
+                entity.ToTable("ProductIngredient");
+
+                entity.HasOne(d => d.IngredientNavigation)
+                    .WithMany(p => p.ProductIngredients)
+                    .HasForeignKey(d => d.Ingredient)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProductIngredient_Ingredient");
+
+                entity.HasOne(d => d.ProductNavigation)
+                    .WithMany(p => p.ProductIngredients)
+                    .HasForeignKey(d => d.Product)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProductIngredient_Product");
             });
 
             modelBuilder.Entity<ProductOrder>(entity =>
@@ -857,6 +944,41 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Question>(entity =>
+            {
+                entity.ToTable("Question");
+
+                entity.Property(e => e.QuestionText)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.QuestionnaireNavigation)
+                    .WithMany(p => p.Questions)
+                    .HasForeignKey(d => d.Questionnaire)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Question_Questionnaire");
+            });
+
+            modelBuilder.Entity<Questionnaire>(entity =>
+            {
+                entity.ToTable("Questionnaire");
+
+                entity.Property(e => e.DateCreated).HasColumnType("datetime");
+
+                entity.Property(e => e.Description).IsUnicode(false);
+
+                entity.Property(e => e.QuestionnaireName)
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.CreatedByNavigation)
+                    .WithMany(p => p.Questionnaires)
+                    .HasForeignKey(d => d.CreatedBy)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Questionnaire_User");
             });
 
             modelBuilder.Entity<ShoppingCart>(entity =>
@@ -1006,9 +1128,29 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<SynergeticIngredient>(entity =>
+            {
+                entity.ToTable("SynergeticIngredient");
+
+                entity.HasOne(d => d.IngredientANavigation)
+                    .WithMany(p => p.SynergeticIngredientIngredientANavigations)
+                    .HasForeignKey(d => d.IngredientA)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_SynergeticIngredient_Ingredient");
+
+                entity.HasOne(d => d.IngredientBNavigation)
+                    .WithMany(p => p.SynergeticIngredientIngredientBNavigations)
+                    .HasForeignKey(d => d.IngredientB)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_SynergeticIngredient_Ingredient1");
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("User");
+
+                entity.HasIndex(e => e.EmailAddress, "IX_User")
+                    .IsUnique();
 
                 entity.Property(e => e.AdditionalPhoneNumber)
                     .HasMaxLength(50)
@@ -1016,6 +1158,7 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.EmailAddress)
                     .IsRequired()
+                    .HasMaxLength(200)
                     .IsUnicode(false);
 
                 entity.Property(e => e.FirstName)
@@ -1046,6 +1189,46 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.UserGroup)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_User_UserGroup");
+            });
+
+            modelBuilder.Entity<UserAnswer>(entity =>
+            {
+                entity.ToTable("UserAnswer");
+
+                entity.Property(e => e.Answer)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AnswerDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.QuestionNavigation)
+                    .WithMany(p => p.UserAnswers)
+                    .HasForeignKey(d => d.Question)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Answer_Question");
+
+                entity.HasOne(d => d.UserNavigation)
+                    .WithMany(p => p.UserAnswers)
+                    .HasForeignKey(d => d.User)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Answer_User");
+            });
+
+            modelBuilder.Entity<UserCommonAllergen>(entity =>
+            {
+                entity.ToTable("UserCommonAllergen");
+
+                entity.HasOne(d => d.CommonAllergenNavigation)
+                    .WithMany(p => p.UserCommonAllergens)
+                    .HasForeignKey(d => d.CommonAllergen)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_UserCommonAllergen_CommonAllergen");
+
+                entity.HasOne(d => d.UserNavigation)
+                    .WithMany(p => p.UserCommonAllergens)
+                    .HasForeignKey(d => d.User)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_UserCommonAllergen_User");
             });
 
             modelBuilder.Entity<UserGroup>(entity =>
