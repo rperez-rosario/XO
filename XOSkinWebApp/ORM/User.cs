@@ -1,5 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using CompareAttribute =
+System.ComponentModel.DataAnnotations.CompareAttribute;
+using Microsoft.AspNetCore.Mvc;
 
 #nullable disable
 
@@ -36,13 +41,31 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
+
+        [StringLength(200, ErrorMessage = "Maximum field length is 200.")]
+        [Required(ErrorMessage = "Email address required.")]
+        [Remote("EmailAddressAvailable", "Users", ErrorMessage = "Email address already registered.", AdditionalFields = "ActionCreate, OriginalEmailAddress")]
         public string EmailAddress { get; set; }
+
+        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
         public string HomePhoneNumber { get; set; }
+
+        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
         public string WorkPhoneNumber { get; set; }
+        
+        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
         public string AdditionalPhoneNumber { get; set; }
+        
         public string PasswordHash { get; set; }
+        
+        [Required(ErrorMessage ="First name required.")]
+        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
         public string FirstName { get; set; }
+        
+        [Required(ErrorMessage = "Last name required.")]
+        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
         public string LastName { get; set; }
+
         public int? PreferredLanguage { get; set; }
         public bool IsLocked { get; set; }
         public short UserGroup { get; set; }

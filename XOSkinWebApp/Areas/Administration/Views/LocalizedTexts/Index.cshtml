@@ -9,7 +9,7 @@
 <p>
   <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
+<table class="table" id="TextLocalizations">
   <thead>
     <tr>
       <th>
@@ -44,10 +44,18 @@
           @Html.DisplayFor(modelItem => item.PageNavigation.Name)
         </td>
         <td>
-          <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> <!--|
+          <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+          <!--|
           <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>-->
         </td>
       </tr>
     }
   </tbody>
 </table>
+<script type="text/javascript">
+  var table = $('#TextLocalizations').DataTable();
+
+  new $.fn.dataTable.Responsive(table, {
+    details: true
+  });
+</script>

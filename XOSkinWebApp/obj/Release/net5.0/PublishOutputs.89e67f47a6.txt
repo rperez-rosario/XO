@@ -1,4 +1,5 @@
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\XOSkinWebApp.exe
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\css\datatables.min.css
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\css\site.css
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\favicon.ico
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\img\facebookLogo.png
@@ -27,6 +28,7 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwro
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\bootstrap\LICENSE
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\datatables\datatables.min.js
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt

@@ -1,52 +1,60 @@
 ﻿@model IEnumerable<XOSkinWebApp.ORM.LocalizedImage>
 
 @{
-    ViewData["Title"] = "Image Localizations";
+  ViewData["Title"] = "Image Localizations";
 }
 
 <h1>Image Localizations</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+  <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Path)
-            </th>
-            <th>
-                Placement Point Code
-            </th>
-            <th>
-                Language
-            </th>
-            <th>
-                Page
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Path)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PlacementPointCode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LanguageNavigation.LanguageName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PageNavigation.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
+<table class="table" id="ImageLocalizations">
+  <thead>
+    <tr>
+      <th>
+        @Html.DisplayNameFor(model => model.Path)
+      </th>
+      <th>
+        Placement Point Code
+      </th>
+      <th>
+        Language
+      </th>
+      <th>
+        Page
+      </th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var item in Model)
+    {
+      <tr>
+        <td>
+          @Html.DisplayFor(modelItem => item.Path)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.PlacementPointCode)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.LanguageNavigation.LanguageName)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.PageNavigation.Name)
+        </td>
+        <td>
+          <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+          <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+        </td>
+      </tr>
+    }
+  </tbody>
 </table>
+<script type="text/javascript">
+  var table = $('#ImageLocalizations').DataTable();
+
+  new $.fn.dataTable.Responsive(table, {
+    details: true
+  });
+</script>

@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<XOSkinWebApp.ORM.Language>
 
 @{
-    ViewData["Title"] = "Languages";
+  ViewData["Title"] = "Languages";
 }
 
 <h1>Languages</h1>
@@ -9,7 +9,7 @@
 <p>
   <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
+<table class="table" id="Languages">
   <thead>
     <tr>
       <th>
@@ -18,22 +18,30 @@
       <th>
         @Html.DisplayNameFor(model => model.Active)
       </th>
-      <th></th>
+      <!--<th></th>-->
     </tr>
   </thead>
   <tbody>
-    @foreach (var item in Model) {
-    <tr>
-      <td>
-        @Html.DisplayFor(modelItem => item.LanguageName)
-      </td>
-      <td>
-        @Html.DisplayFor(modelItem => item.Active)
-      </td>
-      <!--<td>
-        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-      </td>-->
-    </tr>
-}
+    @foreach (var item in Model)
+    {
+      <tr>
+        <td>
+          @Html.DisplayFor(modelItem => item.LanguageName)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.Active)
+        </td>
+        <!--<td>
+          <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+        </td>-->
+      </tr>
+    }
   </tbody>
 </table>
+<script type="text/javascript">
+  var table = $('#Languages').DataTable();
+
+  new $.fn.dataTable.Responsive(table, {
+    details: true
+  });
+</script>
