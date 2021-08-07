@@ -100,8 +100,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedText localizedText)
-        {
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedText localizedText,
+          bool LimitedEntry)
+        {   
             if (id != localizedText.Id)
             {
                 return NotFound();
@@ -109,25 +110,34 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+              try
+              {
+                if (LimitedEntry)
                 {
-                  localizedText.PlacementPointCode = _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
-                    "." + localizedText.PlacementPointCode;
-                  _context.Update(localizedText);
-                  await _context.SaveChangesAsync();
+                  localizedText.Language = _context.LocalizedTexts.Where(x => x.Id == id).Select(x => x.Language).FirstOrDefault();
+                  localizedText.Page = _context.LocalizedTexts.Where(x => x.Id == id).Select(x => x.Page).FirstOrDefault();
+
+                  localizedText.PlacementPointCode =
+                    _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
+                    "." + _context.LocalizedTexts.Where(
+                    x => x.Id == id).Select(x => x.PlacementPointCode).FirstOrDefault().Replace(
+                   _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + ".", "");
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!LocalizedTextExists(localizedText.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(localizedText);
+                await _context.SaveChangesAsync();
+              }
+              catch (DbUpdateConcurrencyException)
+              {
+                  if (!LocalizedTextExists(localizedText.Id))
+                  {
+                      return NotFound();
+                  }
+                  else
+                  {
+                      throw;
+                  }
+              }
+              return RedirectToAction(nameof(Index));
             }
             ViewData["Language"] = new SelectList(_context.Languages, "Id", "LanguageName", localizedText.Language);
             ViewData["Page"] = new SelectList(_context.Pages, "Id", "Name", localizedText.Page);

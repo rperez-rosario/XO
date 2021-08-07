@@ -1,0 +1,38 @@
+﻿@model IEnumerable<XOSkinWebApp.ORM.Question>
+
+@{
+  ViewData["Title"] = "About Your Skin";
+}
+<div class="text-center">
+  <h1 class="display-4">About Your<br />Skin</h1>
+  <p>
+    @Html.Raw(ViewData["Questionnaire.WelcomeText"])
+  </p>
+</div>
+<table class="table">
+  <thead>
+    <tr>
+      <th>
+        #
+      </th>
+      <th>
+        Question Text
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var item in Model)
+    {
+      <tr>
+        <td>
+          @Html.DisplayFor(modelItem => item.DisplayOrder)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.QuestionText)
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+<a class="btn-outline-dark btn" asp-area="" asp-controller="ProductRecommendation" asp-action="Index">Your Results</a>
+  

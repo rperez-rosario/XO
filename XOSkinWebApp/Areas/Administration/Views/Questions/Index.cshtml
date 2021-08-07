@@ -1,0 +1,52 @@
+﻿@model IEnumerable<XOSkinWebApp.ORM.Question>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Questions</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table" id="Questions">
+    <thead>
+        <tr>
+            <th>
+                Question Text
+            </th>
+            <th>
+                Display Order
+            </th>
+            <th>
+                Questionnaire
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.QuestionText)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DisplayOrder)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.QuestionnaireNavigation.QuestionnaireName)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+<script type="text/javascript">
+  var table = $('#Questions').DataTable();
+
+  new $.fn.dataTable.Responsive(table, {
+    details: true
+  });
+</script>

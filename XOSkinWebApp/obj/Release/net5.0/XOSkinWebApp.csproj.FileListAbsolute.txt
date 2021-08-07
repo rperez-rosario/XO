@@ -472,3 +472,10 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Admi
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Users\Details.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Users\Edit.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Users\Index.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Questionnaires\Create.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Questionnaires\Edit.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Questionnaires\Index.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Questions\Create.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Questions\Edit.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Questions\Index.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\Questionnaire\Index.cshtml.g.cs

@@ -1,5 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using CompareAttribute =
+System.ComponentModel.DataAnnotations.CompareAttribute;
+using Microsoft.AspNetCore.Mvc;
 
 #nullable disable
 
@@ -14,8 +19,13 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
+
+        [Required(ErrorMessage = "Question text required.")]
         public string QuestionText { get; set; }
+
         public int Questionnaire { get; set; }
+
+        [Required(ErrorMessage = "Question order required.")]
         public long DisplayOrder { get; set; }
 
         public virtual Questionnaire QuestionnaireNavigation { get; set; }

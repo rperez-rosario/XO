@@ -63,7 +63,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         {
             if (ModelState.IsValid)
             {
-        localizedImage.PlacementPointCode = _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + 
+                localizedImage.PlacementPointCode = _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + 
                   "." + localizedImage.PlacementPointCode;
                 _context.Add(localizedImage);
                 await _context.SaveChangesAsync();
@@ -101,7 +101,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImage localizedImage)
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImage localizedImage,
+          bool LimitedEntry)
         {
             if (id != localizedImage.Id)
             {
@@ -112,10 +113,20 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             {
                 try
                 {
-                    localizedImage.PlacementPointCode = _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
-                      "." + localizedImage.PlacementPointCode;
-                    _context.Update(localizedImage);
-                    await _context.SaveChangesAsync();
+                  if (LimitedEntry)
+                  {
+                    localizedImage.Language = _context.LocalizedImages.Where(x => x.Id == id).Select(x => x.Language).FirstOrDefault();
+                    localizedImage.Page = _context.LocalizedImages.Where(x => x.Id == id).Select(x => x.Page).FirstOrDefault();
+
+                    localizedImage.PlacementPointCode =
+                      _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
+                      "." + _context.LocalizedTexts.Where(
+                      x => x.Id == id).Select(x => x.PlacementPointCode).FirstOrDefault().Replace(
+                     _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + ".", "");
+                }
+
+                  _context.Update(localizedImage);
+                  await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -173,7 +184,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             (!ActionCreate && Language != OriginalLanguage))
           {
             String prefixedPlacementCode =
-              _context.Pages.Where(x => x.Id == Page).Select(x => x.Name).FirstOrDefault() + "." + PlacementPointCode;
+              _context.Pages.Where(x => x.Id == Page).Select(x => x.Name).FirstOrDefault() + "." + PlacementPointCode.Trim();
             if (_context.LocalizedImages.Where(x => x.Language == Language).Any(x => x.PlacementPointCode.Equals(prefixedPlacementCode)))
             {
               return Json(false);

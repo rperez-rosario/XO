@@ -10,86 +10,90 @@ using XOSkinWebApp.ORM;
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
     [Area("Administration")]
-    public class LanguagesController : Controller
+    public class QuestionsController : Controller
     {
         private readonly XOSkinContext _context;
 
-        public LanguagesController(XOSkinContext context)
+        public QuestionsController(XOSkinContext context)
         {
             _context = context;
         }
 
-        // GET: Administration/Languages
+        // GET: Administration/Questions
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Languages.ToListAsync());
+            var xOSkinContext = _context.Questions.Include(q => q.QuestionnaireNavigation);
+            return View(await xOSkinContext.ToListAsync());
         }
 
-        // GET: Administration/Languages/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: Administration/Questions/Details/5
+        public async Task<IActionResult> Details(long? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var language = await _context.Languages
+            var question = await _context.Questions
+                .Include(q => q.QuestionnaireNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (language == null)
+            if (question == null)
             {
                 return NotFound();
             }
 
-            return View(language);
+            return View(question);
         }
 
-        // GET: Administration/Languages/Create
+        // GET: Administration/Questions/Create
         public IActionResult Create()
         {
+            ViewData["Questionnaire"] = new SelectList(_context.Questionnaires, "Id", "QuestionnaireName");
             return View();
         }
 
-        // POST: Administration/Languages/Create
+        // POST: Administration/Questions/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,LanguageName,Active")] Language language)
+        public async Task<IActionResult> Create([Bind("Id,QuestionText,Questionnaire,DisplayOrder")] Question question)
         {
             if (ModelState.IsValid)
             {
-                language.LanguageName = language.LanguageName.Trim();
-                _context.Add(language);
+                _context.Add(question);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(language);
+            ViewData["Questionnaire"] = new SelectList(_context.Questionnaires, "Id", "QuestionnaireName", question.Questionnaire);
+            return View(question);
         }
 
-        // GET: Administration/Languages/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Administration/Questions/Edit/5
+        public async Task<IActionResult> Edit(long? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var language = await _context.Languages.FindAsync(id);
-            if (language == null)
+            var question = await _context.Questions.FindAsync(id);
+            if (question == null)
             {
                 return NotFound();
             }
-            return View(language);
+            ViewData["Questionnaire"] = new SelectList(_context.Questionnaires, "Id", "QuestionnaireName", question.Questionnaire);
+            return View(question);
         }
 
-        // POST: Administration/Languages/Edit/5
+        // POST: Administration/Questions/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,LanguageName,Active")] Language language)
+        public async Task<IActionResult> Edit(long id, [Bind("Id,QuestionText,Questionnaire,DisplayOrder")] Question question)
         {
-            if (id != language.Id)
+            if (id != question.Id)
             {
                 return NotFound();
             }
@@ -98,13 +102,12 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             {
                 try
                 {
-                    language.LanguageName = language.LanguageName.Trim();
-                    _context.Update(language);
+                    _context.Update(question);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!LanguageExists(language.Id))
+                    if (!QuestionExists(question.Id))
                     {
                         return NotFound();
                     }
@@ -115,52 +118,43 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(language);
+            ViewData["Questionnaire"] = new SelectList(_context.Questionnaires, "Id", "QuestionnaireName", question.Questionnaire);
+            return View(question);
         }
 
-        // GET: Administration/Languages/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Administration/Questions/Delete/5
+        public async Task<IActionResult> Delete(long? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var language = await _context.Languages
+            var question = await _context.Questions
+                .Include(q => q.QuestionnaireNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (language == null)
+            if (question == null)
             {
                 return NotFound();
             }
 
-            return View(language);
+            return View(question);
         }
 
-        // POST: Administration/Languages/Delete/5
+        // POST: Administration/Questions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(long id)
         {
-            var language = await _context.Languages.FindAsync(id);
-            _context.Languages.Remove(language);
+            var question = await _context.Questions.FindAsync(id);
+            _context.Questions.Remove(question);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        public JsonResult LanguageNameAvailable(String LanguageName, bool ActionCreate, String OriginalLanguageName)
+        private bool QuestionExists(long id)
         {
-          if (OriginalLanguageName == null)
-            OriginalLanguageName = String.Empty;
-          if (ActionCreate || (!ActionCreate && !LanguageName.Equals(OriginalLanguageName)))
-          {
-            return Json(!_context.Languages.Any(x => x.LanguageName.Equals(LanguageName.Trim())));
-          }
-          return Json(true);
+            return _context.Questions.Any(e => e.Id == id);
         }
-
-        private bool LanguageExists(int id)
-        {
-            return _context.Languages.Any(e => e.Id == id);
-        }
-  }
+    }
 }

@@ -63,6 +63,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     {
       if (ModelState.IsValid)
       {
+        user.EmailAddress = user.EmailAddress.Trim();
         _context.Add(user);
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
@@ -106,6 +107,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       {
         try
         {
+          user.EmailAddress = user.EmailAddress.Trim();
           _context.Update(user);
           await _context.SaveChangesAsync();
         }

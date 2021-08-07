@@ -3,24 +3,23 @@
 @{
   ViewData["Title"] = "Product Recommendation";
 }
-
-<div class="text-center">
+<div class="text-sm-center">
   <h1 class="display-4">For Your <br />Skin</h1>
+
   <p>
     @Html.Raw(ViewData["ProductRecommendation.WelcomeText"])
   </p>
-  <br />
-  @{ 
+  @{
     foreach (ProductViewModel product in Model)
     {
-    <p>
-      <input type="checkbox" class="" checked />
-      <b>@Html.DisplayFor(modelItem => product.ProductName)</b>, $@Html.DisplayFor(modelItem => product.ProductPrice)
-    </p>
+      <p>
+        <input type="checkbox" class="" checked />
+        <b>@Html.DisplayFor(modelItem => product.ProductName)</b>, $@Html.DisplayFor(modelItem => product.ProductPrice)
+      </p>
     }
   }
   <br />
-<p>
-  <button type="submit" class="btn-outline-dark btn">Add to Shopping Basket</button>
-</p>
+  <p>
+    <button type="submit" class="btn-outline-dark btn">Add to Shopping Cart</button>
+  </p>
 </div>
