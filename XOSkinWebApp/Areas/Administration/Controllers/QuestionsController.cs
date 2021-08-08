@@ -102,6 +102,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             {
                 try
                 {
+                    question.Questionnaire = _context.Questions.Where(x => x.Id == id).Select(x => x.Questionnaire).FirstOrDefault();
+
                     _context.Update(question);
                     await _context.SaveChangesAsync();
                 }
