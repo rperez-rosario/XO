@@ -2,10 +2,41 @@
   ViewData["Title"] = "Home Page";
 }
 
-<div class="text-sm-center bg-light">
+<div id="splash" class="text-sm-center bg-light text-center">
+  <div id="splash-content" class="text-sm-center bg-light text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>@Html.Raw(ViewData["Home.SplashText"])</p>
+  </div>
+</div>
+
+<div class="text-sm-center bg-light text-center">
   @Html.Raw(ViewData["Home.PromotionalRibbon"])
 </div>
 <div class="text-center">
   <h1 class="display-4">Welcome</h1>
-    @Html.Raw(ViewData["Home.WelcomeText"])
+  @Html.Raw(ViewData["Home.WelcomeText"])
 </div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $.fn.center = function () {
+      this.css("position", "absolute");
+      this.css("top", Math.max(0, (
+        ($(window).height() - $(this).outerHeight()) / 2) +
+        $(window).scrollTop()) + "px"
+      );
+      this.css("left", Math.max(0, (
+        ($(window).width() - $(this).outerWidth()) / 2) +
+        $(window).scrollLeft()) + "px"
+      );
+      return this;
+    }
+
+    $("#splash").show();
+    $("#splash-content").show().center();
+
+    setTimeout(function () {
+      $("#splash").fadeOut();
+    }, 2800);
+  });
+</script>
