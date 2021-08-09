@@ -45,6 +45,8 @@ namespace XOSkinWebApp.ORM
         [StringLength(200, ErrorMessage = "Maximum field length is 200.")]
         [Required(ErrorMessage = "Email address required.")]
         [Remote("EmailAddressAvailable", "Users", ErrorMessage = "Email address already registered.", AdditionalFields = "ActionCreate, OriginalEmailAddress")]
+        [RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
+        ErrorMessage = "Invalid email format")]
         public string EmailAddress { get; set; }
 
         [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
