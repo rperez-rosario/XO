@@ -31,6 +31,8 @@ namespace XOSkinWebApp.Controllers
 
     public IActionResult Privacy()
     {
+      ViewData.Add("Privacy.PrivacyPolicy", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Privacy.PrivacyPolicy")).Select(x => x.Text).FirstOrDefault());
+
       return View();
     }
 
