@@ -105,11 +105,11 @@
           "lib/net5.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": {}
         }
       },
-      "Microsoft.AspNetCore.Identity.UI/5.0.6": {
+      "Microsoft.AspNetCore.Identity.UI/5.0.8": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.FileProviders.Embedded": "5.0.6",
-          "Microsoft.Extensions.Identity.Stores": "5.0.6"
+          "Microsoft.Extensions.FileProviders.Embedded": "5.0.8",
+          "Microsoft.Extensions.Identity.Stores": "5.0.8"
         },
         "compile": {
           "lib/net5.0/Microsoft.AspNetCore.Identity.UI.Views.V4.dll": {},
@@ -741,7 +741,7 @@
           "lib/netstandard2.0/Microsoft.Extensions.FileProviders.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.FileProviders.Embedded/5.0.6": {
+      "Microsoft.Extensions.FileProviders.Embedded/5.0.8": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.FileProviders.Abstractions": "5.0.0"
@@ -1329,6 +1329,28 @@
             "assetType": "native",
             "rid": "ubuntu.16.10-x64"
           }
+        }
+      },
+      "SendGrid/9.24.1": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "9.0.1",
+          "starkbank-ecdsa": "[1.3.1, 2.0.0)"
+        },
+        "compile": {
+          "lib/netstandard2.0/SendGrid.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/SendGrid.dll": {}
+        }
+      },
+      "starkbank-ecdsa/1.3.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/StarkbankEcdsa.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/StarkbankEcdsa.dll": {}
         }
       },
       "System.AppContext/4.3.0": {
@@ -3094,10 +3116,10 @@
         "microsoft.aspnetcore.identity.entityframeworkcore.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.Identity.UI/5.0.6": {
-      "sha512": "PfTihuqKSNtB5i2JrWsuA89TEfc2+2O/PPOew8W2uLHtwUOe34fd5MciOEuJwzK5AdIfqWd9/WwBPCpl+NFkTg==",
+    "Microsoft.AspNetCore.Identity.UI/5.0.8": {
+      "sha512": "5CnVJgEJOxUQe5COmLt6yJBpuljRlW2wuLYV8mPzVmk7U1oI5pZKLxUCP99bt/hL2E0JhCPAe4+YWSV1tmimdg==",
       "type": "package",
-      "path": "microsoft.aspnetcore.identity.ui/5.0.6",
+      "path": "microsoft.aspnetcore.identity.ui/5.0.8",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3112,7 +3134,7 @@
         "lib/net5.0/Microsoft.AspNetCore.Identity.UI.Views.V4.dll",
         "lib/net5.0/Microsoft.AspNetCore.Identity.UI.dll",
         "lib/net5.0/Microsoft.AspNetCore.Identity.UI.xml",
-        "microsoft.aspnetcore.identity.ui.5.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.identity.ui.5.0.8.nupkg.sha512",
         "microsoft.aspnetcore.identity.ui.nuspec",
         "staticwebassets/V4/css/site.css",
         "staticwebassets/V4/favicon.ico",
@@ -3996,10 +4018,10 @@
         "version.txt"
       ]
     },
-    "Microsoft.Extensions.FileProviders.Embedded/5.0.6": {
-      "sha512": "W3HjLWtCjrz/RXsIDznMKNJunGwvtWOm7ZQ2XUMnkbWLFLNPYhvmAx751E0HBgVEsSBPE3qZ2mZ8umm5B6k/og==",
+    "Microsoft.Extensions.FileProviders.Embedded/5.0.8": {
+      "sha512": "IQFOk6L+j5QzdPmx8AvMZMNK9oObA2CLt/Hh/3QQjIcI2nNXT43wFX2v90G8ltq7Dxumn1rVlMgbKKJ3aiRPHw==",
       "type": "package",
-      "path": "microsoft.extensions.fileproviders.embedded/5.0.6",
+      "path": "microsoft.extensions.fileproviders.embedded/5.0.8",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4014,7 +4036,7 @@
         "lib/net5.0/Microsoft.Extensions.FileProviders.Embedded.xml",
         "lib/netstandard2.0/Microsoft.Extensions.FileProviders.Embedded.dll",
         "lib/netstandard2.0/Microsoft.Extensions.FileProviders.Embedded.xml",
-        "microsoft.extensions.fileproviders.embedded.5.0.6.nupkg.sha512",
+        "microsoft.extensions.fileproviders.embedded.5.0.8.nupkg.sha512",
         "microsoft.extensions.fileproviders.embedded.nuspec",
         "tasks/netstandard2.0/Microsoft.Extensions.FileProviders.Embedded.Manifest.Task.dll"
       ]
@@ -5107,6 +5129,45 @@
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.nuspec",
         "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so"
+      ]
+    },
+    "SendGrid/9.24.1": {
+      "sha512": "381S6vABlaA12T7MeoaqErx4kHlX/d/rvOJPxjWYePCPEFfP2rmmWfGd51KEkjKMHIBGNxzgUV+DnI9LWJT3aA==",
+      "type": "package",
+      "path": "sendgrid/9.24.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net40/SendGrid.dll",
+        "lib/net40/SendGrid.pdb",
+        "lib/net40/SendGrid.xml",
+        "lib/net452/SendGrid.dll",
+        "lib/net452/SendGrid.pdb",
+        "lib/net452/SendGrid.xml",
+        "lib/netstandard1.3/SendGrid.dll",
+        "lib/netstandard1.3/SendGrid.pdb",
+        "lib/netstandard1.3/SendGrid.xml",
+        "lib/netstandard2.0/SendGrid.dll",
+        "lib/netstandard2.0/SendGrid.pdb",
+        "lib/netstandard2.0/SendGrid.xml",
+        "sendgrid.9.24.1.nupkg.sha512",
+        "sendgrid.nuspec"
+      ]
+    },
+    "starkbank-ecdsa/1.3.1": {
+      "sha512": "YV20cpN7WgEiaIuIv8ZQPgkDVximP6gHCMCTgy6+IwArDHmuDVQLJ15Qwwmgd5woETnogquD+gu4SXDZW/ffog==",
+      "type": "package",
+      "path": "starkbank-ecdsa/1.3.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net40/StarkbankEcdsa.dll",
+        "lib/net452/StarkbankEcdsa.dll",
+        "lib/netstandard1.3/StarkbankEcdsa.dll",
+        "lib/netstandard2.0/StarkbankEcdsa.dll",
+        "lib/netstandard2.1/StarkbankEcdsa.dll",
+        "starkbank-ecdsa.1.3.1.nupkg.sha512",
+        "starkbank-ecdsa.nuspec"
       ]
     },
     "System.AppContext/4.3.0": {
@@ -9523,7 +9584,7 @@
       "AdaptiveProductRecommendationEngine >= 1.0.0",
       "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore >= 5.0.8",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 5.0.8",
-      "Microsoft.AspNetCore.Identity.UI >= 5.0.6",
+      "Microsoft.AspNetCore.Identity.UI >= 5.0.8",
       "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation >= 5.0.6",
       "Microsoft.EntityFrameworkCore >= 5.0.8",
       "Microsoft.EntityFrameworkCore.Abstractions >= 5.0.8",
@@ -9537,6 +9598,7 @@
       "Microsoft.EntityFrameworkCore.Tools >= 5.0.8",
       "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 5.0.2",
       "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore >= 5.0.2",
+      "SendGrid >= 9.24.1",
       "jQuery >= 3.6.0"
     ]
   },
@@ -9598,7 +9660,7 @@
           },
           "Microsoft.AspNetCore.Identity.UI": {
             "target": "Package",
-            "version": "[5.0.6, )"
+            "version": "[5.0.8, )"
           },
           "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation": {
             "target": "Package",
@@ -9655,6 +9717,10 @@
           "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": {
             "target": "Package",
             "version": "[5.0.2, )"
+          },
+          "SendGrid": {
+            "target": "Package",
+            "version": "[9.24.1, )"
           },
           "jQuery": {
             "target": "Package",

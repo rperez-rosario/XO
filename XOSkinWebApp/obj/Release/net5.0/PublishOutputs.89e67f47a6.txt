@@ -92,6 +92,8 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Micro
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Microsoft.VisualStudio.Web.CodeGeneration.Utils.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Newtonsoft.Json.dll
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\SendGrid.dll
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\StarkbankEcdsa.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\System.Composition.AttributedModel.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\System.Composition.Convention.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\System.Composition.Hosting.dll
