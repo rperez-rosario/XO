@@ -53,9 +53,11 @@
   </tbody>
 </table>
 <script type="text/javascript">
-  var table = $('#TextLocalizations').DataTable();
+  $(document).ready(function () {
+    var table = $('#TextLocalizations').DataTable();
 
-  new $.fn.dataTable.Responsive(table, {
-    details: true
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
   });
 </script>

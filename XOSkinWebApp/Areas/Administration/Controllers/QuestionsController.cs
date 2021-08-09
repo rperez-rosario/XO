@@ -22,7 +22,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // GET: Administration/Questions
         public async Task<IActionResult> Index()
         {
-            var xOSkinContext = _context.Questions.Include(q => q.QuestionnaireNavigation);
+            var xOSkinContext = _context.Questions
+              .Include(q => q.QuestionnaireNavigation);
             return View(await xOSkinContext.ToListAsync());
         }
 

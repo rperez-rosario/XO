@@ -39,9 +39,11 @@
   </tbody>
 </table>
 <script type="text/javascript">
-  var table = $('#Languages').DataTable();
+  $(document).ready(function () {
+    var table = $('#Languages').DataTable();
 
-  new $.fn.dataTable.Responsive(table, {
-    details: true
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
   });
 </script>

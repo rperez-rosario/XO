@@ -57,9 +57,11 @@
   </tbody>
 </table>
 <script type="text/javascript">
-  var table = $('#Users').DataTable();
+  $(document).ready(function () {
+    var table = $('#Users').DataTable();
 
-  new $.fn.dataTable.Responsive(table, {
-    details: true
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
   });
 </script>

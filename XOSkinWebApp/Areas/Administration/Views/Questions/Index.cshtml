@@ -44,9 +44,13 @@
     </tbody>
 </table>
 <script type="text/javascript">
-  var table = $('#Questions').DataTable();
+  $(document).ready(function () {
+    var table = $('#Questions').DataTable({
+      'order': [[2, 'asc'], [1, 'asc']]
+    });
 
-  new $.fn.dataTable.Responsive(table, {
-    details: true
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
   });
 </script>
