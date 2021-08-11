@@ -6,6 +6,7 @@
   <div id="splash-content" class="text-sm-center bg-light text-center">
     <h1 class="display-4">Welcome</h1>
     <p>@Html.Raw(ViewData["Home.SplashText"])</p>
+    @*<img src="~/img/scarjo.png" id="splash-image" />*@
   </div>
 </div>
 
@@ -33,7 +34,7 @@
     $("#splash-content").show().center();
 
     setTimeout(function () {
-      $("#splash").fadeOut();
+      $("#splash").fadeOut(1000);
     }, 2800);
   });
 </script>

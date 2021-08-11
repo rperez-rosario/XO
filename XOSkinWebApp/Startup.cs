@@ -15,6 +15,9 @@ using XOSkinWebApp.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using XOSkinWebApp.Services;
 using XOSkinWebApp.ORM;
+using XOSkinWebApp.Areas.Identity.Models;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 
 namespace XOSkinWebApp
 {
@@ -29,7 +32,7 @@ namespace XOSkinWebApp
 
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
-    {
+    { 
       services.AddTransient<IEmailSender, EmailSender>();
       services.Configure<AuthMessageSenderOptions>(Configuration);
 
@@ -43,7 +46,7 @@ namespace XOSkinWebApp
 
       services.AddScoped<ORM.XOSkinContext, ORM.XOSkinContext>();
 
-      services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+      services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
           .AddEntityFrameworkStores<ApplicationDbContext>();
 
       services.AddControllersWithViews();

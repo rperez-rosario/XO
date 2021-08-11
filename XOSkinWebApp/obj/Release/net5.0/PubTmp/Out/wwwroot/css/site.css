@@ -72,31 +72,122 @@ body {
 }
 
 /* XO Skin Modifications */
+
 .nav-link {
   font-size: 14px;
 }
 
+#forgot-password {
+  color: #212529;
+}
+
+a {
+  color: #212529;
+}
+
+a:hover {
+  color: #131415;
+}
+
+div.alert.alert-success.alert-dismissible {
+  background: #e9ecef;
+  color: #000;
+}
+
+.page-link {
+  color: #fff;
+  background: #626262;
+}
+
+.page-item.active .page-link {
+  color: #fff;
+  background: #212529;
+  border-color: #212529;
+}
+
+/* Splash */
 #splash {
   display: none;
   position: fixed;
   top: 0%;
   left: 0%;
   width: 100%;
-  height: 100%;
+  height: auto;
   background-color: white;
   opacity: 0.9;
   z-index: 1001;
   vertical-align: central;
+  align-content: center;
 }
 
 #splash-content {
- /position: absolute;
+  position: absolute;
   display: none;
   width: 100%;
-  height: 100%;
+  height: auto;
   padding: 16px;
   border: 0px;
   background-color: white;
   z-index: 1002;
   vertical-align: central;
+  align-content: center;
+}
+
+#splash-image {
+  max-width: 100%;
+  min-width: 300px;
+  height: auto;
+}
+
+/* Account Management */
+
+#profile.nav-link.active {
+  color: #fff;
+  background: #212529;
+}
+
+#profile.nav-link {
+  color: #212529;
+}
+
+#email.nav-link.active {
+  color: #fff;
+  background: #212529;
+}
+
+#email.nav-link {
+  color: #212529;
+}
+
+#change-password.nav-link {
+  color: #212529;
+}
+
+#change-password.nav-link.active {
+  color: #fff;
+  background: #212529;
+}
+
+#personal-data.nav-link {
+  color: #212529;
+}
+
+#update-profile-button.btn.btn-primary {
+  color: #fff;
+  background: #343A40;
+}
+
+#change-email-button.btn.btn-primary {
+  color: #fff;
+  background: #212529;
+}
+
+#personal-data.nav-link.active {
+  color: #fff;
+  background: #212529;
+}
+
+.btn-primary {
+  color: #fff;
+  background: #212529;
 }

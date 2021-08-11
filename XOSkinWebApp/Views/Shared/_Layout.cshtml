@@ -86,9 +86,9 @@
                 <li>
                   <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedImages" asp-action="Index">Image Localization</a>
                 </li>
-                <li>
+                @*<li>
                   <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Users" asp-action="Index">Users</a>
-                </li>
+                </li>*@
                 <li>
                   <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questionnaires" asp-action="Index">Questionnaires</a>
                 </li>
@@ -111,7 +111,7 @@
 
   <footer class="border-top footer text-muted">
     <div class="container align-items-center text-dark text-center">
-      &copy; 2021 - XO Skin&#8482;<br />
+      &copy; @DateTime.Now.Year - XO Skin&#8482;<br />
       <a href="https://www.facebook.com/" target="_blank"><img src="~/img/facebookLogo.png" height="20" width="20" /></a>&nbsp;&nbsp;<a href="https://www.instagram.com/" target="_blank"><img src="~/img/instagramLogo.png" width="20" height="20" /></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/" target="_blank"><img src="~/img/linkedInLogo.svg" height="15" /></a> - <a asp-area="" asp-controller="Jobs" asp-action="Index" class="text-dark">XO Jobs</a> - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-dark">Privacy</a>
     </div>
   </footer>

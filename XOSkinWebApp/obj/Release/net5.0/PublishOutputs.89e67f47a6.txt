@@ -6,6 +6,7 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwro
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\img\instagramLogo.png
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\img\linkedInLogo.svg
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\img\navbarLeftLogo.svg
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\img\scarjo.png
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\js\site.js
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
