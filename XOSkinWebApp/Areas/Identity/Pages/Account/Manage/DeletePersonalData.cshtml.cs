@@ -79,6 +79,10 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
             try
             {
               appUser = _context.Users.Where(x => x.Id.Equals(user.Id)).FirstOrDefault();
+              appUser.Email = appUser.Email.ToString() + "_DELETED_BY_USER_" + Guid.NewGuid();
+              appUser.NormalizedEmail = appUser.Email.ToString().ToUpper();
+              appUser.UserName = appUser.Email.ToString();
+              appUser.NormalizedUserName = appUser.UserName.ToString().ToUpper();
               appUser.Disabled = true;
               _context.Update(appUser);
               _context.SaveChanges();
@@ -101,5 +105,7 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
 
             return Redirect("~/");
         }
-    }
+  }
 }
+
+

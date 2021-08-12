@@ -107,11 +107,8 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account
             return RedirectToPage("./Lockout");
           }
         }
-        else
-        {
-          ModelState.AddModelError(string.Empty, "User name does not exist or its password is wrong. Did you remember to validate your account through the email confirmation we sent you?");
-          return Page();
-        }
+        ModelState.AddModelError(string.Empty, "User name does not exist or its password is wrong. Did you remember to validate your account through the email confirmation we sent you?");
+        return Page();
       }
       // If we got this far, something failed, redisplay form
       return Page();
