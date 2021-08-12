@@ -92,7 +92,7 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account
 
       [Required]
       [DataType(DataType.Text)]
-      [Display(Name = "First Name")]
+      [Display(Name = "Name")]
       public String FirstName { get; set; }
 
       [Required]
