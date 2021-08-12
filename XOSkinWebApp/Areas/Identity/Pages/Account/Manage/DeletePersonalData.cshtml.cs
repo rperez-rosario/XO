@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using XOSkinWebApp.Areas.Identity.Models;
+using XOSkinWebApp.Data;
 
 namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
 {
@@ -14,15 +16,19 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
+        private readonly ApplicationDbContext _context;
 
         public DeletePersonalDataModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<DeletePersonalDataModel> logger)
+            ILogger<DeletePersonalDataModel> logger, 
+            ApplicationDbContext context
+            )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
         [BindProperty]
@@ -51,6 +57,7 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
+            ApplicationUser appUser = null;
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
@@ -67,16 +74,30 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
                 }
             }
 
-            var result = await _userManager.DeleteAsync(user);
             var userId = await _userManager.GetUserIdAsync(user);
-            if (!result.Succeeded)
+              
+            try
             {
-                throw new InvalidOperationException($"Unexpected error occurred deleting user with ID '{userId}'.");
+              appUser = _context.Users.Where(x => x.Id.Equals(user.Id)).FirstOrDefault();
+              appUser.Disabled = true;
+              _context.Update(appUser);
+              _context.SaveChanges();
             }
+            catch (Exception ex)
+            {
+              throw new InvalidOperationException($"Unexpected error occurred disabling user with ID '{userId}'.", ex);
+            }
+      
+            //var result = await _userManager.DeleteAsync(user);
+
+            //if (!result.Succeeded)
+            //{
+            //    throw new InvalidOperationException($"Unexpected error occurred disabling user with ID '{userId}'.");
+            //}
 
             await _signInManager.SignOutAsync();
 
-            _logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
+            _logger.LogInformation("User with ID '{UserId}' locked themselves.", userId);
 
             return Redirect("~/");
         }

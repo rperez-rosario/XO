@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using XOSkinWebApp.Areas.Identity.Models;
 using XOSkinWebApp.ORM;
+using XOSkinWebApp.Data;
 
 namespace XOSkinWebApp.Areas.Identity.Pages.Account
 {
@@ -26,19 +27,22 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account
     private readonly ILogger<RegisterModel> _logger;
     private readonly IEmailSender _emailSender;
     private readonly XOSkinContext _context;
+    private readonly ApplicationDbContext _idcontext;
 
 
     public RegisterModel(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         ILogger<RegisterModel> logger,
-        IEmailSender emailSender, XOSkinContext context)
+        IEmailSender emailSender, XOSkinContext context, 
+        ApplicationDbContext idcontext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
         _emailSender = emailSender;
         _context = context;
+        _idcontext = idcontext;
     }
 
     [BindProperty]
@@ -71,16 +75,20 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account
       public string ConfirmPassword { get; set; }
 
       [DataType(DataType.PhoneNumber)]
-      [Display(Name = "Home Phone Number")]
-      public String HomePhoneNumber { get; set; }
+      [Display(Name = "Phone Number")]
+      public String PhoneNumber { get; set; }
 
-      [DataType(DataType.PhoneNumber)]
-      [Display(Name = "Work Phone Number")]
-      public String WorkPhoneNumber { get; set; }
+      //[DataType(DataType.PhoneNumber)]
+      //[Display(Name = "Phone Number")]
+      //public String HomePhoneNumber { get; set; }
 
-      [DataType(DataType.PhoneNumber)]
-      [Display(Name = "Additional Phone Number")]
-      public String AdditionalPhoneNumber { get; set; }
+      //[DataType(DataType.PhoneNumber)]
+      //[Display(Name = "Work Phone Number")]
+      //public String WorkPhoneNumber { get; set; }
+
+      //[DataType(DataType.PhoneNumber)]
+      //[Display(Name = "Additional Phone Number")]
+      //public String AdditionalPhoneNumber { get; set; }
 
       [Required]
       [DataType(DataType.Text)]
@@ -91,6 +99,10 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account
       [DataType(DataType.Text)]
       [Display(Name = "Last Name")]
       public String LastName { get; set; }
+
+      [DataType(DataType.Text)]
+      [Display(Name = "Disabled")]
+      public bool Disabled { get; set; }
     }
 
     public async Task OnGetAsync(string returnUrl = null)
@@ -101,17 +113,28 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account
 
     public async Task<IActionResult> OnPostAsync(string returnUrl = null)
     {
+        ApplicationUser appUser = null;
         returnUrl ??= Url.Content("~/");
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         if (ModelState.IsValid)
         {
             var user = new ApplicationUser { UserName = Input.Email.Trim(), Email = Input.Email.Trim(), 
-              HomePhoneNumber = Input.HomePhoneNumber, WorkPhoneNumber = Input.WorkPhoneNumber, 
-              AdditionalPhoneNumber = Input.AdditionalPhoneNumber, FirstName = Input.FirstName, 
+              PhoneNumber = Input.PhoneNumber,
+              /*HomePhoneNumber = Input.HomePhoneNumber, WorkPhoneNumber = Input.WorkPhoneNumber, 
+              AdditionalPhoneNumber = Input.AdditionalPhoneNumber,*/ FirstName = Input.FirstName, 
               LastName = Input.LastName };
             var result = await _userManager.CreateAsync(user, Input.Password);
-            if (result.Succeeded)
+
+            
+
+        if (result.Succeeded)
             {
+                // Set disabled to false.
+                appUser = _idcontext.Users.Where(x => x.Id.Equals(user.Id)).FirstOrDefault();
+                appUser.Disabled = false;
+                _idcontext.Update(appUser);
+                _idcontext.SaveChanges();
+                
                 _logger.LogInformation("User created a new account with password.");
                     
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

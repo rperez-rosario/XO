@@ -38,20 +38,21 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
-          //[Phone]
-          //[Display(Name = "Phone number")]
-          //public string PhoneNumber { get; set; }
-          [DataType(DataType.PhoneNumber)]
-          [Display(Name = "Home Phone Number")]
-          public String HomePhoneNumber { get; set; }
+          [Phone]
+          [Display(Name = "Phone number")]
+          public string PhoneNumber { get; set; }
 
-          [DataType(DataType.PhoneNumber)]
-          [Display(Name = "Work Phone Number")]
-          public String WorkPhoneNumber { get; set; }
+          //[DataType(DataType.PhoneNumber)]
+          //[Display(Name = "Home Phone Number")]
+          //public String HomePhoneNumber { get; set; }
 
-          [DataType(DataType.PhoneNumber)]
-          [Display(Name = "Additional Phone Number")]
-          public String AdditionalPhoneNumber { get; set; }
+          //[DataType(DataType.PhoneNumber)]
+          //[Display(Name = "Work Phone Number")]
+          //public String WorkPhoneNumber { get; set; }
+
+          //[DataType(DataType.PhoneNumber)]
+          //[Display(Name = "Additional Phone Number")]
+          //public String AdditionalPhoneNumber { get; set; }
 
           [Required]
           [DataType(DataType.Text)]
@@ -67,9 +68,10 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
     private async Task LoadAsync(ApplicationUser user)
     {
       var userName = await _userManager.GetUserNameAsync(user);
-      String homePhoneNumber = await _context.Users.Where(x => x.Id.Equals(user.Id)).Select(x => x.HomePhoneNumber).FirstAsync();
-      String workPhoneNumber = await _context.Users.Where(x => x.Id.Equals(user.Id)).Select(x => x.WorkPhoneNumber).FirstAsync();
-      String additionalPhoneNumber = await _context.Users.Where(x => x.Id.Equals(user.Id)).Select(x => x.AdditionalPhoneNumber).FirstAsync();
+      var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+      //String homePhoneNumber = await _context.Users.Where(x => x.Id.Equals(user.Id)).Select(x => x.HomePhoneNumber).FirstAsync();
+      //String workPhoneNumber = await _context.Users.Where(x => x.Id.Equals(user.Id)).Select(x => x.WorkPhoneNumber).FirstAsync();
+      //String additionalPhoneNumber = await _context.Users.Where(x => x.Id.Equals(user.Id)).Select(x => x.AdditionalPhoneNumber).FirstAsync();
       String firstName = await _context.Users.Where(x => x.Id.Equals(user.Id)).Select(x => x.FirstName).FirstAsync();
       String lastName = await _context.Users.Where(x => x.Id.Equals(user.Id)).Select(x => x.LastName).FirstAsync();
 
@@ -77,10 +79,10 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
 
       Input = new InputModel
       {
-        //PhoneNumber = phoneNumber
-        HomePhoneNumber = homePhoneNumber,
-        WorkPhoneNumber = workPhoneNumber,
-        AdditionalPhoneNumber = additionalPhoneNumber,
+        PhoneNumber = phoneNumber,
+        //HomePhoneNumber = homePhoneNumber,
+        //WorkPhoneNumber = workPhoneNumber,
+        //AdditionalPhoneNumber = additionalPhoneNumber,
         FirstName = firstName,
         LastName = lastName
       };
@@ -113,9 +115,9 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
         try
         {
           appUser = _context.Users.Where(x => x.Id.Equals(user.Id)).FirstOrDefault();
-          appUser.HomePhoneNumber = Input.HomePhoneNumber;
-          appUser.WorkPhoneNumber = Input.WorkPhoneNumber;
-          appUser.AdditionalPhoneNumber = Input.AdditionalPhoneNumber;
+          //appUser.HomePhoneNumber = Input.HomePhoneNumber;
+          //appUser.WorkPhoneNumber = Input.WorkPhoneNumber;
+          //appUser.AdditionalPhoneNumber = Input.AdditionalPhoneNumber;
           appUser.FirstName = Input.FirstName;
           appUser.LastName = Input.LastName;
           _context.Update(appUser);
@@ -134,16 +136,16 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
         return Page();
       }
 
-      //var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-      //if (Input.PhoneNumber != phoneNumber)
-      //{
-      //    var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-      //    if (!setPhoneResult.Succeeded)
-      //    {
-      //        StatusMessage = "Unexpected error when trying to set phone number.";
-      //        return RedirectToPage();
-      //    }
-      //}
+      var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+      if (Input.PhoneNumber != phoneNumber)
+      {
+        var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+        if (!setPhoneResult.Succeeded)
+        {
+          StatusMessage = "Unexpected error when trying to set phone number.";
+          return RedirectToPage();
+        }
+      }
 
       await _signInManager.RefreshSignInAsync(user);
       StatusMessage = "Your profile has been updated";

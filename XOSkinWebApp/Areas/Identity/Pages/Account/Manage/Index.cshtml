@@ -15,12 +15,12 @@
           <label asp-for="Username"></label>
           <input asp-for="Username" class="form-control" disabled />
         </div>
-        @*<div class="form-group">
-    <label asp-for="Input.PhoneNumber"></label>
-    <input asp-for="Input.PhoneNumber" class="form-control" />
-    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-    </div>*@
         <div class="form-group">
+        <label asp-for="Input.PhoneNumber"></label>
+        <input asp-for="Input.PhoneNumber" class="form-control" />
+        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+        </div>
+        @*<div class="form-group">
           <label asp-for="Input.HomePhoneNumber"></label>
           <input asp-for="Input.HomePhoneNumber" class="form-control" />
           <span asp-validation-for="Input.HomePhoneNumber" class="text-danger"></span>
@@ -34,7 +34,7 @@
           <label asp-for="Input.AdditionalPhoneNumber"></label>
           <input asp-for="Input.AdditionalPhoneNumber" class="form-control" />
           <span asp-validation-for="Input.AdditionalPhoneNumber" class="text-danger"></span>
-        </div>
+        </div>*@
         <div class="form-group">
           <label asp-for="Input.FirstName"></label>
           <input asp-for="Input.FirstName" class="form-control" />
@@ -55,19 +55,24 @@
 }
 <script type="text/javascript">
   $(document).ready(function () {
-    document.getElementById('Input_HomePhoneNumber').addEventListener('input', function (e) {
+    document.getElementById('Input_PhoneNumber').addEventListener('input', function (e) {
       var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
       e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
     });
 
-    document.getElementById('Input_WorkPhoneNumber').addEventListener('input', function (e) {
-      var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
-      e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
-    });
+    //document.getElementById('Input_HomePhoneNumber').addEventListener('input', function (e) {
+    //  var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+    //  e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    //});
 
-    document.getElementById('Input_AdditionalPhoneNumber').addEventListener('input', function (e) {
-      var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
-      e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
-    });
+    //document.getElementById('Input_WorkPhoneNumber').addEventListener('input', function (e) {
+    //  var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+    //  e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    //});
+
+    //document.getElementById('Input_AdditionalPhoneNumber').addEventListener('input', function (e) {
+    //  var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+    //  e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    //});
   });
 </script>
