@@ -97,7 +97,7 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account.Manage
 
             await _signInManager.SignOutAsync();
 
-            _logger.LogInformation("User with ID '{UserId}' locked themselves.", userId);
+            _logger.LogInformation("User with ID '{UserId}' disabled themselves.", userId);
 
             return Redirect("~/");
         }
