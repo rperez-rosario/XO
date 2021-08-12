@@ -8,7 +8,7 @@ namespace XOSkinWebApp.ORM
     public partial class Address
     {
         public long Id { get; set; }
-        public long? User { get; set; }
+        public string User { get; set; }
         public short AddressType { get; set; }
         public string Line1 { get; set; }
         public string Line2 { get; set; }
@@ -26,6 +26,6 @@ namespace XOSkinWebApp.ORM
         public virtual CityPr CityPrNavigation { get; set; }
         public virtual CityStateU CityUsNavigation { get; set; }
         public virtual CityStateCountryWorld CityWorldNavigation { get; set; }
-        public virtual User UserNavigation { get; set; }
+        public virtual AspNetUser UserNavigation { get; set; }
     }
 }

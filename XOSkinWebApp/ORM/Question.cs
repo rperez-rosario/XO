@@ -22,7 +22,7 @@ namespace XOSkinWebApp.ORM
 
         [Required(ErrorMessage = "Question text required.")]
         public string QuestionText { get; set; }
-
+   
         public int Questionnaire { get; set; }
 
         [Required(ErrorMessage = "Question order required.")]

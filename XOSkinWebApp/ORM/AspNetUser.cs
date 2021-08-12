@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using CompareAttribute =
-System.ComponentModel.DataAnnotations.CompareAttribute;
-using Microsoft.AspNetCore.Mvc;
 
 #nullable disable
 
 namespace XOSkinWebApp.ORM
 {
-    public partial class User
+    public partial class AspNetUser
     {
-        public User()
+        public AspNetUser()
         {
             Addresses = new HashSet<Address>();
+            AspNetUserClaims = new HashSet<AspNetUserClaim>();
+            AspNetUserLogins = new HashSet<AspNetUserLogin>();
+            AspNetUserRoles = new HashSet<AspNetUserRole>();
+            AspNetUserTokens = new HashSet<AspNetUserToken>();
             DiscountCodeCreatedByNavigations = new HashSet<DiscountCode>();
             DiscountCodeLastUpdatedByNavigations = new HashSet<DiscountCode>();
             DiscountCouponCreatedByNavigations = new HashSet<DiscountCoupon>();
             DiscountCouponLastUpdatedByNavigations = new HashSet<DiscountCoupon>();
             PaymentPlanCreatedByNavigations = new HashSet<PaymentPlan>();
+            PaymentPlanLastUpdatedByNavigations = new HashSet<PaymentPlan>();
             PaymentPlanProductOrderCreatedByNavigations = new HashSet<PaymentPlanProductOrder>();
             PaymentPlanProductOrderLastUpdatedByNavigations = new HashSet<PaymentPlanProductOrder>();
             PaymentPlanScheduleCreatedByNavigations = new HashSet<PaymentPlanSchedule>();
@@ -40,46 +40,39 @@ namespace XOSkinWebApp.ORM
             UserProductLists = new HashSet<UserProductList>();
         }
 
-        public long Id { get; set; }
-
-        [StringLength(200, ErrorMessage = "Maximum field length is 200.")]
-        [Required(ErrorMessage = "Email address required.")]
-        [Remote("EmailAddressAvailable", "Users", ErrorMessage = "Email address already registered.", AdditionalFields = "ActionCreate, OriginalEmailAddress")]
-        [RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
-        ErrorMessage = "Invalid email format.")]
-        public string EmailAddress { get; set; }
-
-        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
-        public string HomePhoneNumber { get; set; }
-
-        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
-        public string WorkPhoneNumber { get; set; }
-        
-        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
-        public string AdditionalPhoneNumber { get; set; }
-        
+        public string Id { get; set; }
+        public string UserName { get; set; }
+        public string NormalizedUserName { get; set; }
+        public string Email { get; set; }
+        public string NormalizedEmail { get; set; }
+        public bool EmailConfirmed { get; set; }
         public string PasswordHash { get; set; }
-        
-        [Required(ErrorMessage ="First name required.")]
-        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
+        public string SecurityStamp { get; set; }
+        public string ConcurrencyStamp { get; set; }
+        public string PhoneNumber { get; set; }
+        public bool PhoneNumberConfirmed { get; set; }
+        public bool TwoFactorEnabled { get; set; }
+        public DateTimeOffset? LockoutEnd { get; set; }
+        public bool LockoutEnabled { get; set; }
+        public int AccessFailedCount { get; set; }
+        public string AdditionalPhoneNumber { get; set; }
         public string FirstName { get; set; }
-        
-        [Required(ErrorMessage = "Last name required.")]
-        [StringLength(50, ErrorMessage = "Maximum field length is 50.")]
+        public string HomePhoneNumber { get; set; }
         public string LastName { get; set; }
+        public string WorkPhoneNumber { get; set; }
+        public bool? Disabled { get; set; }
 
-        public int? PreferredLanguage { get; set; }
-        public bool IsLocked { get; set; }
-        public short UserGroup { get; set; }
-
-        public virtual Language PreferredLanguageNavigation { get; set; }
-        public virtual UserGroup UserGroupNavigation { get; set; }
         public virtual ICollection<Address> Addresses { get; set; }
+        public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; }
+        public virtual ICollection<AspNetUserLogin> AspNetUserLogins { get; set; }
+        public virtual ICollection<AspNetUserRole> AspNetUserRoles { get; set; }
+        public virtual ICollection<AspNetUserToken> AspNetUserTokens { get; set; }
         public virtual ICollection<DiscountCode> DiscountCodeCreatedByNavigations { get; set; }
         public virtual ICollection<DiscountCode> DiscountCodeLastUpdatedByNavigations { get; set; }
         public virtual ICollection<DiscountCoupon> DiscountCouponCreatedByNavigations { get; set; }
         public virtual ICollection<DiscountCoupon> DiscountCouponLastUpdatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlan> PaymentPlanCreatedByNavigations { get; set; }
+        public virtual ICollection<PaymentPlan> PaymentPlanLastUpdatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlanProductOrder> PaymentPlanProductOrderCreatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlanProductOrder> PaymentPlanProductOrderLastUpdatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlanSchedule> PaymentPlanScheduleCreatedByNavigations { get; set; }

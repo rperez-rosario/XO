@@ -16,10 +16,10 @@ namespace XOSkinWebApp.ORM
         public decimal Amount { get; set; }
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
-        public long CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
 
-        public virtual User CreatedByNavigation { get; set; }
+        public virtual AspNetUser CreatedByNavigation { get; set; }
         public virtual ICollection<Product> Products { get; set; }
     }
 }

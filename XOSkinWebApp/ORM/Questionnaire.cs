@@ -23,13 +23,13 @@ namespace XOSkinWebApp.ORM
         [Required(ErrorMessage = "Questionnaire name required.")]
         [Remote("QuestionnaireNameAvailable", "Questionnaires", ErrorMessage = "Questionnaire name already registered.", AdditionalFields = "ActionCreate, OriginalQuestionnaireName")]
         public string QuestionnaireName { get; set; }
-        
+    
         public string Description { get; set; }
         public bool Active { get; set; }
-        public long CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
         public DateTime DateCreated { get; set; }
 
-        public virtual User CreatedByNavigation { get; set; }
+        public virtual AspNetUser CreatedByNavigation { get; set; }
         public virtual ICollection<Question> Questions { get; set; }
     }
 }

@@ -34,15 +34,15 @@ namespace XOSkinWebApp.ORM
         public string ImagePathMedium { get; set; }
         public string ImagePathLarge { get; set; }
         public bool Active { get; set; }
-        public long CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
         public DateTime Created { get; set; }
-        public long? LastUpdatedBy { get; set; }
+        public string LastUpdatedBy { get; set; }
         public DateTime? LastUpdated { get; set; }
 
-        public virtual User CreatedByNavigation { get; set; }
+        public virtual AspNetUser CreatedByNavigation { get; set; }
         public virtual Price CurrentPriceNavigation { get; set; }
         public virtual KitType KitTypeNavigation { get; set; }
-        public virtual User LastUpdatedByNavigation { get; set; }
+        public virtual AspNetUser LastUpdatedByNavigation { get; set; }
         public virtual ProductCategory ProductCategoryNavigation { get; set; }
         public virtual ProductType ProductTypeNavigation { get; set; }
         public virtual ICollection<DiscountCodeProduct> DiscountCodeProducts { get; set; }

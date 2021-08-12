@@ -14,13 +14,13 @@ namespace XOSkinWebApp.ORM
         public DateTime? ActualDate { get; set; }
         public decimal? ActualAmount { get; set; }
         public long LedgerTransaction { get; set; }
-        public long CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
         public DateTime Created { get; set; }
-        public long LastUpdatedBy { get; set; }
+        public string LastUpdatedBy { get; set; }
         public DateTime? LastUpdated { get; set; }
 
-        public virtual User CreatedByNavigation { get; set; }
-        public virtual User LastUpdatedByNavigation { get; set; }
+        public virtual AspNetUser CreatedByNavigation { get; set; }
+        public virtual AspNetUser LastUpdatedByNavigation { get; set; }
         public virtual UserLedgerTransaction LedgerTransactionNavigation { get; set; }
         public virtual PaymentPlanSchedule PlanScheduleNavigation { get; set; }
     }

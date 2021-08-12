@@ -13,7 +13,7 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
-        public long Customer { get; set; }
+        public string Customer { get; set; }
         public short Type { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

@@ -13,11 +13,11 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
-        public long User { get; set; }
+        public string User { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public virtual User UserNavigation { get; set; }
+        public virtual AspNetUser UserNavigation { get; set; }
         public virtual ICollection<UserProductListProduct> UserProductListProducts { get; set; }
     }
 }

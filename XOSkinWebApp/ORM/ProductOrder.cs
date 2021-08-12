@@ -17,7 +17,7 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
-        public long User { get; set; }
+        public string User { get; set; }
         public DateTime DatePlaced { get; set; }
         public decimal Subtotal { get; set; }
         public decimal CouponDiscount { get; set; }
@@ -27,7 +27,7 @@ namespace XOSkinWebApp.ORM
         public decimal Total { get; set; }
         public bool GiftOrder { get; set; }
 
-        public virtual User UserNavigation { get; set; }
+        public virtual AspNetUser UserNavigation { get; set; }
         public virtual ICollection<OrderProduct> OrderProducts { get; set; }
         public virtual ICollection<OrderShipTo> OrderShipTos { get; set; }
         public virtual ICollection<PaymentPlanProductOrder> PaymentPlanProductOrders { get; set; }

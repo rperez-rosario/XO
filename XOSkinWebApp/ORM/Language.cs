@@ -16,7 +16,6 @@ namespace XOSkinWebApp.ORM
         {
             LocalizedImages = new HashSet<LocalizedImage>();
             LocalizedTexts = new HashSet<LocalizedText>();
-            Users = new HashSet<User>();
         }
 
         public int Id { get; set; }
@@ -25,11 +24,10 @@ namespace XOSkinWebApp.ORM
         [Required(ErrorMessage = "Language name required.")]
         [Remote("LanguageNameAvailable", "Languages", ErrorMessage = "Language name already registered.", AdditionalFields = "ActionCreate, OriginalLanguageName")]
         public string LanguageName { get; set; }
- 
+        
         public bool Active { get; set; }
 
         public virtual ICollection<LocalizedImage> LocalizedImages { get; set; }
         public virtual ICollection<LocalizedText> LocalizedTexts { get; set; }
-        public virtual ICollection<User> Users { get; set; }
     }
 }

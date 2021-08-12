@@ -14,9 +14,9 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
-        public long User { get; set; }
+        public string User { get; set; }
 
-        public virtual User UserNavigation { get; set; }
+        public virtual AspNetUser UserNavigation { get; set; }
         public virtual ShoppingCartDiscountCoupon ShoppingCartDiscountCoupon { get; set; }
         public virtual ICollection<ShoppingCartDiscountCode> ShoppingCartDiscountCodes { get; set; }
         public virtual ICollection<ShoppingCartHistory> ShoppingCartHistories { get; set; }

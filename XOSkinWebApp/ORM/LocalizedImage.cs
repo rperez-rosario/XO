@@ -20,7 +20,7 @@ namespace XOSkinWebApp.ORM
         [Required(ErrorMessage = "Placement code required.")]
         [Remote("PlacementCodeAvailable", "LocalizedImages", ErrorMessage = "Placement code already registered.", AdditionalFields = "ActionCreate, Page, Language, OriginalLanguage, OriginalPlacementCode")]
         public string PlacementPointCode { get; set; }
-  
+        
         public int Page { get; set; }
 
         public virtual Language LanguageNavigation { get; set; }

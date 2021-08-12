@@ -48,7 +48,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // GET: Administration/Questionnaires/Create
         public IActionResult Create()
         {
-            ViewData["CreatedBy"] = new SelectList(_context.Users, "Id", "EmailAddress");
+            ViewData["CreatedBy"] = new SelectList(_context.AspNetUsers, "Id", "Email");
             return View();
         }
 
@@ -61,7 +61,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         {
             if (ModelState.IsValid)
             {
-                questionnaire.CreatedBy = 1; // TODO: Change to current user.
+                questionnaire.CreatedBy = "7e6ab0a1-a0c7-4e95-93da-75c824746bc7"; // TODO: Change to current user.
                 questionnaire.DateCreated = DateTime.UtcNow;
                 questionnaire.QuestionnaireName = questionnaire.QuestionnaireName.Trim();
                 if (questionnaire.Active)
@@ -76,7 +76,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CreatedBy"] = new SelectList(_context.Users, "Id", "EmailAddress", questionnaire.CreatedBy);
+            ViewData["CreatedBy"] = new SelectList(_context.AspNetUsers, "Id", "Email", questionnaire.CreatedBy);
             return View(questionnaire);
         }
 
@@ -93,7 +93,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             {
                 return NotFound();
             }
-            ViewData["CreatedBy"] = new SelectList(_context.Users, "Id", "EmailAddress", questionnaire.CreatedBy);
+            ViewData["CreatedBy"] = new SelectList(_context.AspNetUsers, "Id", "Email", questionnaire.CreatedBy);
             return View(questionnaire);
         }
 
@@ -142,7 +142,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CreatedBy"] = new SelectList(_context.Users, "Id", "EmailAddress", questionnaire.CreatedBy);
+            ViewData["CreatedBy"] = new SelectList(_context.AspNetUsers, "Id", "Email", questionnaire.CreatedBy);
             return View(questionnaire);
         }
 
