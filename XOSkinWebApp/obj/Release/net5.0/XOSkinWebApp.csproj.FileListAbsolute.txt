@@ -516,3 +516,6 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Iden
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Identity\Pages\_ValidationScriptsPartial.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Identity\Pages\_ViewImports.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\_ViewStart.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Roles\Create.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Roles\Index.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Roles\Update.cshtml.g.cs

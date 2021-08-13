@@ -1,0 +1,79 @@
+﻿@using XOSkinWebApp.Areas.Identity.Models 
+
+@model RoleEdit
+
+<h1>Update an Application Role</h1>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form method="post">
+  <input type="hidden" name="roleName" value="@Model.Role.Name" />
+  <input type="hidden" name="roleId" value="@Model.Role.Id" />
+
+  <h3>Add To @Model.Role.Name</h3>
+  <table class="table" id="addTo">
+    <thead><tr><th>User Name</th><th>Select</th></tr></thead>
+    <tbody>
+      @if (Model.NonMember.Count() == 0)
+      {
+        <tr><td>All Users Are Members</td><td>No Users are Members</td></tr>
+      }
+      else
+      {
+        @foreach (ApplicationUser user in Model.NonMember)
+        {
+          <tr>
+            <td>@user.UserName</td>
+            <td>
+              <input type="checkbox" name="AddId" value="@user.Id">
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+  <br />
+  <h3>Remove From @Model.Role.Name</h3>
+  <table class="table" id="removeFrom">
+    <thead><tr><td>User Name</td><td>Select</td></tr></thead>
+    <tbody>
+      @if (Model.Member.Count() == 0)
+      {
+        <tr><th>No Users Are Members</th><th>No Users are Members</th></tr>
+      }
+      else
+      {
+        @foreach (ApplicationUser user in Model.Member)
+        {
+          <tr>
+            <td>@user.UserName</td>
+            <td>
+              <input type="checkbox" name="DeleteId" value="@user.Id">
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+  <button type="submit" class="btn-outline-dark btn">Save</button>
+</form>
+<div>
+  <p>
+    <br />
+    <a asp-action="Index">Back to List</a>
+  </p>
+</div>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#addTo').DataTable();
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+    var tableB = $('#removeFrom').DataTable();
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+</script>
