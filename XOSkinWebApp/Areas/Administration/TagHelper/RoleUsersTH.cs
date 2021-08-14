@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
-namespace XOSkinWebApp.TagHelper
+namespace XOSkinWebApp.Areas.Administration.TagHelper
 {
   [HtmlTargetElement("td", Attributes="i-role")]
   public class RoleUsersTH : Microsoft.AspNetCore.Razor.TagHelpers.TagHelper
