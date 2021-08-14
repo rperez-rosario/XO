@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XOSkinWebApp.ORM;
+using Microsoft.AspNetCore.Authorization;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
     [Area("Administration")]
+    [Authorize(Roles = "Administrator")]
     public class LocalizedImagesController : Controller
     {
         private readonly XOSkinContext _context;

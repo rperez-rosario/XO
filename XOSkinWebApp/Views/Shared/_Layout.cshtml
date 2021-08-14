@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -72,34 +75,34 @@
                 (0)
               </a>
             </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle nav-link text-dark text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
-                <span class="nav-label">Administration</span><span class="caret text-dark"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Languages" asp-action="Index">Languages</a>
-                </li>
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedTexts" asp-action="Index">Text Localization</a>
-                </li>
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedImages" asp-action="Index">Image Localization</a>
-                </li>
-                @*<li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Users" asp-action="Index">Users</a>
-                </li>*@
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Roles" asp-action="Index">Application Roles</a>
-                </li>
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questionnaires" asp-action="Index">Questionnaires</a>
-                </li>
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questions" asp-action="Index">Questions</a>
-                </li>
-              </ul>
-            </li>
+            @if (User.IsInRole("Administrator"))
+            {
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle nav-link text-dark text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                  <span class="nav-label">Administration</span><span class="caret text-dark"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Languages" asp-action="Index">Languages</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedTexts" asp-action="Index">Text Localization</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedImages" asp-action="Index">Image Localization</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Roles" asp-action="Index">Application Roles</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questionnaires" asp-action="Index">Questionnaires</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questions" asp-action="Index">Questions</a>
+                  </li>
+                </ul>
+              </li>
+            }
           </ul>
           <partial name="_LoginPartial" />
         </div>

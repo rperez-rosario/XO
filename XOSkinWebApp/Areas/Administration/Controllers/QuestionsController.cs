@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XOSkinWebApp.ORM;
+using Microsoft.AspNetCore.Authorization;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     [Area("Administration")]
     public class QuestionsController : Controller
     {

@@ -10,9 +10,11 @@ using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace XOSkinWebApp.Controllers
 {
+  [Authorize]
   public class ProductRecommendationController : Controller
   {
     private readonly XOSkinContext _context;

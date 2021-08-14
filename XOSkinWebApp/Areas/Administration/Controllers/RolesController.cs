@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using XOSkinWebApp.Areas.Identity.Models;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
+  //[Authorize(Roles = "Administrator")]
   [Area("Administration")]
   public class RolesController : Controller
   {

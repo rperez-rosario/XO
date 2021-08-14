@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using XOSkinWebApp.ORM;
 
 namespace XOSkinWebApp.Controllers
 {
+    [Authorize]
     public class OrdersController : Controller
     {
       private readonly XOSkinContext _context;
