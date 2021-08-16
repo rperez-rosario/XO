@@ -71,6 +71,7 @@ body {
   margin-bottom: 5px;
 }
 
+
 /* XO Skin Modifications */
 
 .nav-link {
@@ -191,3 +192,7 @@ div.alert.alert-success.alert-dismissible {
   color: #fff;
   background: #212529;
 }
+
+/* DataTables 
+  Changed datatables.min.css td.dtr-control background-color to #000.
+*/
