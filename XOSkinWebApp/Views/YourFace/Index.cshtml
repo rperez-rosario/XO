@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<XOSkinWebApp.Models.ProductModel>
+
+@{
   ViewData["Title"] = "Your Face";
 }
 
@@ -6,3 +8,22 @@
   <h1 class="display-4">Your Face</h1>
   @Html.Raw(ViewData["YourFace.WelcomeText"])
 </div>
+
+<table class="table text-center" style="width: 390px; margin-left: auto; margin-right: auto">
+  @foreach (var item in Model)
+  {
+    <tr>
+      <td>
+        <p>
+          <img src="@item.ImageSource" height="300" /><br />
+          <b>@Html.DisplayFor(modelItem => item.Name)</b> <br />
+          <span style="text-align: justify">
+            @Html.DisplayFor(modelItem => item.Description)
+          </span> <br />
+          $@Html.DisplayFor(modelItem => item.Price) <br />
+          <span class="text-nowrap font-weight-bold">Add to Cart</span>
+        </p>
+      </td>
+    </tr>
+  }
+</table>

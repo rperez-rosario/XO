@@ -1,4 +1,4 @@
-﻿@model IEnumerable<XOSkinWebApp.Models.TopProductModel>
+﻿@model IEnumerable<XOSkinWebApp.Models.ProductModel>
 
 @{
   ViewData["Title"] = "Top Sellers";
@@ -9,7 +9,7 @@
   @Html.Raw(ViewData["TopSellers.WelcomeText"])
 </div>
 
-<table class="table" id="TopProduct">
+@*<table class="table" id="TopProduct">
   <thead>
     <tr>
       <th></th>
@@ -30,7 +30,7 @@
     {
       <tr>
         <td>
-          <img src="@item.ImageSource" height="100" />
+          <img src="@item.ImageSource" height="200" />
         </td>
         <td>
           @Html.DisplayFor(modelItem => item.Name)
@@ -42,13 +42,33 @@
           $@Html.DisplayFor(modelItem => item.Price)
         </td>
         <td>
-          Add to Cart
+          <span class="text-nowrap">Add to Cart</span>
         </td>
       </tr>
     }
   </tbody>
+</table>*@
+
+<table class="table text-center" style="width: 390px; margin-left: auto; margin-right: auto">
+  @foreach (var item in Model)
+  {
+  <tr>
+    <td>
+      <p>
+        <img src="@item.ImageSource" height="300" /><br />
+        <b>@Html.DisplayFor(modelItem => item.Name)</b> <br />
+        <span style="text-align: justify">
+          @Html.DisplayFor(modelItem => item.Description)
+        </span> <br />
+        $@Html.DisplayFor(modelItem => item.Price) <br />
+        <span class="text-nowrap font-weight-bold">Add to Cart</span>
+      </p>
+    </td>
+  </tr>
+  }
 </table>
-<script type="text/javascript">
+
+@*<script type="text/javascript">
   $(document).ready(function () {
     var table = $('#TopProduct').DataTable();
 
@@ -56,4 +76,4 @@
       details: true
     });
   });
-</script>
+</script>*@

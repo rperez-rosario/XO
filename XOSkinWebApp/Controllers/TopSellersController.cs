@@ -25,20 +25,20 @@ namespace XOSkinWebApp.Controllers
 
     public IActionResult Index()
     {
-      List<TopProductModel> topProductModel = new List<TopProductModel>();
+      List<ProductModel> productModel = new List<ProductModel>();
 
       IEnumerable<ShopifySharp.Product> product = GetShopifyProducts(_option.Value.ShopifyUrl, 
         _option.Value.ShopifyStoreFrontAccessToken).Result;
 
       foreach (ShopifySharp.Product sp in product)
       {
-        topProductModel.Add(
-          new TopProductModel(sp.Id.ToString(), sp.Images.ElementAt(0).Src, sp.Title, sp.BodyHtml, 
+        productModel.Add(
+          new ProductModel(sp.Id.ToString(), sp.Images.ElementAt(0).Src, sp.Title, sp.BodyHtml, 
           sp.Variants.ElementAt(0).Price));
       }
 
       ViewData.Add("TopSellers.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("TopSellers.WelcomeText")).Select(x => x.Text).FirstOrDefault());
-      return View(topProductModel);
+      return View(productModel);
     }
 
     private async Task<IEnumerable<ShopifySharp.Product>> GetShopifyProducts(
