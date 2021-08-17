@@ -519,3 +519,5 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Views\_Vie
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Roles\Create.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Roles\Index.cshtml.g.cs
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\Razor\Areas\Administration\Views\Roles\Update.cshtml.g.cs
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\libman.json
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\bin\Release\net5.0\ShopifySharp.dll

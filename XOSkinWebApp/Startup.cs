@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using XOSkinWebApp.Services;
 using XOSkinWebApp.ORM;
 using XOSkinWebApp.Areas.Identity.Models;
+using XOSkinWebApp.ConfigurationHelper;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,6 +50,9 @@ namespace XOSkinWebApp
       services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
           .AddRoles<IdentityRole>()
           .AddEntityFrameworkStores<ApplicationDbContext>();
+
+      services.AddOptions();
+      services.Configure<Option>(Configuration.GetSection(Option.SectionName));
 
       services.AddControllersWithViews();
     }

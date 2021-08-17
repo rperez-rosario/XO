@@ -44,6 +44,7 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwro
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\wwwroot\lib\jquery\LICENSE.txt
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\appsettings.Development.json
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\appsettings.json
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\libman.json
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\XOSkinWebApp.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\XOSkinWebApp.runtimeconfig.json
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\XOSkinWebApp.pdb
@@ -94,6 +95,7 @@ C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Micro
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\Newtonsoft.Json.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\SendGrid.dll
+C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\ShopifySharp.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\StarkbankEcdsa.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\System.Composition.AttributedModel.dll
 C:\Users\Rafael\source\repos\XO\XOSkinWebApp\obj\Release\net5.0\PubTmp\Out\System.Composition.Convention.dll

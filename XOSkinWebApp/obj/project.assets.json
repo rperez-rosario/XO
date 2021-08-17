@@ -1344,6 +1344,20 @@
           "lib/netstandard2.0/SendGrid.dll": {}
         }
       },
+      "ShopifySharp/5.12.0": {
+        "type": "package",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "microsoft.extensions.primitives": "1.1.0",
+          "newtonsoft.json": "10.0.1"
+        },
+        "compile": {
+          "lib/netstandard1.4/ShopifySharp.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.4/ShopifySharp.dll": {}
+        }
+      },
       "starkbank-ecdsa/1.3.1": {
         "type": "package",
         "compile": {
@@ -5152,6 +5166,19 @@
         "lib/netstandard2.0/SendGrid.xml",
         "sendgrid.9.24.1.nupkg.sha512",
         "sendgrid.nuspec"
+      ]
+    },
+    "ShopifySharp/5.12.0": {
+      "sha512": "8B8JZtj6qnzIgeOMWSLGft4rli3YH79lUHsvRM8xiiQ+FTBjMuMCUf251f5KStKYOaLUNfKh5qrN8MifcUjZ+A==",
+      "type": "package",
+      "path": "shopifysharp/5.12.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/ShopifySharp.dll",
+        "lib/netstandard1.4/ShopifySharp.dll",
+        "shopifysharp.5.12.0.nupkg.sha512",
+        "shopifysharp.nuspec"
       ]
     },
     "starkbank-ecdsa/1.3.1": {
@@ -9599,6 +9626,7 @@
       "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 5.0.2",
       "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore >= 5.0.2",
       "SendGrid >= 9.24.1",
+      "ShopifySharp >= 5.12.0",
       "jQuery >= 3.6.0"
     ]
   },
@@ -9721,6 +9749,10 @@
           "SendGrid": {
             "target": "Package",
             "version": "[9.24.1, )"
+          },
+          "ShopifySharp": {
+            "target": "Package",
+            "version": "[5.12.0, )"
           },
           "jQuery": {
             "target": "Package",

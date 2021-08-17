@@ -184,6 +184,10 @@
               "target": "Package",
               "version": "[9.24.1, )"
             },
+            "ShopifySharp": {
+              "target": "Package",
+              "version": "[5.12.0, )"
+            },
             "jQuery": {
               "target": "Package",
               "version": "[3.6.0, )"
