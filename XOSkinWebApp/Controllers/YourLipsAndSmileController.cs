@@ -8,7 +8,6 @@ using XOSkinWebApp.Models;
 using XOSkinWebApp.ConfigurationHelper;
 using ShopifySharp;
 using ShopifySharp.Filters;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace XOSkinWebApp.Controllers
