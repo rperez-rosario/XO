@@ -10,7 +10,7 @@ using XOSkinWebApp.Areas.Identity.Models;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
-  //[Authorize(Roles = "Administrator")]
+  [Authorize(Roles = "Administrator")]
   [Area("Administration")]
   public class RolesController : Controller
   {

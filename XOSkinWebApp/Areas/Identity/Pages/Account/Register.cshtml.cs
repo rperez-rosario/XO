@@ -118,6 +118,7 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account
     public async Task<IActionResult> OnPostAsync(string returnUrl = null)
     {
       ApplicationUser appUser = null;
+      ShoppingCart shoppingCart = null;
       CustomerService shopifyCustomerService = new CustomerService(_option.Value.ShopifyUrl, 
         _option.Value.ShopifyStoreFrontAccessToken);
       Customer shopifyCustomer = new Customer()
@@ -134,54 +135,72 @@ namespace XOSkinWebApp.Areas.Identity.Pages.Account
       ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
       if (ModelState.IsValid)
       {
-        var user = new ApplicationUser { UserName = Input.Email.Trim(), Email = Input.Email.Trim(), 
-          PhoneNumber = Input.PhoneNumber,
-          /*HomePhoneNumber = Input.HomePhoneNumber, WorkPhoneNumber = Input.WorkPhoneNumber, 
-          AdditionalPhoneNumber = Input.AdditionalPhoneNumber,*/ FirstName = Input.FirstName, 
-          LastName = Input.LastName };
+        var resultShopify = await shopifyCustomerService.CreateAsync(shopifyCustomer);
 
-        var result = await _userManager.CreateAsync(user, Input.Password);
-        var resultB = await shopifyCustomerService.CreateAsync(shopifyCustomer);
-
-        if (result.Succeeded && resultB.Id != null)
+        // If Shopify user created sucessfully.
+        if (resultShopify.Id != null)
         {
-          // Set disabled to false.
-          appUser = _idcontext.Users.Where(x => x.Id.Equals(user.Id)).FirstOrDefault();
-          appUser.Disabled = false;
-          _idcontext.Update(appUser);
-          _idcontext.SaveChanges();
-                
-          _logger.LogInformation("User created a new account with password.");
-                    
-          var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-          code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-          var callbackUrl = Url.Page(
-              "/Account/ConfirmEmail",
-              pageHandler: null,
-              values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
-              protocol: Request.Scheme);
-
-          await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-              $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-          if (_userManager.Options.SignIn.RequireConfirmedAccount)
+          var user = new ApplicationUser
           {
-            return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
-          }
-          else
+            UserName = Input.Email.Trim(),
+            Email = Input.Email.Trim(),
+            PhoneNumber = Input.PhoneNumber,
+            /*HomePhoneNumber = Input.HomePhoneNumber, WorkPhoneNumber = Input.WorkPhoneNumber, 
+            AdditionalPhoneNumber = Input.AdditionalPhoneNumber,*/
+            FirstName = Input.FirstName,
+            LastName = Input.LastName,
+            ShopifyCustomerId = (long)resultShopify.Id
+          };
+
+          var result = await _userManager.CreateAsync(user, Input.Password);
+
+          if (result.Succeeded)
           {
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            return LocalRedirect(returnUrl);
+            // Set disabled to false.
+            appUser = _idcontext.Users.Where(x => x.Id.Equals(user.Id)).FirstOrDefault();
+            appUser.Disabled = false;
+            _idcontext.Update(appUser);
+            _idcontext.SaveChanges();
+
+            // Create user shopping cart.
+            shoppingCart = new ShoppingCart();
+            shoppingCart.User = appUser.Id;
+            _context.Add(shoppingCart);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("User created a new account with password.");
+
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: null,
+                values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
+                protocol: Request.Scheme);
+
+            await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+            if (_userManager.Options.SignIn.RequireConfirmedAccount)
+            {
+              return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+            }
+            else
+            {
+              await _signInManager.SignInAsync(user, isPersistent: false);
+              return LocalRedirect(returnUrl);
+            }
           }
-        }
-        foreach (var error in result.Errors)
+          foreach (var error in result.Errors)
+          {
+            ModelState.AddModelError(string.Empty, error.Description);
+          }
+        } 
+        else
         {
-          ModelState.AddModelError(string.Empty, error.Description);
-        }
-        if (resultB.Id == null)
           ModelState.AddModelError(string.Empty, "An error has resulted while creating Shopify user " + Input.Email + ".");
-      }
-        
+        } 
+      } 
       // If we got this far, something failed, redisplay form
       return Page();
     }

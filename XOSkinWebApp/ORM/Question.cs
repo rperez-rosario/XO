@@ -10,26 +10,26 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace XOSkinWebApp.ORM
 {
-    public partial class Question
+  public partial class Question
+  {
+    public Question()
     {
-        public Question()
-        {
-            PossibleAnswers = new HashSet<PossibleAnswer>();
-            UserAnswers = new HashSet<UserAnswer>();
-        }
-
-        public long Id { get; set; }
-
-        [Required(ErrorMessage = "Question text required.")]
-        public string QuestionText { get; set; }
-   
-        public int Questionnaire { get; set; }
-
-        [Required(ErrorMessage = "Question order required.")]
-        public long DisplayOrder { get; set; }
-
-        public virtual Questionnaire QuestionnaireNavigation { get; set; }
-        public virtual ICollection<PossibleAnswer> PossibleAnswers { get; set; }
-        public virtual ICollection<UserAnswer> UserAnswers { get; set; }
+      PossibleAnswers = new HashSet<PossibleAnswer>();
+      UserAnswers = new HashSet<UserAnswer>();
     }
+
+    public long Id { get; set; }
+
+    [Required(ErrorMessage = "Question text required.")]
+    public string QuestionText { get; set; }
+
+    public int Questionnaire { get; set; }
+
+    [Required(ErrorMessage = "Question order required.")]
+    public long DisplayOrder { get; set; }
+
+    public virtual Questionnaire QuestionnaireNavigation { get; set; }
+    public virtual ICollection<PossibleAnswer> PossibleAnswers { get; set; }
+    public virtual ICollection<UserAnswer> UserAnswers { get; set; }
+  }
 }

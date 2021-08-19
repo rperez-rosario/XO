@@ -31,5 +31,9 @@ namespace XOSkinWebApp.Areas.Identity.Models
     [DataType(DataType.Text)]
     [Display(Name = "Disabled")]
     public bool Disabled { get; set; }
+
+    [DataType(DataType.Text)]
+    [Display(Name = "Disabled")]
+    public long ShopifyCustomerId { get; set; }
   }
 }

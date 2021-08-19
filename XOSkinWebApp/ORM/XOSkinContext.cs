@@ -81,9 +81,9 @@ namespace XOSkinWebApp.ORM
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-//            if (!optionsBuilder.IsConfigured)
-//            {
-//#warning    }
+            //if (!optionsBuilder.IsConfigured)
+            //{
+            //}
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -380,16 +380,16 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.DiscountAsInNproductPercentage).HasColumnName("DiscountAsInNProductPercentage");
 
-                entity.Property(e => e.DiscountGlobalOrderDollars).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.DiscountGlobalOrderDollars).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.DiscountGlobalOrderPercentage).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.DiscountGlobalOrderPercentage).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.DiscountInNproductDollars)
-                    .HasColumnType("decimal(18, 0)")
+                    .HasColumnType("decimal(18, 2)")
                     .HasColumnName("DiscountInNProductDollars");
 
                 entity.Property(e => e.DiscountNproductPercentage)
-                    .HasColumnType("decimal(18, 0)")
+                    .HasColumnType("decimal(18, 2)")
                     .HasColumnName("DiscountNProductPercentage");
 
                 entity.Property(e => e.LastUpdated).HasColumnType("datetime");
@@ -443,16 +443,16 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.DiscountAsInNproductPercentage).HasColumnName("DiscountAsInNProductPercentage");
 
-                entity.Property(e => e.DiscountGlobalOrderDollars).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.DiscountGlobalOrderDollars).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.DiscountGlobalOrderPercentage).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.DiscountGlobalOrderPercentage).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.DiscountInNproductDollars)
-                    .HasColumnType("decimal(18, 0)")
+                    .HasColumnType("decimal(18, 2)")
                     .HasColumnName("DiscountInNProductDollars");
 
                 entity.Property(e => e.DiscountNproductPercentage)
-                    .HasColumnType("decimal(18, 0)")
+                    .HasColumnType("decimal(18, 2)")
                     .HasColumnName("DiscountNProductPercentage");
 
                 entity.Property(e => e.LastUpdated).HasColumnType("datetime");
@@ -822,7 +822,7 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("PaymentPlanSchedulePayment");
 
-                entity.Property(e => e.ActualAmount).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.ActualAmount).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.ActualDate).HasColumnType("datetime");
 
@@ -832,7 +832,7 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(450);
 
-                entity.Property(e => e.DueAmount).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.DueAmount).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.DueDate).HasColumnType("datetime");
 
@@ -886,7 +886,7 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("Price");
 
-                entity.Property(e => e.Amount).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.CreatedBy)
                     .IsRequired()
@@ -932,7 +932,7 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false);
 
                 entity.Property(e => e.Ph)
-                    .HasColumnType("decimal(18, 0)")
+                    .HasColumnType("decimal(18, 2)")
                     .HasColumnName("PH");
 
                 entity.Property(e => e.Sku)
@@ -940,7 +940,7 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false)
                     .HasColumnName("SKU");
 
-                entity.Property(e => e.VolumeInFluidOunces).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.VolumeInFluidOunces).HasColumnType("decimal(18, 2)");
 
                 entity.HasOne(d => d.CreatedByNavigation)
                     .WithMany(p => p.ProductCreatedByNavigations)
@@ -1228,23 +1228,24 @@ namespace XOSkinWebApp.ORM
                 entity.HasOne(d => d.ShoppingCartNavigation)
                     .WithMany(p => p.ShoppingCartHistories)
                     .HasForeignKey(d => d.ShoppingCart)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ShoppingCartHistory_ShoppingCart2");
             });
 
             modelBuilder.Entity<ShoppingCartProduct>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => new { e.ShoppingCart, e.Product });
 
                 entity.ToTable("ShoppingCartProduct");
 
                 entity.HasOne(d => d.ProductNavigation)
-                    .WithMany()
+                    .WithMany(p => p.ShoppingCartProducts)
                     .HasForeignKey(d => d.Product)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ShoppingCartProduct_Product");
 
                 entity.HasOne(d => d.ShoppingCartNavigation)
-                    .WithMany()
+                    .WithMany(p => p.ShoppingCartProducts)
                     .HasForeignKey(d => d.ShoppingCart)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ShoppingCartProduct_ShoppingCart");
@@ -1384,11 +1385,11 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("UserLedgerTransaction");
 
-                entity.Property(e => e.Amount).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.AmountAfterTransaction).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.AmountAfterTransaction).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.AmountBeforeTransaction).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.AmountBeforeTransaction).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.Created).HasColumnType("datetime");
 

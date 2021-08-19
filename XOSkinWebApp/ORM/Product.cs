@@ -15,11 +15,13 @@ namespace XOSkinWebApp.ORM
             OrderProducts = new HashSet<OrderProduct>();
             ProductIngredients = new HashSet<ProductIngredient>();
             ShoppingCartHistories = new HashSet<ShoppingCartHistory>();
+            ShoppingCartProducts = new HashSet<ShoppingCartProduct>();
             SubscriptionProducts = new HashSet<SubscriptionProduct>();
             UserProductListProducts = new HashSet<UserProductListProduct>();
         }
 
         public long Id { get; set; }
+        public long? ShopifyProductId { get; set; }
         public string Sku { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -51,6 +53,7 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<OrderProduct> OrderProducts { get; set; }
         public virtual ICollection<ProductIngredient> ProductIngredients { get; set; }
         public virtual ICollection<ShoppingCartHistory> ShoppingCartHistories { get; set; }
+        public virtual ICollection<ShoppingCartProduct> ShoppingCartProducts { get; set; }
         public virtual ICollection<SubscriptionProduct> SubscriptionProducts { get; set; }
         public virtual ICollection<UserProductListProduct> UserProductListProducts { get; set; }
     }
