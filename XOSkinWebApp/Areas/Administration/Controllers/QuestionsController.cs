@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XOSkinWebApp.ORM;
 using Microsoft.AspNetCore.Authorization;
+using XOSkinWebApp.Areas.Administration.Models;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
@@ -24,9 +25,22 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // GET: Administration/Questions
         public async Task<IActionResult> Index()
         {
-            var xOSkinContext = _context.Questions
-              .Include(q => q.QuestionnaireNavigation);
-            return View(await xOSkinContext.ToListAsync());
+            List<QuestionViewModel> question = new List<QuestionViewModel>();
+            foreach(Question q in _context.Questions.Include(q => q.QuestionnaireNavigation))
+            {
+              question.Add(new QuestionViewModel()
+              {
+                Id = q.Id,
+                QuestionText = q.QuestionText,
+                Questionnaire = q.Questionnaire,
+                DisplayOrder = q.DisplayOrder,
+                QuestionnaireNavigation = q.QuestionnaireNavigation,
+                PossibleAnswers = q.PossibleAnswers,
+                UserAnswers = q.UserAnswers
+              });
+            }
+
+            return View(question);
         }
 
         // GET: Administration/Questions/Details/5
@@ -45,7 +59,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
 
-            return View(question);
+            return View(new QuestionViewModel() {
+              Id = question.Id,
+              QuestionText = question.QuestionText,
+              Questionnaire = question.Questionnaire,
+              DisplayOrder = question.DisplayOrder,
+              QuestionnaireNavigation = question.QuestionnaireNavigation,
+              PossibleAnswers = question.PossibleAnswers,
+              UserAnswers = question.UserAnswers
+            });
         }
 
         // GET: Administration/Questions/Create
@@ -60,11 +82,19 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,QuestionText,Questionnaire,DisplayOrder")] Question question)
+        public async Task<IActionResult> Create([Bind("Id,QuestionText,Questionnaire,DisplayOrder")] QuestionViewModel question)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(question);
+                _context.Add(new Question() {
+                  Id = question.Id,
+                  QuestionText = question.QuestionText,
+                  Questionnaire = question.Questionnaire,
+                  DisplayOrder = question.DisplayOrder,
+                  QuestionnaireNavigation = question.QuestionnaireNavigation,
+                  PossibleAnswers = question.PossibleAnswers,
+                  UserAnswers = question.UserAnswers
+                });
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -86,7 +116,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
             ViewData["Questionnaire"] = new SelectList(_context.Questionnaires, "Id", "QuestionnaireName", question.Questionnaire);
-            return View(question);
+            return View(new QuestionViewModel() {
+              Id = question.Id,
+              QuestionText = question.QuestionText,
+              Questionnaire = question.Questionnaire,
+              DisplayOrder = question.DisplayOrder,
+              QuestionnaireNavigation = question.QuestionnaireNavigation,
+              PossibleAnswers = question.PossibleAnswers,
+              UserAnswers = question.UserAnswers
+            });
         }
 
         // POST: Administration/Questions/Edit/5
@@ -94,7 +132,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,QuestionText,Questionnaire,DisplayOrder")] Question question)
+        public async Task<IActionResult> Edit(
+          long id, [Bind("Id,QuestionText,Questionnaire,DisplayOrder")] QuestionViewModel question)
         {
             if (id != question.Id)
             {
@@ -107,7 +146,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 {
                     question.Questionnaire = _context.Questions.Where(x => x.Id == id).Select(x => x.Questionnaire).FirstOrDefault();
 
-                    _context.Update(question);
+                    _context.Update(new Question() {
+                      Id = question.Id,
+                      QuestionText = question.QuestionText,
+                      Questionnaire = question.Questionnaire,
+                      DisplayOrder = question.DisplayOrder,
+                      QuestionnaireNavigation = question.QuestionnaireNavigation,
+                      PossibleAnswers = question.PossibleAnswers,
+                      UserAnswers = question.UserAnswers
+                    });
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -143,7 +190,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
 
-            return View(question);
+            return View(new QuestionViewModel() {
+              Id = question.Id,
+              QuestionText = question.QuestionText,
+              Questionnaire = question.Questionnaire,
+              DisplayOrder = question.DisplayOrder,
+              QuestionnaireNavigation = question.QuestionnaireNavigation,
+              PossibleAnswers = question.PossibleAnswers,
+              UserAnswers = question.UserAnswers
+            });
         }
 
         // POST: Administration/Questions/Delete/5

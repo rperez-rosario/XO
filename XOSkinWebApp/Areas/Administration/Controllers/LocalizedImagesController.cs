@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XOSkinWebApp.ORM;
 using Microsoft.AspNetCore.Authorization;
+using XOSkinWebApp.Areas.Administration.Models;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
@@ -24,8 +25,24 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // GET: Administration/LocalizedImages
         public async Task<IActionResult> Index()
         {
-            var xOSkinContext = _context.LocalizedImages.Include(l => l.LanguageNavigation).Include(l => l.PageNavigation);
-            return View(await xOSkinContext.ToListAsync());
+            List<LocalizedImageViewModel> localizedImage = new List<LocalizedImageViewModel>();
+            
+            foreach (LocalizedImage m in 
+              _context.LocalizedImages.Include(l => l.LanguageNavigation).Include(l => l.PageNavigation).ToListAsync().Result)
+            {
+              localizedImage.Add(new LocalizedImageViewModel()
+              {
+                Id = m.Id,
+                Path = m.Path,
+                Language = m.Language,
+                PlacementPointCode = m.PlacementPointCode,
+                Page = m.Page,
+                LanguageNavigation = m.LanguageNavigation,
+                PageNavigation = m.PageNavigation
+              });
+            }
+            
+            return View(localizedImage);
         }
 
         // GET: Administration/LocalizedImages/Details/5
@@ -45,7 +62,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
 
-            return View(localizedImage);
+            return View(new LocalizedImage() { 
+              Id = localizedImage.Id,
+              Path = localizedImage.Path,
+              Language = localizedImage.Language,
+              PlacementPointCode = localizedImage.PlacementPointCode,
+              Page = localizedImage.Page,
+              LanguageNavigation = localizedImage.LanguageNavigation,
+              PageNavigation = localizedImage.PageNavigation
+            });
         }
 
         // GET: Administration/LocalizedImages/Create
@@ -61,13 +86,23 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImage localizedImage)
+        public async Task<IActionResult> Create([Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImageViewModel localizedImage)
         {
             if (ModelState.IsValid)
             {
                 localizedImage.PlacementPointCode = _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + 
                   "." + localizedImage.PlacementPointCode;
-                _context.Add(localizedImage);
+
+                _context.Add(new LocalizedImage()
+                {
+                  Id = localizedImage.Id,
+                  Path = localizedImage.Path,
+                  Language = localizedImage.Language,
+                  PlacementPointCode = localizedImage.PlacementPointCode,
+                  Page = localizedImage.Page,
+                  LanguageNavigation = localizedImage.LanguageNavigation,
+                  PageNavigation = localizedImage.PageNavigation
+                });
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -94,16 +129,25 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
               , "");
             ViewData["Language"] = new SelectList(_context.Languages.Where(x => x.Active == true), "Id", "LanguageName", localizedImage.Language);
             ViewData["Page"] = new SelectList(_context.Pages, "Id", "Name", localizedImage.Page);
-      
-            return View(localizedImage);
-        }
+            
+            return View(new LocalizedImageViewModel()
+            {
+              Id = localizedImage.Id,
+              Path = localizedImage.Path,
+              Language = localizedImage.Language,
+              PlacementPointCode = localizedImage.PlacementPointCode,
+              Page = localizedImage.Page,
+              LanguageNavigation = localizedImage.LanguageNavigation,
+              PageNavigation = localizedImage.PageNavigation
+            });
+       }
 
         // POST: Administration/LocalizedImages/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImage localizedImage,
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImageViewModel localizedImage,
           bool LimitedEntry)
         {
             if (id != localizedImage.Id)
@@ -125,10 +169,18 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                       "." + _context.LocalizedTexts.Where(
                       x => x.Id == id).Select(x => x.PlacementPointCode).FirstOrDefault().Replace(
                      _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + ".", "");
-                }
-
-                  _context.Update(localizedImage);
-                  await _context.SaveChangesAsync();
+                   }
+                    _context.Update(new LocalizedImage()
+                    {
+                      Id = localizedImage.Id,
+                      Path = localizedImage.Path,
+                      Language = localizedImage.Language,
+                      PlacementPointCode = localizedImage.PlacementPointCode,
+                      Page = localizedImage.Page,
+                      LanguageNavigation = localizedImage.LanguageNavigation,
+                      PageNavigation = localizedImage.PageNavigation
+                    });
+                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -165,7 +217,16 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
 
-            return View(localizedImage);
+            return View(new LocalizedImageViewModel()
+            {
+              Id = localizedImage.Id,
+              Path = localizedImage.Path,
+              Language = localizedImage.Language,
+              PlacementPointCode = localizedImage.PlacementPointCode,
+              Page = localizedImage.Page,
+              LanguageNavigation = localizedImage.LanguageNavigation,
+              PageNavigation = localizedImage.PageNavigation
+            });
         }
 
         // POST: Administration/LocalizedImages/Delete/5

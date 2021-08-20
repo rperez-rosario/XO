@@ -1,4 +1,4 @@
-﻿@model IEnumerable<XOSkinWebApp.ORM.LocalizedText>
+﻿@model List<XOSkinWebApp.Areas.Administration.Models.LocalizedTextViewModel>
 
 @{
   ViewData["Title"] = "Text Localizations";
@@ -13,7 +13,7 @@
   <thead>
     <tr>
       <th>
-        @Html.DisplayNameFor(model => model.Text)
+        Text
       </th>
       <th>
         Placement Point Code

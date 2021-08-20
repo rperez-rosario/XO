@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XOSkinWebApp.ORM;
 using Microsoft.AspNetCore.Authorization;
+using XOSkinWebApp.Areas.Administration.Models;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
@@ -24,8 +25,21 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // GET: Administration/Questionnaires
         public async Task<IActionResult> Index()
         {
-            var xOSkinContext = _context.Questionnaires.Include(q => q.CreatedByNavigation);
-            return View(await xOSkinContext.ToListAsync());
+            List<QuestionnaireViewModel> questionnaire = new List<QuestionnaireViewModel>();
+            foreach (Questionnaire q in _context.Questionnaires.Include(q => q.CreatedByNavigation))
+            {
+              questionnaire.Add(new QuestionnaireViewModel() { 
+                Id = q.Id,
+                QuestionnaireName = q.QuestionnaireName,
+                Description = q.Description,
+                Active = q.Active,
+                CreatedBy = q.CreatedBy,
+                DateCreated = q.DateCreated,
+                CreatedByNavigation = q.CreatedByNavigation,
+                Questions = q.Questions
+              });
+            }
+            return View(questionnaire);
         }
 
         // GET: Administration/Questionnaires/Details/5
@@ -44,7 +58,16 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
 
-            return View(questionnaire);
+            return View(new QuestionnaireViewModel() { 
+              Id = questionnaire.Id,
+              QuestionnaireName = questionnaire.QuestionnaireName,
+              Description = questionnaire.Description,
+              Active = questionnaire.Active,
+              CreatedBy = questionnaire.CreatedBy,
+              DateCreated = questionnaire.DateCreated,
+              CreatedByNavigation = questionnaire.CreatedByNavigation,
+              Questions = questionnaire.Questions
+            });
         }
 
         // GET: Administration/Questionnaires/Create
@@ -59,11 +82,14 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,QuestionnaireName,Description,Active,CreatedBy,DateCreated")] Questionnaire questionnaire)
+        public async Task<IActionResult> Create(
+          [Bind("Id,QuestionnaireName,Description,Active,CreatedBy,DateCreated")] QuestionnaireViewModel questionnaire)
         {
+            Questionnaire newQuestionnaire = null;
             if (ModelState.IsValid)
             {
-                questionnaire.CreatedBy = "7e6ab0a1-a0c7-4e95-93da-75c824746bc7"; // TODO: Change to current user.
+                questionnaire.CreatedBy = _context.AspNetUsers.Where(
+                  x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(); // TODO: Change to current user.
                 questionnaire.DateCreated = DateTime.UtcNow;
                 questionnaire.QuestionnaireName = questionnaire.QuestionnaireName.Trim();
                 if (questionnaire.Active)
@@ -74,9 +100,29 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                   }
                   _context.SaveChanges();
                 }
-                _context.Add(questionnaire);
+                newQuestionnaire = new Questionnaire()
+                {
+                  Id = questionnaire.Id,
+                  QuestionnaireName = questionnaire.QuestionnaireName,
+                  Description = questionnaire.Description,
+                  Active = questionnaire.Active,
+                  CreatedBy = questionnaire.CreatedBy,
+                  DateCreated = questionnaire.DateCreated,
+                  CreatedByNavigation = questionnaire.CreatedByNavigation,
+                  Questions = questionnaire.Questions
+                };
+                _context.Add(newQuestionnaire);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (questionnaire.Active)
+                {
+                  foreach (Questionnaire q in _context.Questionnaires)
+                  {
+                    if (q.Id != newQuestionnaire.Id)
+                      q.Active = false;
+                  }
+                  await _context.SaveChangesAsync();
+                }
+        return RedirectToAction(nameof(Index));
             }
             ViewData["CreatedBy"] = new SelectList(_context.AspNetUsers, "Id", "Email", questionnaire.CreatedBy);
             return View(questionnaire);
@@ -96,7 +142,16 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
             ViewData["CreatedBy"] = new SelectList(_context.AspNetUsers, "Id", "Email", questionnaire.CreatedBy);
-            return View(questionnaire);
+            return View(new QuestionnaireViewModel() { 
+              Id = questionnaire.Id,
+              QuestionnaireName = questionnaire.QuestionnaireName,
+              Description = questionnaire.Description,
+              Active = questionnaire.Active,
+              CreatedBy = questionnaire.CreatedBy,
+              DateCreated = questionnaire.DateCreated,
+              CreatedByNavigation = questionnaire.CreatedByNavigation,
+              Questions = questionnaire.Questions
+            });
         }
 
         // POST: Administration/Questionnaires/Edit/5
@@ -104,10 +159,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,QuestionnaireName,Description,Active,CreatedBy,DateCreated")] Questionnaire questionnaire)
+        public async Task<IActionResult> Edit(
+          int id, [Bind("Id,QuestionnaireName,Description,Active,CreatedBy,DateCreated")] QuestionnaireViewModel questionnaire)
         {
-            XOSkinContext _contextB = new XOSkinContext();
-
             if (id != questionnaire.Id)
             {
                 return NotFound();
@@ -117,20 +171,30 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             {
                 try
                 {
-                  if (questionnaire.Active)
-                  {
-                    foreach (Questionnaire q in _contextB.Questionnaires)
-                    {
-                      q.Active = false;
-                    }
-                    await _contextB.SaveChangesAsync();
-                  }
                   questionnaire.QuestionnaireName = questionnaire.QuestionnaireName.Trim();
                   questionnaire.CreatedBy = _context.Questionnaires.Where(x => x.Id == id).Select(x => x.CreatedBy).FirstOrDefault();
                   questionnaire.DateCreated = _context.Questionnaires.Where(x => x.Id == id).Select(x => x.DateCreated).FirstOrDefault();
-                  _context.Update(questionnaire);
+                  _context.Update(new Questionnaire() {
+                    Id = questionnaire.Id,
+                    QuestionnaireName = questionnaire.QuestionnaireName,
+                    Description = questionnaire.Description,
+                    Active = questionnaire.Active,
+                    CreatedBy = questionnaire.CreatedBy,
+                    DateCreated = questionnaire.DateCreated,
+                    CreatedByNavigation = questionnaire.CreatedByNavigation,
+                    Questions = questionnaire.Questions
+                  });
                   await _context.SaveChangesAsync();
-                }
+                  if (questionnaire.Active)
+                  {
+                    foreach (Questionnaire q in _context.Questionnaires)
+                    {
+                      if (q.Id != questionnaire.Id)
+                        q.Active = false;
+                    }
+                    await _context.SaveChangesAsync();
+                  }
+        }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!QuestionnaireExists(questionnaire.Id))
@@ -164,7 +228,16 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
 
-            return View(questionnaire);
+            return View(new QuestionnaireViewModel() {
+              Id = questionnaire.Id,
+              QuestionnaireName = questionnaire.QuestionnaireName,
+              Description = questionnaire.Description,
+              Active = questionnaire.Active,
+              CreatedBy = questionnaire.CreatedBy,
+              DateCreated = questionnaire.DateCreated,
+              CreatedByNavigation = questionnaire.CreatedByNavigation,
+              Questions = questionnaire.Questions
+            });
         }
 
         // POST: Administration/Questionnaires/Delete/5

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XOSkinWebApp.ORM;
 using Microsoft.AspNetCore.Authorization;
+using XOSkinWebApp.Areas.Administration.Models;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
@@ -24,8 +25,22 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // GET: Administration/LocalizedTexts
         public async Task<IActionResult> Index()
         {
-            var xOSkinContext = _context.LocalizedTexts.Include(l => l.LanguageNavigation).Include(l => l.PageNavigation);
-            return View(await xOSkinContext.ToListAsync());
+            List<LocalizedTextViewModel> localizedText = new List<LocalizedTextViewModel>();
+            foreach (LocalizedText t in 
+              _context.LocalizedTexts.Include(l => l.LanguageNavigation).Include(l => l.PageNavigation).ToListAsync().Result)
+            {
+                localizedText.Add(new LocalizedTextViewModel()
+                {
+                  Id = t.Id,
+                  Text = t.Text,
+                  Language = t.Language,
+                  PlacementPointCode = t.PlacementPointCode,
+                  Page = t.Page,
+                  LanguageNavigation = t.LanguageNavigation,
+                  PageNavigation = t.PageNavigation
+                });
+            }
+            return View(localizedText);
         }
 
         // GET: Administration/LocalizedTexts/Details/5
@@ -45,7 +60,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
 
-            return View(localizedText);
+            return View(new LocalizedTextViewModel() { 
+              Id = localizedText.Id,
+              Text = localizedText.Text,
+              Language = localizedText.Language,
+              PlacementPointCode = localizedText.PlacementPointCode,
+              Page = localizedText.Page,
+              LanguageNavigation = localizedText.LanguageNavigation,
+              PageNavigation = localizedText.PageNavigation
+            });
         }
 
         // GET: Administration/LocalizedTexts/Create
@@ -61,13 +84,21 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedText localizedText)
+        public async Task<IActionResult> Create([Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedTextViewModel localizedText)
         {
             if (ModelState.IsValid)
             {
                 localizedText.PlacementPointCode = _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
                   "." + localizedText.PlacementPointCode;
-                _context.Add(localizedText);
+                _context.Add(new LocalizedText() {
+                  Id = localizedText.Id,
+                  Text = localizedText.Text,
+                  Language = localizedText.Language,
+                  PlacementPointCode = localizedText.PlacementPointCode,
+                  Page = localizedText.Page,
+                  LanguageNavigation = localizedText.LanguageNavigation,
+                  PageNavigation = localizedText.PageNavigation
+                });
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -94,7 +125,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
               , "");
             ViewData["Language"] = new SelectList(_context.Languages.Where(x => x.Active == true), "Id", "LanguageName", localizedText.Language);
             ViewData["Page"] = new SelectList(_context.Pages, "Id", "Name", localizedText.Page);
-            return View(localizedText);
+            return View(new LocalizedTextViewModel() { 
+              Id = localizedText.Id,
+              Text = localizedText.Text,
+              Language = localizedText.Language,
+              PlacementPointCode = localizedText.PlacementPointCode,
+              Page = localizedText.Page,
+              LanguageNavigation = localizedText.LanguageNavigation,
+              PageNavigation = localizedText.PageNavigation
+            });
         }
 
         // POST: Administration/LocalizedTexts/Edit/5
@@ -102,7 +141,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedText localizedText,
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedTextViewModel localizedText,
           bool LimitedEntry)
         {   
             if (id != localizedText.Id)
@@ -125,7 +164,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                     x => x.Id == id).Select(x => x.PlacementPointCode).FirstOrDefault().Replace(
                    _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + ".", "");
                 }
-                _context.Update(localizedText);
+                _context.Update(new LocalizedText() { 
+                  Id = localizedText.Id,
+                  Text = localizedText.Text,
+                  Language = localizedText.Language,
+                  PlacementPointCode = localizedText.PlacementPointCode,
+                  Page = localizedText.Page,
+                  LanguageNavigation = localizedText.LanguageNavigation,
+                  PageNavigation = localizedText.PageNavigation
+                });
                 await _context.SaveChangesAsync();
               }
               catch (DbUpdateConcurrencyException)
@@ -163,7 +210,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 return NotFound();
             }
 
-            return View(localizedText);
+            return View(new LocalizedTextViewModel() { 
+              Id = localizedText.Id,
+              Text = localizedText.Text,
+              Language = localizedText.Language,
+              PlacementPointCode = localizedText.PlacementPointCode,
+              Page = localizedText.Page,
+              LanguageNavigation = localizedText.LanguageNavigation,
+              PageNavigation = localizedText.PageNavigation
+            });
         }
 
         // POST: Administration/LocalizedTexts/Delete/5
