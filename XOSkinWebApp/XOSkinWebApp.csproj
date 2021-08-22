@@ -38,8 +38,4 @@
     <ProjectReference Include="..\AdaptiveProductRecommendationEngine\AdaptiveProductRecommendationEngine.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ScaffoldingTemp\" />
-  </ItemGroup>
-
 </Project>

@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<ShoppingCartLineItemViewModel>
+
+@{
   ViewData["Title"] = "Shopping Cart";
 }
 
@@ -6,3 +8,39 @@
   <h1 class="display-4">Shopping <br />Cart</h1>
   @Html.Raw(ViewData["ShoppingCart.WelcomeText"])
 </div>
+<table class="table table-responsive" id="ShoppingCart">
+  <thead>
+    <tr>
+      <th>Product Name</th>
+      <th>Description</th>
+      <th>Quantity</th>
+      <th>Total Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (ShoppingCartLineItemViewModel lineItem in Model)
+    {
+      <tr>
+        <td>@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
+        <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
+        <td>
+          <form action="/ShoppingCart/UpdateQuantity" method="post">
+            <input type="hidden" name="ProductId" value="@lineItem.ProductId" />
+            <input name="Quantity" class="form-control" size="2" maxlength="20" type="text" value="1" />
+            <input type="submit" value="Update" class="btn-outline-dark btn" />
+          </form>
+        </td>
+        <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
+      </tr>
+    }
+  </tbody>
+</table>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#ShoppingCart').DataTable();
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+</script>

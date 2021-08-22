@@ -122,7 +122,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                   }
                   await _context.SaveChangesAsync();
                 }
-        return RedirectToAction(nameof(Index));
+              return RedirectToAction(nameof(Index));
             }
             ViewData["CreatedBy"] = new SelectList(_context.AspNetUsers, "Id", "Email", questionnaire.CreatedBy);
             return View(questionnaire);

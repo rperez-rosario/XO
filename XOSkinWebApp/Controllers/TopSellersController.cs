@@ -38,17 +38,16 @@ namespace XOSkinWebApp.Controllers
           new ProductModel(sp.Id.ToString(), sp.Images.ElementAt(0).Src, sp.Title, sp.BodyHtml, 
           sp.Variants.ElementAt(0).Price));
       }
-
       ViewData.Add("TopSellers.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("TopSellers.WelcomeText")).Select(x => x.Text).FirstOrDefault());
       return View(productModel);
     }
 
     [Authorize]
-    public void AddItemToCart(long? id)
+    public IActionResult AddItemToCart(long? id)
     {
       AspNetUser user = null;
       ShoppingCart shoppingCart = null;
-      ShoppingCartProduct cartProduct = null;
+      ShoppingCartLineItem cartLineItem = null;
       ShoppingCartHistory cartHistory = null;
       ORM.Product product = null;
 
@@ -58,7 +57,7 @@ namespace XOSkinWebApp.Controllers
         {
           user = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
           product = _context.Products.Where(x => x.ShopifyProductId.Equals(id)).FirstOrDefault();
-          cartProduct = new ShoppingCartProduct();
+          cartLineItem = new ShoppingCartLineItem();
           cartHistory = new ShoppingCartHistory();
           shoppingCart = _context.ShoppingCarts.Where(x => x.User.Equals(user.Id)).FirstOrDefault();
         }
@@ -67,15 +66,16 @@ namespace XOSkinWebApp.Controllers
           throw new Exception("Error while retrieving user, product or shopping cart information.", ex);
         }
         
-        cartProduct.ShoppingCart = shoppingCart.Id;
-        cartProduct.Product = product.Id;
+        cartLineItem.ShoppingCart = shoppingCart.Id;
+        cartLineItem.Product = product.Id;
+        cartLineItem.Quantity = 1;
 
-        cartHistory.ShoppingCart = cartProduct.ShoppingCart;
+        cartHistory.ShoppingCart = shoppingCart.Id;
         cartHistory.Product = product.Id;
         cartHistory.DateAddedToCart = DateTime.UtcNow;
         cartHistory.PromotedToOrder = false;
 
-        _context.ShoppingCartProducts.Add(cartProduct);
+        _context.ShoppingCartLineItems.Add(cartLineItem);
         _context.ShoppingCartHistories.Add(cartHistory);
 
         try
@@ -89,6 +89,7 @@ namespace XOSkinWebApp.Controllers
           throw new Exception("Error while adding shopping cart product.", ex);
         }
       }
+      return RedirectToAction("Index", "ShoppingCart");
     }
 
     private async Task<IEnumerable<ShopifySharp.Product>> GetShopifyProducts(

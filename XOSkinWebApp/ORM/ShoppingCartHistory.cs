@@ -7,6 +7,11 @@ namespace XOSkinWebApp.ORM
 {
     public partial class ShoppingCartHistory
     {
+        public ShoppingCartHistory()
+        {
+            ShoppingCartLineItems = new HashSet<ShoppingCartLineItem>();
+        }
+
         public long Id { get; set; }
         public long ShoppingCart { get; set; }
         public long Product { get; set; }
@@ -16,5 +21,6 @@ namespace XOSkinWebApp.ORM
 
         public virtual Product ProductNavigation { get; set; }
         public virtual ShoppingCart ShoppingCartNavigation { get; set; }
+        public virtual ICollection<ShoppingCartLineItem> ShoppingCartLineItems { get; set; }
     }
 }

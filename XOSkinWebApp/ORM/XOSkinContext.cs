@@ -66,7 +66,7 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<ShoppingCartDiscountCode> ShoppingCartDiscountCodes { get; set; }
         public virtual DbSet<ShoppingCartDiscountCoupon> ShoppingCartDiscountCoupons { get; set; }
         public virtual DbSet<ShoppingCartHistory> ShoppingCartHistories { get; set; }
-        public virtual DbSet<ShoppingCartProduct> ShoppingCartProducts { get; set; }
+        public virtual DbSet<ShoppingCartLineItem> ShoppingCartLineItems { get; set; }
         public virtual DbSet<Subscription> Subscriptions { get; set; }
         public virtual DbSet<SubscriptionProduct> SubscriptionProducts { get; set; }
         public virtual DbSet<SubscriptionShipmentSchedule> SubscriptionShipmentSchedules { get; set; }
@@ -81,9 +81,6 @@ namespace XOSkinWebApp.ORM
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //if (!optionsBuilder.IsConfigured)
-            //{
-            //}
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -1232,23 +1229,21 @@ namespace XOSkinWebApp.ORM
                     .HasConstraintName("FK_ShoppingCartHistory_ShoppingCart2");
             });
 
-            modelBuilder.Entity<ShoppingCartProduct>(entity =>
+            modelBuilder.Entity<ShoppingCartLineItem>(entity =>
             {
-                entity.HasKey(e => new { e.ShoppingCart, e.Product });
-
-                entity.ToTable("ShoppingCartProduct");
+                entity.ToTable("ShoppingCartLineItem");
 
                 entity.HasOne(d => d.ProductNavigation)
-                    .WithMany(p => p.ShoppingCartProducts)
+                    .WithMany(p => p.ShoppingCartLineItems)
                     .HasForeignKey(d => d.Product)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_ShoppingCartProduct_Product");
+                    .HasConstraintName("FK_ShoppingCartLineItem_Product");
 
                 entity.HasOne(d => d.ShoppingCartNavigation)
-                    .WithMany(p => p.ShoppingCartProducts)
+                    .WithMany(p => p.ShoppingCartLineItems)
                     .HasForeignKey(d => d.ShoppingCart)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_ShoppingCartProduct_ShoppingCart");
+                    .HasConstraintName("FK_ShoppingCartLineItem_ShoppingCartHistory");
             });
 
             modelBuilder.Entity<Subscription>(entity =>
