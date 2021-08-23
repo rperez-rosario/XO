@@ -21,7 +21,9 @@
             @Html.DisplayFor(modelItem => item.Description)
           </span> <br />
           $@Html.DisplayFor(modelItem => item.Price) <br />
-          <span class="text-nowrap font-weight-bold">Add to Cart</span>
+          <span class="text-nowrap font-weight-bold">
+            <a asp-action="AddItemToCart" asp-route-id="@item.Id">Add to Cart</a>
+          </span>
         </p>
       </td>
     </tr>

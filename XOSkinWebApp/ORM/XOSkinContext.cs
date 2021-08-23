@@ -1233,6 +1233,8 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("ShoppingCartLineItem");
 
+                entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
+
                 entity.HasOne(d => d.ProductNavigation)
                     .WithMany(p => p.ShoppingCartLineItems)
                     .HasForeignKey(d => d.Product)
@@ -1243,7 +1245,7 @@ namespace XOSkinWebApp.ORM
                     .WithMany(p => p.ShoppingCartLineItems)
                     .HasForeignKey(d => d.ShoppingCart)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_ShoppingCartLineItem_ShoppingCartHistory");
+                    .HasConstraintName("FK_ShoppingCartLineItem_ShoppingCart");
             });
 
             modelBuilder.Entity<Subscription>(entity =>

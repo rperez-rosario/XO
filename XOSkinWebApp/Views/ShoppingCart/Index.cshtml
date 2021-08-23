@@ -1,4 +1,5 @@
 ﻿@model List<ShoppingCartLineItemViewModel>
+@{ decimal? total = 0.00M; }
 
 @{
   ViewData["Title"] = "Shopping Cart";
@@ -8,39 +9,70 @@
   <h1 class="display-4">Shopping <br />Cart</h1>
   @Html.Raw(ViewData["ShoppingCart.WelcomeText"])
 </div>
+@if (Model.Count == 0)
+{
+<br />
+<div class="text-center">
+  @Html.Raw("Your shopping cart is currently empty. Go <a href=/TopSellers/>add some items</a>.")
+</div>
+}
+else
+{
 <table class="table table-responsive" id="ShoppingCart">
   <thead>
     <tr>
+      <th></th>
       <th>Product Name</th>
       <th>Description</th>
       <th>Quantity</th>
-      <th>Total Price</th>
+      <th></th>
+      <th>Sub-Total</th>
     </tr>
   </thead>
   <tbody>
     @foreach (ShoppingCartLineItemViewModel lineItem in Model)
     {
       <tr>
+        <td><img src="@lineItem.ImageSource" style="height: 150px; display: inline; float: left" /></td>
         <td>@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
         <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
-        <td>
+        <td style="width: 170px">
           <form action="/ShoppingCart/UpdateQuantity" method="post">
+            <div style="display: inline; float: left">
+              <input type="hidden" name="ProductId" value="@lineItem.ProductId" />
+              <input name="Quantity" class="form-control" size="2" maxlength="20" type="text" value="@lineItem.Quantity" />
+            </div>
+            <div style="display: inline; float: left">&nbsp;</div>
+            <div style="display: inline; float: left">
+              <input type="submit" value="Update" class="btn-outline-dark btn" />
+            </div>
+          </form>
+        </td>
+        <td>
+          <form action="/ShoppingCart/DeleteLineItem" method="post">
             <input type="hidden" name="ProductId" value="@lineItem.ProductId" />
-            <input name="Quantity" class="form-control" size="2" maxlength="20" type="text" value="1" />
-            <input type="submit" value="Update" class="btn-outline-dark btn" />
+            <input type="submit" value="Remove" class="btn-outline-danger" />
           </form>
         </td>
         <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
       </tr>
+      total += lineItem.Total;
     }
+    <tr><td></td><td></td><td></td><td></td><td style="font-weight: bold">Total:</td><td>$@Html.Raw(total.ToString())</td></tr>
   </tbody>
 </table>
 <script type="text/javascript">
   $(document).ready(function () {
-    var table = $('#ShoppingCart').DataTable();
+    var table = $('#ShoppingCart').DataTable({
+      paging: false,
+      searching: false,
+      sort: false
+    });
 
     new $.fn.dataTable.Responsive(table, {
       details: true
     });
   });
 </script>
+}
+

@@ -38,7 +38,8 @@ namespace XOSkinWebApp.Controllers
           new ProductModel(sp.Id.ToString(), sp.Images.ElementAt(0).Src, sp.Title, sp.BodyHtml, 
           sp.Variants.ElementAt(0).Price));
       }
-      ViewData.Add("TopSellers.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("TopSellers.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("TopSellers.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("TopSellers.WelcomeText")).Select(x => x.Text).FirstOrDefault());
       return View(productModel);
     }
 
@@ -49,6 +50,7 @@ namespace XOSkinWebApp.Controllers
       ShoppingCart shoppingCart = null;
       ShoppingCartLineItem cartLineItem = null;
       ShoppingCartHistory cartHistory = null;
+      List<ShoppingCartLineItem> cartLineItemList = null;
       ORM.Product product = null;
 
       if (id != null)
@@ -57,32 +59,46 @@ namespace XOSkinWebApp.Controllers
         {
           user = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
           product = _context.Products.Where(x => x.ShopifyProductId.Equals(id)).FirstOrDefault();
-          cartLineItem = new ShoppingCartLineItem();
           cartHistory = new ShoppingCartHistory();
           shoppingCart = _context.ShoppingCarts.Where(x => x.User.Equals(user.Id)).FirstOrDefault();
+          cartLineItemList = _context.ShoppingCartLineItems.Where(x => x.ShoppingCart == shoppingCart.Id).ToList();
+
+          if (cartLineItemList.Any(x => x.Product == product.Id))
+          {
+            _context.ShoppingCartLineItems.Where(x => x.Product == product.Id).FirstOrDefault().Quantity =
+              _context.ShoppingCartLineItems.Where(x => x.Product == product.Id).FirstOrDefault().Quantity + 1;
+            _context.SaveChanges();
+            _context.ShoppingCartLineItems.Where(x => x.Product == product.Id).FirstOrDefault().Total =
+              _context.ShoppingCartLineItems.Where(x => x.Product == product.Id).FirstOrDefault().Quantity *
+              _context.Prices.Where(x => x.Id == product.CurrentPrice).Select(x => x.Amount).FirstOrDefault();
+            _context.SaveChanges();
+          }
+          else
+          {
+            cartLineItem = new ShoppingCartLineItem();
+            cartLineItem.ShoppingCart = shoppingCart.Id;
+            cartLineItem.Product = product.Id;
+            cartLineItem.Quantity = 1;
+            cartLineItem.Total = _context.Prices.Where(x => x.Id == product.CurrentPrice).Select(x => x.Amount).FirstOrDefault();
+            _context.ShoppingCartLineItems.Add(cartLineItem);
+          }
         }
         catch (Exception ex)
         {
           throw new Exception("Error while retrieving user, product or shopping cart information.", ex);
         }
-        
-        cartLineItem.ShoppingCart = shoppingCart.Id;
-        cartLineItem.Product = product.Id;
-        cartLineItem.Quantity = 1;
 
         cartHistory.ShoppingCart = shoppingCart.Id;
         cartHistory.Product = product.Id;
         cartHistory.DateAddedToCart = DateTime.UtcNow;
         cartHistory.PromotedToOrder = false;
 
-        _context.ShoppingCartLineItems.Add(cartLineItem);
         _context.ShoppingCartHistories.Add(cartHistory);
 
         try
         {
-          if (_context.SaveChanges() != 2)
-            throw new ApplicationException("Error while adding shopping cart product and cart history entry. " + 
-              "Created rows not equal to 2.");
+          if (_context.SaveChanges() <= 0)
+            throw new ApplicationException("Error while adding shopping cart product and cart history entry.");
         }
         catch (Exception ex)
         {

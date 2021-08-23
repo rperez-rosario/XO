@@ -11,8 +11,9 @@ namespace XOSkinWebApp.ORM
         public long ShoppingCart { get; set; }
         public long Product { get; set; }
         public int Quantity { get; set; }
+        public decimal? Total { get; set; }
 
         public virtual Product ProductNavigation { get; set; }
-        public virtual ShoppingCartHistory ShoppingCartNavigation { get; set; }
+        public virtual ShoppingCart ShoppingCartNavigation { get; set; }
     }
 }

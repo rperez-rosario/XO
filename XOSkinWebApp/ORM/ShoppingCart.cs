@@ -11,6 +11,7 @@ namespace XOSkinWebApp.ORM
         {
             ShoppingCartDiscountCodes = new HashSet<ShoppingCartDiscountCode>();
             ShoppingCartHistories = new HashSet<ShoppingCartHistory>();
+            ShoppingCartLineItems = new HashSet<ShoppingCartLineItem>();
         }
 
         public long Id { get; set; }
@@ -20,5 +21,6 @@ namespace XOSkinWebApp.ORM
         public virtual ShoppingCartDiscountCoupon ShoppingCartDiscountCoupon { get; set; }
         public virtual ICollection<ShoppingCartDiscountCode> ShoppingCartDiscountCodes { get; set; }
         public virtual ICollection<ShoppingCartHistory> ShoppingCartHistories { get; set; }
+        public virtual ICollection<ShoppingCartLineItem> ShoppingCartLineItems { get; set; }
     }
 }

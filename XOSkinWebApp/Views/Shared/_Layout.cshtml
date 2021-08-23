@@ -76,11 +76,15 @@
                 </svg>
                 @if (User.Identity.IsAuthenticated)
                 {
-                  @Html.Raw("(" +
-                    Context.ShoppingCartLineItems.Where(
-                      x => x.ShoppingCart == Context.ShoppingCarts.Where(
-                        y => y.UserNavigation.Email.Equals(User.Identity.Name)).FirstOrDefault().Id).Count().ToString() +
-                    ")");
+                  long itemCount = 0L;
+
+                  foreach (ShoppingCartLineItem li in Context.ShoppingCartLineItems.Where(
+                    x => x.ShoppingCart == Context.ShoppingCarts.Where(
+                    x => x.UserNavigation.Email.Equals(User.Identity.Name)).FirstOrDefault().Id).ToList())
+                  {
+                    itemCount += li.Quantity;
+                  }
+                  @Html.Raw("(" + itemCount.ToString() + ")");
                 }
                 else
                 {
