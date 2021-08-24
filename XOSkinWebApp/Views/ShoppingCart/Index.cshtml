@@ -39,8 +39,9 @@ else
         <td style="width: 170px">
           <form action="/ShoppingCart/UpdateQuantity" method="post">
             <div style="display: inline; float: left">
+              <input type="hidden" name="LineItemId" value="@lineItem.Id" />
               <input type="hidden" name="ProductId" value="@lineItem.ProductId" />
-              <input name="Quantity" class="form-control" size="2" maxlength="20" type="text" value="@lineItem.Quantity"
+              <input name="Quantity" class="form-control" size="2" maxlength="2" type="text" value="@lineItem.Quantity"
                 onkeypress="return restrictAlphabets(event)" />
             </div>
             <div style="display: inline; float: left">&nbsp;</div>
@@ -51,7 +52,7 @@ else
         </td>
         <td>
           <form action="/ShoppingCart/DeleteLineItem" method="post">
-            <input type="hidden" name="ProductId" value="@lineItem.ProductId" />
+            <input type="hidden" name="LineItemId" value="@lineItem.Id" />
             <input type="submit" value="Remove" class="btn-outline-danger" />
           </form>
         </td>
@@ -62,6 +63,10 @@ else
   </tbody>
 </table>
 <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(total.ToString())</div>
+<br />
+<div style="text-align: right; margin-right: 40px">
+  <button type="submit" class="btn-outline-dark btn">Checkout</button>
+</div>
 <script type="text/javascript">
   $(document).ready(function () {
     var table = $('#ShoppingCart').DataTable({

@@ -4,6 +4,7 @@ namespace XOSkinWebApp.Models
 {
   public class ShoppingCartLineItemViewModel
   {
+    public long Id { get; set; }
     public long ProductId { get; set; }
     public String ImageSource { get; set; }
     public String ProductName { get; set; }
