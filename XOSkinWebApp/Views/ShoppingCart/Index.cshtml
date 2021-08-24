@@ -22,11 +22,11 @@ else
   <thead>
     <tr>
       <th></th>
-      <th>Product Name</th>
+      <th class="text-nowrap">Product Name</th>
       <th>Description</th>
       <th>Quantity</th>
       <th></th>
-      <th>Sub-Total</th>
+      <th class="text-nowrap">Sub-Total</th>
     </tr>
   </thead>
   <tbody>
@@ -34,13 +34,14 @@ else
     {
       <tr>
         <td><img src="@lineItem.ImageSource" style="height: 150px; display: inline; float: left" /></td>
-        <td>@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
+        <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
         <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
         <td style="width: 170px">
           <form action="/ShoppingCart/UpdateQuantity" method="post">
             <div style="display: inline; float: left">
               <input type="hidden" name="ProductId" value="@lineItem.ProductId" />
-              <input name="Quantity" class="form-control" size="2" maxlength="20" type="text" value="@lineItem.Quantity" />
+              <input name="Quantity" class="form-control" size="2" maxlength="20" type="text" value="@lineItem.Quantity"
+                onkeypress="return restrictAlphabets(event)" />
             </div>
             <div style="display: inline; float: left">&nbsp;</div>
             <div style="display: inline; float: left">
@@ -58,21 +59,29 @@ else
       </tr>
       total += lineItem.Total;
     }
-    <tr><td></td><td></td><td></td><td></td><td style="font-weight: bold">Total:</td><td>$@Html.Raw(total.ToString())</td></tr>
   </tbody>
 </table>
+<div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(total.ToString())</div>
 <script type="text/javascript">
   $(document).ready(function () {
     var table = $('#ShoppingCart').DataTable({
       paging: false,
       searching: false,
-      sort: false
+      sort: false,
+      bInfo: false
     });
 
     new $.fn.dataTable.Responsive(table, {
       details: true
     });
   });
+
+  function restrictAlphabets(e) {
+    var x = e.which || e.keycode;
+    if ((x >= 48 && x <= 57))
+      return true;
+    else
+      return false;
+  }
 </script>
 }
-
