@@ -74,7 +74,17 @@ namespace XOSkinWebApp.Controllers
           else
           {
             _context.ShoppingCartLineItems.Where(
-            x => x.Id == LineItemId).FirstOrDefault().Quantity = Quantity;
+              x => x.Id == LineItemId).FirstOrDefault().Quantity = Quantity;
+
+            _context.ShoppingCartLineItems.Where(
+              x => x.Id == LineItemId).FirstOrDefault().Total = Quantity * 
+              _context.Prices.Where(
+             x => x.Id == _context.Products.Where(
+             x => x.Id == _context.ShoppingCartLineItems.Where(
+             x => x.Id == LineItemId).Select(x => x.Product).FirstOrDefault())
+             .Select(x => x.CurrentPrice).FirstOrDefault())
+             .Select(x => x.Amount).FirstOrDefault();
+
             _context.SaveChanges();
           }
 
