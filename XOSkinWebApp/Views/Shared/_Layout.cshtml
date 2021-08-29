@@ -20,7 +20,7 @@
 </head>
 <body>
   <div id="splash" style="width: 100%; height: 100%; text-align: center; margin-top: 0; opacity: 100%">
-    <div id="splash-content">
+    <div id="splash-content" style="opacity: 100%">
       <img src="~/img/splashLogo.png" />
     </div>
   </div>
@@ -90,41 +90,41 @@
                     {
                       itemCount += li.Quantity;
                     }
-                    @Html.Raw("(" + itemCount.ToString() + ")");
+                  @Html.Raw("(" + itemCount.ToString() + ")");
                   }
                   else
                   {
-                    @Html.Raw("(0)");
+                  @Html.Raw("(0)");
                   }
                 </a>
               </li>
               @if (User.IsInRole("Administrator"))
               {
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle nav-link text-dark text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
-                    <span class="nav-label">Administration</span><span class="caret text-dark"></span>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li>
-                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Languages" asp-action="Index">Languages</a>
-                    </li>
-                    <li>
-                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedTexts" asp-action="Index">Text Localization</a>
-                    </li>
-                    <li>
-                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedImages" asp-action="Index">Image Localization</a>
-                    </li>
-                    <li>
-                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Roles" asp-action="Index">Application Roles</a>
-                    </li>
-                    <li>
-                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questionnaires" asp-action="Index">Questionnaires</a>
-                    </li>
-                    <li>
-                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questions" asp-action="Index">Questions</a>
-                    </li>
-                  </ul>
-                </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle nav-link text-dark text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                  <span class="nav-label">Administration</span><span class="caret text-dark"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Languages" asp-action="Index">Languages</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedTexts" asp-action="Index">Text Localization</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedImages" asp-action="Index">Image Localization</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Roles" asp-action="Index">Application Roles</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questionnaires" asp-action="Index">Questionnaires</a>
+                  </li>
+                  <li>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questions" asp-action="Index">Questions</a>
+                  </li>
+                </ul>
+              </li>
               }
             </ul>
             <partial name="_LoginPartial" />
@@ -145,8 +145,14 @@
       </div>
     </footer>
   </div>
-  <script type="text/javascript">
-    $('#content').css({ 'opacity': '100%' });
-  </script>
+
+  @if (!ViewData["Title"].Equals("Home Page"))
+  {
+    {
+      <script type="text/javascript">
+        $('#content').css({ 'opacity': '100%' });
+      </script>
+    }
+  }
 </body>
 </html>
