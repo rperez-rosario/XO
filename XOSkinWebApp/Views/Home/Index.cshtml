@@ -2,14 +2,6 @@
   ViewData["Title"] = "Home Page";
 }
 
-<!--<div id="splash" class="text-sm-center bg-light text-center">
-  <div id="splash-content" class="text-sm-center bg-light text-center">
-    <h1 class="display-4">Welcome</h1>
-    @Html.Raw(ViewData["Splash.SplashText"])-->
-    @*<img src="~/img/scarjo.png" id="splash-image" />*@
-  <!--</div>
-</div>-->
-
 <div class="text-sm-center bg-light text-center">
   @Html.Raw(ViewData["Home.PromotionalRibbon"])
 </div>
@@ -22,7 +14,7 @@
   $(document).ready(function () {
     $.fn.center = function () {
       this.css("position", "absolute");
-      this.css("top", "98px");
+      this.css("top", "40%");
       this.css("left", Math.max(0, (
         ($(window).width() - $(this).outerWidth()) / 2) +
         $(window).scrollLeft()) + "px"
@@ -34,7 +26,12 @@
     $("#splash-content").show().center();
 
     setTimeout(function () {
-      $("#splash").fadeOut(1000);
+      $("#splash-content").fadeOut(1000, removeSplash);
     }, 2800);
+
+    function removeSplash() {
+      $('#splash').remove();
+      $('#content').css({ 'opacity': '100%' });
+    }
   });
 </script>

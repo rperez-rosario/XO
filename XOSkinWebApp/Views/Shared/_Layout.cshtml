@@ -19,124 +19,134 @@
   @await RenderSectionAsync("Scripts", required: false)
 </head>
 <body>
-  <header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-      <div class="container">
-        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/img/navbarLeftLogo.svg" width="55" height="55" /></a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-          <ul class="navbar-nav flex-grow-1">
-            <li class="nav-item">
-              <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="TopSellers" asp-action="Index">Top Sellers</a>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle nav-link text-dark text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
-                <span class="nav-label">Your Skin</span><span class="caret text-dark"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Questionnaire" asp-action="Index">About Your Skin</a>
-                </li>
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="YourFace" asp-action="Index">Your Face</a>
-                </li>
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="YourEyes" asp-action="Index">Your Eyes</a>
-                </li>
-                <li>
-                  <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="YourLipsAndSmile" asp-action="Index">Your Lips and Smile</a>
-                </li>
-              </ul>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Kits" asp-action="Index">Kits</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="GiftsAndSavings" asp-action="Index">Gifts and Savings</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="SubscriptionsAndReferrals" asp-action="Index">Subscriptions and Referrals</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Orders" asp-action="Index">Orders</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="UserLists" asp-action="Index">Lists</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="ShoppingCart" asp-action="Index">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                  <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                </svg>
-                @if (User.Identity.IsAuthenticated)
-                {
-                  long itemCount = 0L;
-
-                  foreach (ShoppingCartLineItem li in Context.ShoppingCartLineItems.Where(
-                    x => x.ShoppingCart == Context.ShoppingCarts.Where(
-                    x => x.UserNavigation.Email.Equals(User.Identity.Name)).FirstOrDefault().Id).ToList())
-                  {
-                    itemCount += li.Quantity;
-                  }
-                  @Html.Raw("(" + itemCount.ToString() + ")");
-                }
-                else
-                {
-                  @Html.Raw("(0)");
-                }  
-              </a>
-            </li>
-            @if (User.IsInRole("Administrator"))
-            {
+  <div id="splash" style="width: 100%; height: 100%; text-align: center; margin-top: 0; opacity: 100%">
+    <div id="splash-content">
+      <img src="~/img/splashLogo.png" style="width: 150px" />
+    </div>
+  </div>
+  <div id="content" style="opacity: 0%">
+    <header>
+      <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <div class="container">
+          <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/img/navbarLeftLogo.svg" width="55" height="55" /></a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                  aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <ul class="navbar-nav flex-grow-1">
+              <li class="nav-item">
+                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="TopSellers" asp-action="Index">Top Sellers</a>
+              </li>
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle nav-link text-dark text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
-                  <span class="nav-label">Administration</span><span class="caret text-dark"></span>
+                  <span class="nav-label">Your Skin</span><span class="caret text-dark"></span>
                 </a>
                 <ul class="dropdown-menu">
                   <li>
-                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Languages" asp-action="Index">Languages</a>
+                    <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Questionnaire" asp-action="Index">About Your Skin</a>
                   </li>
                   <li>
-                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedTexts" asp-action="Index">Text Localization</a>
+                    <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="YourFace" asp-action="Index">Your Face</a>
                   </li>
                   <li>
-                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedImages" asp-action="Index">Image Localization</a>
+                    <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="YourEyes" asp-action="Index">Your Eyes</a>
                   </li>
                   <li>
-                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Roles" asp-action="Index">Application Roles</a>
-                  </li>
-                  <li>
-                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questionnaires" asp-action="Index">Questionnaires</a>
-                  </li>
-                  <li>
-                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questions" asp-action="Index">Questions</a>
+                    <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="YourLipsAndSmile" asp-action="Index">Your Lips and Smile</a>
                   </li>
                 </ul>
               </li>
-            }
-          </ul>
-          <partial name="_LoginPartial" />
-        </div>
-      </div>
-    </nav>
-  </header>
-  <div class="container">
-    <main role="main" class="pb-3">
-      @RenderBody()
-    </main>
-  </div>
+              <li class="nav-item">
+                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Kits" asp-action="Index">Kits</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="GiftsAndSavings" asp-action="Index">Gifts and Savings</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="SubscriptionsAndReferrals" asp-action="Index">Subscriptions and Referrals</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="Orders" asp-action="Index">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="UserLists" asp-action="Index">Lists</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-dark text-nowrap" asp-area="" asp-controller="ShoppingCart" asp-action="Index">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                  </svg>
+                  @if (User.Identity.IsAuthenticated)
+                  {
+                    long itemCount = 0L;
 
-  <footer class="border-top footer text-muted">
-    <div class="container align-items-center text-dark text-center">
-      &copy; @DateTime.Now.Year - XO Skin&#8482;<br />
-      <a href="https://www.facebook.com/" target="_blank"><img src="~/img/facebookLogo.png" height="20" width="20" /></a>&nbsp;&nbsp;<a href="https://www.instagram.com/" target="_blank"><img src="~/img/instagramLogo.png" width="20" height="20" /></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/" target="_blank"><img src="~/img/linkedInLogo.svg" height="15" /></a> - <a asp-area="" asp-controller="Jobs" asp-action="Index" class="text-dark">XO Jobs</a> - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-dark">Privacy</a>
+                    foreach (ShoppingCartLineItem li in Context.ShoppingCartLineItems.Where(
+                      x => x.ShoppingCart == Context.ShoppingCarts.Where(
+                      x => x.UserNavigation.Email.Equals(User.Identity.Name)).FirstOrDefault().Id).ToList())
+                    {
+                      itemCount += li.Quantity;
+                    }
+                    @Html.Raw("(" + itemCount.ToString() + ")");
+                  }
+                  else
+                  {
+                    @Html.Raw("(0)");
+                  }
+                </a>
+              </li>
+              @if (User.IsInRole("Administrator"))
+              {
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle nav-link text-dark text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                    <span class="nav-label">Administration</span><span class="caret text-dark"></span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Languages" asp-action="Index">Languages</a>
+                    </li>
+                    <li>
+                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedTexts" asp-action="Index">Text Localization</a>
+                    </li>
+                    <li>
+                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="LocalizedImages" asp-action="Index">Image Localization</a>
+                    </li>
+                    <li>
+                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Roles" asp-action="Index">Application Roles</a>
+                    </li>
+                    <li>
+                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questionnaires" asp-action="Index">Questionnaires</a>
+                    </li>
+                    <li>
+                      <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Questions" asp-action="Index">Questions</a>
+                    </li>
+                  </ul>
+                </li>
+              }
+            </ul>
+            <partial name="_LoginPartial" />
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div class="container">
+      <main role="main" class="pb-3">
+        @RenderBody()
+      </main>
     </div>
-  </footer>
+
+    <footer class="border-top footer text-muted">
+      <div class="container align-items-center text-dark text-center">
+        &copy; @DateTime.Now.Year - XO Skin&#8482;<br />
+        <a href="https://www.facebook.com/" target="_blank"><img src="~/img/facebookLogo.png" height="20" width="20" /></a>&nbsp;&nbsp;<a href="https://www.instagram.com/" target="_blank"><img src="~/img/instagramLogo.png" width="20" height="20" /></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/" target="_blank"><img src="~/img/linkedInLogo.svg" height="15" /></a> - <a asp-area="" asp-controller="Jobs" asp-action="Index" class="text-dark">XO Jobs</a> - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-dark">Privacy</a>
+      </div>
+    </footer>
+  </div>
+  <script type="text/javascript">
+    $('#content').css({ 'opacity': '100%' });
+  </script>
 </body>
 </html>
