@@ -1,7 +1,7 @@
 ﻿@page
 @model RegisterConfirmationModel
 @{
-    ViewData["Title"] = "Register confirmation";
+    ViewData["Title"] = "Register Confirmation";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -15,8 +15,13 @@
     }
     else
     {
-<p>
-        Please check your email to confirm your account.
-</p>
+      <br />
+      <p class="font-weight-bolder" style="color: red">
+        Please check your email to confirm your account. You will not be able to log in until you confirm in your email.
+      </p>
+      <br />
+      <p>
+        <a class="btn-outline-dark btn" asp-area="" asp-controller="Home" asp-action="Index">Go to Home</a>
+      </p>
     }
 }
