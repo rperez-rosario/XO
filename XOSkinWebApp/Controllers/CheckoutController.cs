@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using ShopifySharp;
@@ -11,6 +12,7 @@ using XOSkinWebApp.ORM;
 
 namespace XOSkinWebApp.Controllers
 {
+  [Authorize]
   public class CheckoutController : Controller
   {
     private readonly XOSkinContext _context;
@@ -23,6 +25,7 @@ namespace XOSkinWebApp.Controllers
 
     public IActionResult Index()
     {
+      CheckoutViewModel checkoutViewModel = new CheckoutViewModel();
       List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
       List<ShoppingCartLineItem> lineItem = _context.ShoppingCartLineItems.Where(
         x => x.ShoppingCart == _context.ShoppingCarts.Where(x => x.User.Equals(_context.AspNetUsers.Where(
@@ -48,10 +51,19 @@ namespace XOSkinWebApp.Controllers
         });
       }
 
+      checkoutViewModel.LineItem = lineItemViewModel;
+      checkoutViewModel.CreditCardExpirationDate = DateTime.Now;
+
       ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
         x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))
         .Select(x => x.Text).FirstOrDefault());
-      return View(lineItemViewModel);
+
+      return View(checkoutViewModel);
+    }
+
+    public IActionResult PlaceOrder()
+    {
+      return RedirectToAction("Index", "Checkout");
     }
   }
 }

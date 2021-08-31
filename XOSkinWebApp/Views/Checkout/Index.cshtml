@@ -1,4 +1,4 @@
-﻿@model List<ShoppingCartLineItemViewModel>
+﻿@model CheckoutViewModel
 @{ decimal? total = 0.00M; }
 
 @{
@@ -9,7 +9,7 @@
   <h1 class="display-4">Place Your <br />Order</h1>
   @Html.Raw(ViewData["Checkout.WelcomeText"])
 </div>
-@if (Model.Count == 0)
+@if (Model.LineItem.Count == 0)
 {
   <br />
   <div class="text-center">
@@ -19,125 +19,144 @@
 else
 {
   <br />
-  <div class="container-fluid">
-    <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
-      <div class="col-sm-4">
-        <h4>Billing Address</h4>
+  <form asp-action="PlaceOrder" id="PlaceOrder">
+    <div class="container-fluid">
+      <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-          <label class="control-label">Name on Credit Card</label>
-          <input class="form-control" />
+        <div class="col-sm-4">
+          <h4>Billing Address</h4>
+          <div class="form-group">
+            <label class="control-label">Name on Credit Card</label>
+            <input asp-for="BillingName" class="form-control" />
+            <span asp-validation-for="BillingName" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Address Line 1</label>
+            <input asp-for="BillingAddress1" class="form-control" />
+            <span asp-validation-for="BillingAddress1" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Address Line 2</label>
+            <input asp-for="BillingAddress2" class="form-control" />
+            <span asp-validation-for="BillingAddress2" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">City</label>
+            <input asp-for="BillingCity" class="form-control" />
+            <span asp-validation-for="BillingCity" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">State</label>
+            <input asp-for="BillingState" class="form-control" />
+            <span asp-validation-for="BillingState" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Country</label>
+            <input asp-for="BillingCountry" class="form-control" />
+            <span asp-validation-for="BillingCountry" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Postal Code</label>
+            <input asp-for="BillingPostalCode" class="form-control" />
+            <span asp-validation-for="BillingPostalCode" class="text-danger"></span>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="control-label">Address Line 1</label>
-          <input class="form-control" />
+        <div class="col-sm-4" style="padding-left: 10px; padding-right: 10px">
+          <h4>Shipping Address, Same? <input asp-for="ShippingAddressSame" id="same-address" type="checkbox" /></h4>
+          <div class="form-group">
+            <label class="control-label">Recipient's Name</label>
+            <input asp-for="ShippingName" class="form-control" id="shipping-name" />
+            <span asp-validation-for="ShippingName" class="text-danger" id="val-shipping-name"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Address Line 1</label>
+            <input asp-for="ShippingAddress1" class="form-control" id="shipping-address1" />
+            <span asp-validation-for="ShippingAddress1" class="text-danger" id="val-shipping-address1"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Address Line 2</label>
+            <input asp-for="ShippingAddress2" class="form-control" id="shipping-address2" />
+            <span asp-validation-for="ShippingAddress2" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">City</label>
+            <input asp-for="ShippingCity" class="form-control" id="shipping-city" />
+            <span asp-validation-for="ShippingCity" class="text-danger" id="val-shipping-city"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">State</label>
+            <input asp-for="ShippingState" class="form-control" id="shipping-state" />
+            <span asp-validation-for="ShippingState" class="text-danger" id="val-shipping-state"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Country</label>
+            <input asp-for="ShippingCountry" class="form-control" id="shipping-country" />
+            <span asp-validation-for="ShippingCountry" class="text-danger" id="val-shipping-country"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Postal Code</label>
+            <input asp-for="ShippingPostalCode" class="form-control" id="shipping-postal-code" />
+            <span asp-validation-for="ShippingCountry" class="text-danger" id="val-shipping-postal-code"></span>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="control-label">Address Line 2</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">City</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">State</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">Country</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">Postal Code</label>
-          <input class="form-control" />
-        </div>
-      </div>
-      <div class="col-sm-4" style="padding-left: 10px; padding-right: 10px">
-        <h4>Shipping Address, Same? <input type="checkbox"/></h4>
-        <div class="form-group">
-          <label class="control-label">Recipient's Name</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">Address Line 1</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">Address Line 2</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">City</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">State</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">Country</label>
-          <input class="form-control" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">Postal Code</label>
-          <input class="form-control" />
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <h4>Credit Card</h4>
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-          <label class="control-label">Credit Card Number</label>
-          <input class="form-control" type="password" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">CVC</label>
-          <input class="form-control" type="password" />
-        </div>
-        <div class="form-group">
-          <label class="control-label">Expiration Date</label>
-          <input class="form-control" type="date" />
+        <div class="col-sm-4">
+          <h4>Credit Card</h4>
+          <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+          <div class="form-group">
+            <label class="control-label">Credit Card Number</label>
+            <input asp-for="CreditCardNumber" class="form-control" type="password" />
+            <span asp-validation-for="CreditCardNumber" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">CVC</label>
+            <input asp-for="CreditCardCVC" class="form-control" type="password" />
+            <span asp-validation-for="CreditCardCVC" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Expiration Date</label>
+            <input asp-for="CreditCardExpirationDate" class="form-control" type="Month" />
+            <span asp-validation-for="CreditCardExpirationDate" class="text-danger"></span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <table class="table table-responsive" id="ShoppingCart" style="margin-left: auto; margin-right: auto">
-    <thead>
-      <tr>
-        <th></th>
-        <th class="text-nowrap">Product Name</th>
-        <th>Description</th>
-        <th>Quantity</th>
-        <th class="text-nowrap">Sub-Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      @foreach (ShoppingCartLineItemViewModel lineItem in Model)
-      {
+    <table class="table table-responsive" id="ShoppingCart" style="margin-left: auto; margin-right: auto">
+      <thead>
         <tr>
-          <td><img src="@lineItem.ImageSource" style="height: 150px; display: inline; float: left" /></td>
-          <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
-          <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
-          <td style="width: 170px">
-            <div style="display: inline; float: left">
-              @lineItem.Quantity
-            </div>
-          </td>
-          <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
+          <th></th>
+          <th class="text-nowrap">Product Name</th>
+          <th>Description</th>
+          <th>Quantity</th>
+          <th class="text-nowrap">Sub-Total</th>
         </tr>
-        total += lineItem.Total;
-      }
-    </tbody>
-  </table>
-  <div style="font-weight: bold; text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(total.ToString())</div>
-  <div style="font-weight: bold; text-align: right; margin-right: 40px">Taxes: $0.00</div>
-  <div style="font-weight: bold; text-align: right; margin-right: 40px">Shipping: $0.00</div>
-  <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(total.ToString())</div>
-  <br />
-  <div style="text-align: right; margin-right: 40px">
-    <a class="btn-outline-dark btn" asp-area="" asp-controller="Orders" asp-action="Place">Place Order</a>
-  </div>
+      </thead>
+      <tbody>
+        @foreach (ShoppingCartLineItemViewModel lineItem in Model.LineItem)
+        {
+          <tr>
+            <td><img src="@lineItem.ImageSource" style="height: 150px; display: inline; float: left" /></td>
+            <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
+            <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
+            <td style="width: 170px">
+              <div style="display: inline; float: left">
+                @lineItem.Quantity
+              </div>
+            </td>
+            <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
+          </tr>
+          total += lineItem.Total;
+        }
+      </tbody>
+    </table>
+    <div style="font-weight: bold; text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(total.ToString())</div>
+    <div style="font-weight: bold; text-align: right; margin-right: 40px">Taxes: $0.00</div>
+    <div style="font-weight: bold; text-align: right; margin-right: 40px">Shipping: $0.00</div>
+    <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(total.ToString())</div>
+    <br />
+    <div style="text-align: right; margin-right: 40px">
+      <input id="place-order-button" type="submit" value="PlaceOrder" class="btn-outline-dark btn" />
+    </div>
+  </form>
   <script type="text/javascript">
     $(document).ready(function () {
       var table = $('#ShoppingCart').DataTable({
@@ -150,6 +169,152 @@ else
       new $.fn.dataTable.Responsive(table, {
         details: true
       });
+
+      $('#same-address').change(function () {
+        shippingAddressSame();
+      });
+
+      $('#PlaceOrder').submit(function (e) {
+        validateShippingAddress(e);
+      });
+
+      // Custom required-if validation.
+      function validateShippingAddress(e) {
+        if (!$('#same-address').prop('checked')) {
+          if ($("#shipping-name").val().trim() == '') {
+            $('#val-shipping-name').html("Recipient's name required.");
+            e.preventDefault();
+          }
+          if ($("#shipping-address1").val().trim() == '') {
+            $('#val-shipping-address1').html("Shipping address line 1 required.");
+            e.preventDefault();
+          }
+          if ($("#shipping-city").val().trim() == '') {
+            $('#val-shipping-city').html("Shipping city name required.");
+            e.preventDefault();
+          }
+          if ($("#shipping-state").val().trim() == '') {
+            $('#val-shipping-state').html("Shipping state name required.");
+            e.preventDefault();
+          }
+          if ($("#shipping-country").val().trim() == '') {
+            $('#val-shipping-country').html("Shipping country name required.");
+            e.preventDefault();
+          }
+          if ($("#shipping-postal-code").val().trim() == '') {
+            $('#val-shipping-postal-code').html("Shipping country name required.");
+            e.preventDefault();
+          }
+        }
+      }
+
+      $("#shipping-name").keyup(function () {
+        shippingNameFilled();
+      });
+
+      $("#shipping-address1").keyup(function () {
+        shippingAddress1Filled();
+      });
+
+      $("#shipping-city").keyup(function () {
+        shippingCityFilled();
+      });
+
+      $("#shipping-state").keyup(function () {
+        shippingStateFilled();
+      });
+
+      $("#shipping-country").keyup(function () {
+        shippingCountryFilled();
+      });
+
+      $("#shipping-postal-code").keyup(function () {
+        shippingPostalCodeFilled();
+      });
+
+      function shippingNameFilled() {
+        if ($("#shipping-name").val().trim() != '') {
+          $('#val-shipping-name').html("");
+        } else {
+          $('#val-shipping-name').html("Recipient's name required.");
+        }
+      }
+
+      function shippingAddress1Filled() {
+        if ($("#shipping-address1").val().trim() != '') {
+          $('#val-shipping-address1').html("");
+        } else {
+          $('#val-shipping-address1').html("Shipping address line 1 required.");
+        }
+      }
+
+      function shippingCityFilled() {
+        if ($("#shipping-city").val().trim() != '') {
+          $('#val-shipping-city').html("");
+        } else {
+          $('#val-shipping-city').html("Shipping city name required.");
+        }
+      }
+
+      function shippingStateFilled() {
+        if ($("#shipping-state").val().trim() != '') {
+          $('#val-shipping-state').html("");
+        } else {
+          $('#val-shipping-state').html("Shipping state name required.");
+        }
+      }
+
+      function shippingCountryFilled() {
+        if ($("#shipping-country").val().trim() != '') {
+          $('#val-shipping-country').html("");
+        } else {
+          $('#val-shipping-country').html("Shipping country name required.");
+        }
+      }
+
+      function shippingPostalCodeFilled() {
+        if ($("#shipping-postal-code").val().trim() != '') {
+          $('#val-shipping-postal-code').html("");
+        } else {
+          $('#val-shipping-postal-code').html("Shipping country name required.");
+        }
+      }
+
+      function shippingAddressSame() {
+        if ($('#same-address').prop('checked')) {
+          $('#shipping-name').val('');
+          $('#shipping-address1').val('');
+          $('#shipping-address2').val('');
+          $('#shipping-city').val('');
+          $('#shipping-state').val('');
+          $('#shipping-country').val('');
+          $('#shipping-postal-code').val('');
+          $('#shipping-name').attr('readonly', true);
+          $('#shipping-address1').attr('readonly', true);
+          $('#shipping-address2').attr('readonly', true);
+          $('#shipping-city').attr('readonly', true);
+          $('#shipping-state').attr('readonly', true);
+          $('#shipping-country').attr('readonly', true);
+          $('#shipping-postal-code').attr('readonly', true);
+          $('#val-shipping-name').html("");
+          $('#val-shipping-address1').html("");
+          $('#val-shipping-city').html("");
+          $('#val-shipping-state').html("");
+          $('#val-shipping-country').html("");
+          $('#val-shipping-postal-code').html("");
+        } else {
+          $('#shipping-name').attr('readonly', false);
+          $('#shipping-address1').attr('readonly', false);
+          $('#shipping-address2').attr('readonly', false);
+          $('#shipping-city').attr('readonly', false);
+          $('#shipping-state').attr('readonly', false);
+          $('#shipping-country').attr('readonly', false);
+          $('#shipping-postal-code').attr('readonly', false);
+        }
+      }
     });
   </script>
+}
+@section Scripts {
+  @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
