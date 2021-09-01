@@ -220,6 +220,10 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while saving the order's address(es.)", ex);
       }
 
+      ViewData.Add("OrderConfirmation.WelcomeText", _context.LocalizedTexts.Where(
+       x => x.PlacementPointCode.Equals("OrderConfirmation.WelcomeText"))
+       .Select(x => x.Text).FirstOrDefault());
+
       return View("OrderConfirmation", Model);
     }
   }
