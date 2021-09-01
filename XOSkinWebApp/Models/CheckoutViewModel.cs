@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using XOSkinWebApp.ValidationAttributeHelper;
 
 namespace XOSkinWebApp.Models
 {
   public class CheckoutViewModel
   {
+    [Key]
+    public long OrderId { get; set; }
+    
+    public long ShopifyId { get; set; }
+
     public List<ShoppingCartLineItemViewModel> LineItem { get; set; }
 
     [Required(ErrorMessage = "Name on credit card required.")]
@@ -31,6 +35,16 @@ namespace XOSkinWebApp.Models
     [Required(ErrorMessage = "Billing postal code required.")]
     public String BillingPostalCode { get; set; }
 
+    public DateTime BilledOn { get; set; }
+    public decimal? SubTotal { get; set; }
+    public decimal? ShippingCharges { get; set; }
+    public decimal? Taxes { get; set; }
+    public decimal? CodeDiscount { get; set; }
+    public decimal? CouponDiscount { get; set; }
+    public decimal? Total { get; set; }
+
+    public bool IsGift { get; set; }
+
     public bool ShippingAddressSame { get; set; }
 
     public String ShippingName { get; set; }    
@@ -40,6 +54,10 @@ namespace XOSkinWebApp.Models
     public String ShippingState { get; set; }
     public String ShippingCountry { get; set; }
     public String ShippingPostalCode { get; set; }
+    public String ShippingCarrier { get; set; }
+    public String TrackingNumber { get; set; }
+    public DateTime ShippedOn { get; set; }
+    public DateTime ExpectedToArrive { get; set; }
 
     [Required]
     public String CreditCardNumber { get; set; }

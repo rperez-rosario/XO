@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using XOSkinWebApp.Models;
 
 #nullable disable
 
@@ -43,7 +42,7 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<Language> Languages { get; set; }
         public virtual DbSet<LocalizedImage> LocalizedImages { get; set; }
         public virtual DbSet<LocalizedText> LocalizedTexts { get; set; }
-        public virtual DbSet<OrderProduct> OrderProducts { get; set; }
+        public virtual DbSet<OrderBillTo> OrderBillTos { get; set; }
         public virtual DbSet<OrderShipTo> OrderShipTos { get; set; }
         public virtual DbSet<Page> Pages { get; set; }
         public virtual DbSet<PaymentPlan> PaymentPlans { get; set; }
@@ -58,6 +57,7 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
         public virtual DbSet<ProductOrderDiscountCode> ProductOrderDiscountCodes { get; set; }
         public virtual DbSet<ProductOrderDiscountCoupon> ProductOrderDiscountCoupons { get; set; }
+        public virtual DbSet<ProductOrderLineItem> ProductOrderLineItems { get; set; }
         public virtual DbSet<ProductSubCategory> ProductSubCategories { get; set; }
         public virtual DbSet<ProductSubUnderCategory> ProductSubUnderCategories { get; set; }
         public virtual DbSet<ProductType> ProductTypes { get; set; }
@@ -593,90 +593,97 @@ namespace XOSkinWebApp.ORM
                     .HasConstraintName("FK_LocalizedText_Page");
             });
 
-            modelBuilder.Entity<OrderProduct>(entity =>
+            modelBuilder.Entity<OrderBillTo>(entity =>
             {
-                entity.ToTable("OrderProduct");
+                entity.ToTable("OrderBillTo");
 
-                entity.HasOne(d => d.ProductNavigation)
-                    .WithMany(p => p.OrderProducts)
-                    .HasForeignKey(d => d.Product)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OrderProduct_Product");
+                entity.Property(e => e.AddressLine1)
+                    .IsRequired()
+                    .IsUnicode(false);
 
-                entity.HasOne(d => d.ProductOrderNavigation)
-                    .WithMany(p => p.OrderProducts)
-                    .HasForeignKey(d => d.ProductOrder)
+                entity.Property(e => e.AddressLine2).IsUnicode(false);
+
+                entity.Property(e => e.BillingDate).HasColumnType("datetime");
+
+                entity.Property(e => e.CityName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CountryName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.NameOnCreditCard)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PostalCode)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.StateName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.OrderNavigation)
+                    .WithMany(p => p.OrderBillTos)
+                    .HasForeignKey(d => d.Order)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OrderProduct_ProductOrder");
+                    .HasConstraintName("FK_OrderBillTo_ProductOrder");
             });
 
             modelBuilder.Entity<OrderShipTo>(entity =>
             {
                 entity.ToTable("OrderShipTo");
 
-                entity.Property(e => e.Apartment)
-                    .HasMaxLength(50)
+                entity.Property(e => e.AddressLine1)
+                    .IsRequired()
                     .IsUnicode(false);
+
+                entity.Property(e => e.AddressLine2).IsUnicode(false);
 
                 entity.Property(e => e.CarrierName)
-                    .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
-                entity.Property(e => e.CityPr).HasColumnName("CityPR");
-
-                entity.Property(e => e.CityUs).HasColumnName("CityUS");
+                entity.Property(e => e.CityName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.CountryName)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ForeignPostalCode)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Line1)
                     .IsRequired()
+                    .HasMaxLength(100)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Line2).IsUnicode(false);
+                entity.Property(e => e.PostalCode)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RecipientName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ShipDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StateName)
+                    .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
                 entity.Property(e => e.TrackingNumber).IsUnicode(false);
 
-                entity.Property(e => e.ZipCode4)
-                    .HasMaxLength(4)
-                    .IsUnicode(false)
-                    .IsFixedLength(true);
-
-                entity.Property(e => e.ZipCode5)
-                    .HasMaxLength(5)
-                    .IsUnicode(false)
-                    .IsFixedLength(true);
-
-                entity.HasOne(d => d.CityPrNavigation)
-                    .WithMany(p => p.OrderShipTos)
-                    .HasForeignKey(d => d.CityPr)
-                    .HasConstraintName("FK_OrderShipTo_CityPR");
-
-                entity.HasOne(d => d.CityUsNavigation)
-                    .WithMany(p => p.OrderShipTos)
-                    .HasForeignKey(d => d.CityUs)
-                    .HasConstraintName("FK_OrderShipTo_CityStateUS");
-
-                entity.HasOne(d => d.CityWorldNavigation)
-                    .WithMany(p => p.OrderShipTos)
-                    .HasForeignKey(d => d.CityWorld)
-                    .HasConstraintName("FK_OrderShipTo_CityStateCountryWorld");
-
                 entity.HasOne(d => d.OrderNavigation)
                     .WithMany(p => p.OrderShipTos)
                     .HasForeignKey(d => d.Order)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_OrderShipTo_ProductOrder");
             });
 
@@ -1067,6 +1074,27 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.ProductOrder)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ProductOrderDiscountCoupon_ProductOrder");
+            });
+
+            modelBuilder.Entity<ProductOrderLineItem>(entity =>
+            {
+                entity.ToTable("ProductOrderLineItem");
+
+                entity.Property(e => e.ImageSource).IsUnicode(false);
+
+                entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
+
+                entity.HasOne(d => d.ProductNavigation)
+                    .WithMany(p => p.ProductOrderLineItems)
+                    .HasForeignKey(d => d.Product)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_OrderProduct_Product");
+
+                entity.HasOne(d => d.ProductOrderNavigation)
+                    .WithMany(p => p.ProductOrderLineItems)
+                    .HasForeignKey(d => d.ProductOrder)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_OrderProduct_ProductOrder");
             });
 
             modelBuilder.Entity<ProductSubCategory>(entity =>
@@ -1479,7 +1507,5 @@ namespace XOSkinWebApp.ORM
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-        public DbSet<XOSkinWebApp.Models.ShoppingCartLineItemViewModel> ShoppingCartLineItemViewModel { get; set; }
     }
 }

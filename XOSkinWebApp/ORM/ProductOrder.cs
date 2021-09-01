@@ -9,14 +9,16 @@ namespace XOSkinWebApp.ORM
     {
         public ProductOrder()
         {
-            OrderProducts = new HashSet<OrderProduct>();
+            OrderBillTos = new HashSet<OrderBillTo>();
             OrderShipTos = new HashSet<OrderShipTo>();
             PaymentPlanProductOrders = new HashSet<PaymentPlanProductOrder>();
             ProductOrderDiscountCodes = new HashSet<ProductOrderDiscountCode>();
             ProductOrderDiscountCoupons = new HashSet<ProductOrderDiscountCoupon>();
+            ProductOrderLineItems = new HashSet<ProductOrderLineItem>();
         }
 
         public long Id { get; set; }
+        public long? ShopifyId { get; set; }
         public string User { get; set; }
         public DateTime DatePlaced { get; set; }
         public decimal Subtotal { get; set; }
@@ -28,10 +30,11 @@ namespace XOSkinWebApp.ORM
         public bool GiftOrder { get; set; }
 
         public virtual AspNetUser UserNavigation { get; set; }
-        public virtual ICollection<OrderProduct> OrderProducts { get; set; }
+        public virtual ICollection<OrderBillTo> OrderBillTos { get; set; }
         public virtual ICollection<OrderShipTo> OrderShipTos { get; set; }
         public virtual ICollection<PaymentPlanProductOrder> PaymentPlanProductOrders { get; set; }
         public virtual ICollection<ProductOrderDiscountCode> ProductOrderDiscountCodes { get; set; }
         public virtual ICollection<ProductOrderDiscountCoupon> ProductOrderDiscountCoupons { get; set; }
+        public virtual ICollection<ProductOrderLineItem> ProductOrderLineItems { get; set; }
     }
 }

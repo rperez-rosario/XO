@@ -10,7 +10,6 @@ namespace XOSkinWebApp.ORM
         public CityStateU()
         {
             Addresses = new HashSet<Address>();
-            OrderShipTos = new HashSet<OrderShipTo>();
         }
 
         public int Id { get; set; }
@@ -19,6 +18,5 @@ namespace XOSkinWebApp.ORM
         public string StateName { get; set; }
 
         public virtual ICollection<Address> Addresses { get; set; }
-        public virtual ICollection<OrderShipTo> OrderShipTos { get; set; }
     }
 }

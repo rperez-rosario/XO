@@ -1,5 +1,4 @@
 ﻿@model CheckoutViewModel
-@{ decimal? total = 0.00M; }
 
 @{
   ViewData["Title"] = "Checkout";
@@ -120,6 +119,7 @@ else
         </div>
       </div>
     </div>
+    <h4>Items in this Order</h4>
     <table class="table table-responsive" id="ShoppingCart" style="margin-left: auto; margin-right: auto">
       <thead>
         <tr>
@@ -144,14 +144,22 @@ else
             </td>
             <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
           </tr>
-          total += lineItem.Total;
         }
       </tbody>
     </table>
-    <div style="font-weight: bold; text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(total.ToString())</div>
-    <div style="font-weight: bold; text-align: right; margin-right: 40px">Taxes: $0.00</div>
-    <div style="font-weight: bold; text-align: right; margin-right: 40px">Shipping: $0.00</div>
-    <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(total.ToString())</div>
+    <input type="hidden" asp-for="SubTotal" value="@Model.SubTotal.ToString()" />
+    <input type="hidden" asp-for="Taxes" value="@Model.Taxes.ToString()" />
+    <input type="hidden" asp-for="ShippingCharges" value="@Model.ShippingCharges.ToString()" />
+    <input type="hidden" asp-for="Total" value="@Model.Total.ToString()" />
+    <input type="hidden" asp-for="CodeDiscount" value="@Model.CodeDiscount.ToString()" />
+    <input type="hidden" asp-for="CouponDiscount" value="@Model.CouponDiscount.ToString()" />
+
+    <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(Model.SubTotal.ToString())</div>
+    <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(Model.Taxes.ToString())</div>
+    <div style="text-align: right; margin-right: 40px">Shipping: +$@Html.Raw(Model.ShippingCharges.ToString())</div>
+    <div style="text-align: right; margin-right: 40px">Code Discount: -$@Html.Raw(Model.CodeDiscount).ToString()</div>
+    <div style="text-align: right; margin-right: 40px">Coupon Discount: -$@Html.Raw(Model.CouponDiscount).ToString()</div>
+    <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(Model.Total).ToString()</div>
     <br />
     <div style="text-align: right; margin-right: 40px">
       <input id="place-order-button" type="submit" value="PlaceOrder" class="btn-outline-dark btn" />

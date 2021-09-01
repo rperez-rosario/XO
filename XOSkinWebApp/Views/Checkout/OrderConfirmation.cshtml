@@ -1,5 +1,219 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model CheckoutViewModel
+@{ decimal? total = 0.00M; }
+
 @{
+  ViewData["Title"] = "Your Order Confirmation";
 }
+
+<div class="text-center">
+  <h1 class="display-4">Your Order <br />Confirmation</h1>
+  @Html.Raw(ViewData["OrderConfirmation.WelcomeText"])
+</div>
+
+<br />
+<div class="container-fluid">
+  <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
+    <div class="col-sm-4">
+      <h4>Billing Address</h4>
+      <div class="form-group">
+        <label class="control-label">Name on Credit Card</label>
+        <input asp-for="BillingName" class="form-control" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">Address Line 1</label>
+        <input asp-for="BillingAddress1" class="form-control" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">Address Line 2</label>
+        <input asp-for="BillingAddress2" class="form-control" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">City</label>
+        <input asp-for="BillingCity" class="form-control" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">State</label>
+        <input asp-for="BillingState" class="form-control readonly" />
+      </div>
+      <div class="form-group">
+        <label class="control-label">Country</label>
+        <input asp-for="BillingCountry" class="form-control" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">Postal Code</label>
+        <input asp-for="BillingPostalCode" class="form-control" readonly />
+      </div>
+    </div>
+    <div class="col-sm-4" style="padding-left: 10px; padding-right: 10px">
+      <h4>Shipping Address, Same? <input asp-for="ShippingAddressSame" id="same-address" type="checkbox" disabled /></h4>
+      <div class="form-group">
+        <label class="control-label">Recipient's Name</label>
+        <input asp-for="ShippingName" class="form-control" id="shipping-name" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">Address Line 1</label>
+        <input asp-for="ShippingAddress1" class="form-control" id="shipping-address1" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">Address Line 2</label>
+        <input asp-for="ShippingAddress2" class="form-control" id="shipping-address2" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">City</label>
+        <input asp-for="ShippingCity" class="form-control" id="shipping-city" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">State</label>
+        <input asp-for="ShippingState" class="form-control" id="shipping-state" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">Country</label>
+        <input asp-for="ShippingCountry" class="form-control" id="shipping-country" readonly />
+      </div>
+      <div class="form-group">
+        <label class="control-label">Postal Code</label>
+        <input asp-for="ShippingPostalCode" class="form-control" id="shipping-postal-code" readonly />
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <h4>Billing and Shipping</h4><br />
+      <div class="form-group">
+        <div style="display: inline; float: left; vertical-align: middle">
+          <label class="control-label font-weight-bolder">Order Confirmation Number:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span class="font-weight-bolder">@Html.Raw(Model.OrderId)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">Sub-Total:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span>$@Html.Raw(Model.SubTotal)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">(+) Taxes:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span>$@Html.Raw(Model.Taxes)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">(+) Shipping:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span>$@Html.Raw(Model.ShippingCharges)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">(-) Code Discount:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span>$@Html.Raw(Model.CodeDiscount)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">(-) Coupon Discount:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span>$@Html.Raw(Model.CouponDiscount)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">(=) Total:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span class="font-weight-bolder">$@Html.Raw(Model.Total)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">Billed:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span>@Html.Raw(Model.BilledOn.ToShortDateString())</span>
+        </div>
+      </div><br />
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">Carrier:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span>@Html.Raw(Model.ShippingCarrier)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">Tracking Number:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span class="font-weight-bolder">@Html.Raw(Model.TrackingNumber)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">Shipped:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span>@Html.Raw(Model.ShippedOn.ToShortDateString())</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div style="display: inline;">
+          <label class="control-label font-weight-bolder">Arrives:</label>
+        </div>
+        <div style="display: inline;">&nbsp;</div>
+        <div style="display: inline;">
+          <span class="font-weight-bolder">@Html.Raw(Model.ExpectedToArrive.ToShortDateString())</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<h4>Items in this Order</h4>
+<table class="table table-responsive" id="ShoppingCart" style="margin-left: auto; margin-right: auto">
+  <thead>
+    <tr>
+      <th></th>
+      <th class="text-nowrap">Product Name</th>
+      <th>Description</th>
+      <th>Quantity</th>
+      <th class="text-nowrap">Sub-Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (ShoppingCartLineItemViewModel lineItem in Model.LineItem)
+    {
+      <tr>
+        <td><img src="@lineItem.ImageSource" style="height: 150px; display: inline; float: left" /></td>
+        <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
+        <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
+        <td style="width: 170px">
+          <div style="display: inline; float: left">
+            @lineItem.Quantity
+          </div>
+        </td>
+        <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
+      </tr>
+      total += lineItem.Total;
+    }
+  </tbody>
+</table>

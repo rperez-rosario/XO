@@ -5,11 +5,14 @@ using System.Collections.Generic;
 
 namespace XOSkinWebApp.ORM
 {
-    public partial class OrderProduct
+    public partial class ProductOrderLineItem
     {
         public long Id { get; set; }
+        public string ImageSource { get; set; }
         public long ProductOrder { get; set; }
         public long Product { get; set; }
+        public int Quantity { get; set; }
+        public decimal? Total { get; set; }
 
         public virtual Product ProductNavigation { get; set; }
         public virtual ProductOrder ProductOrderNavigation { get; set; }

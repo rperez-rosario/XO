@@ -89,7 +89,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             if (ModelState.IsValid)
             {
                 questionnaire.CreatedBy = _context.AspNetUsers.Where(
-                  x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(); // TODO: Change to current user.
+                  x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
                 questionnaire.DateCreated = DateTime.UtcNow;
                 questionnaire.QuestionnaireName = questionnaire.QuestionnaireName.Trim();
                 if (questionnaire.Active)
