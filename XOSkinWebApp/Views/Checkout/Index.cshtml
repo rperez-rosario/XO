@@ -217,27 +217,39 @@ else
       }
 
       $("#shipping-name").keyup(function () {
-        shippingNameFilled();
+        if (!$('#same-address').prop('checked')) {
+          shippingNameFilled();
+        }
       });
 
       $("#shipping-address1").keyup(function () {
-        shippingAddress1Filled();
+        if (!$('#same-address').prop('checked')) {
+          shippingAddress1Filled();
+        }
       });
 
       $("#shipping-city").keyup(function () {
-        shippingCityFilled();
+        if (!$('#same-address').prop('checked')) {
+          shippingCityFilled();
+        }
       });
 
       $("#shipping-state").keyup(function () {
-        shippingStateFilled();
+        if (!$('#same-address').prop('checked')) {
+          shippingStateFilled();
+        }
       });
 
       $("#shipping-country").keyup(function () {
-        shippingCountryFilled();
+        if (!$('#same-address').prop('checked')) {
+          shippingCountryFilled();
+        }
       });
 
       $("#shipping-postal-code").keyup(function () {
-        shippingPostalCodeFilled();
+        if (!$('#same-address').prop('checked')) {
+          shippingPostalCodeFilled();
+        }
       });
 
       function shippingNameFilled() {
