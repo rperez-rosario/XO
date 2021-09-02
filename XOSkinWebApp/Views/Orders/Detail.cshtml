@@ -5,8 +5,8 @@
 }
 
 <div class="text-center">
-  <h1 class="display-4">Your Order <br />Confirmation</h1>
-  @Html.Raw(ViewData["OrderConfirmation.WelcomeText"])
+  <h1 class="display-4">Order Detail</h1>
+  @Html.Raw(ViewData["OrderDetail.WelcomeText"])
 </div>
 <p>
   <div style="display: inline"><a class="btn-outline-dark btn" asp-area="" asp-controller="Home" asp-action="Index">Return Home</a></div>
@@ -204,17 +204,17 @@
   <tbody>
     @foreach (ShoppingCartLineItemViewModel lineItem in Model.LineItem)
     {
-      <tr>
-        <td><img src="@lineItem.ImageSource" style="height: 150px; display: inline; float: left" /></td>
-        <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
-        <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
-        <td style="width: 170px">
-          <div style="display: inline; float: left">
-            @lineItem.Quantity
-          </div>
-        </td>
-        <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
-      </tr>
+    <tr>
+      <td><img src="@lineItem.ImageSource" style="height: 150px; display: inline; float: left" /></td>
+      <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
+      <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
+      <td style="width: 170px">
+        <div style="display: inline; float: left">
+          @lineItem.Quantity
+        </div>
+      </td>
+      <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
+    </tr>
     }
   </tbody>
 </table>

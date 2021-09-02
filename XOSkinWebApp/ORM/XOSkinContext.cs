@@ -647,6 +647,8 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.AddressLine2).IsUnicode(false);
 
+                entity.Property(e => e.Arrives).HasColumnType("datetime");
+
                 entity.Property(e => e.CarrierName)
                     .HasMaxLength(100)
                     .IsUnicode(false);

@@ -1,8 +1,66 @@
-﻿@{
+﻿@model IEnumerable<XOSkinWebApp.Models.OrderViewModel>
+
+@{
   ViewData["Title"] = "Track Orders";
 }
 
 <div class="text-center">
-  <h1 class="display-4">Track <br />Orders</h1>
+  <h1 class="display-4">Your <br />Orders</h1>
   @Html.Raw(ViewData["Orders.WelcomeText"])
 </div>
+<table class="table" id="Orders">
+<thead>
+  <tr>
+    <th>
+      Order Id
+    </th>
+    <th>
+      Date Placed
+    </th>
+    <th>
+      Arrives
+    </th>
+    <th>
+      Carrier
+    </th>
+    <th>
+      Tracking Number
+    </th>
+    <th></th>
+  </tr>
+</thead>
+<tbody>
+  @foreach (var item in Model)
+  {
+  <tr>
+    <td>
+      @Html.DisplayFor(modelItem => item.OrderId)
+    </td>
+    <td>
+      @Html.Raw(item.DatePlaced == null ? String.Empty : item.DatePlaced.Value.ToShortDateString())
+    </td>
+    <td>
+      @Html.Raw(item.Arrives == null ? String.Empty : item.Arrives.Value.ToShortDateString())
+    </td>
+    <td>
+      @Html.DisplayFor(modelItem => item.Carrier)
+    </td>
+    <td>
+      @Html.DisplayFor(modelItem => item.TrackingNumber)
+    </td>
+    <td>
+      <a asp-action="Detail" asp-route-id="@item.OrderId">Detail</a>
+    </td>
+  </tr>
+  }
+</tbody>
+</table>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#Orders').DataTable();
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+</script>

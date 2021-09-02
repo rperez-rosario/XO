@@ -5,24 +5,121 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using XOSkinWebApp.ORM;
+using XOSkinWebApp.Models;
 
 namespace XOSkinWebApp.Controllers
 {
-    [Authorize]
-    public class OrdersController : Controller
+  [Authorize]
+  public class OrdersController : Controller
+  {
+    private readonly XOSkinContext _context;
+
+    public OrdersController(XOSkinContext context)
     {
-      private readonly XOSkinContext _context;
+      _context = context;
+    }
 
-      public OrdersController(XOSkinContext context)
+    public IActionResult Index()
+    {
+      List<OrderViewModel> order = new List<OrderViewModel>();
+
+      foreach (ProductOrder o in _context.ProductOrders.Where(
+        x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())))
       {
-        _context = context;
+        order.Add(new OrderViewModel()
+        {
+          OrderId = o.Id,
+          Arrives = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.Arrives).FirstOrDefault(),
+          Carrier = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.CarrierName).FirstOrDefault(),
+          DatePlaced = o.DatePlaced,
+          TrackingNumber = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault()
+        });
       }
 
-      public IActionResult Index()
-      {
-        ViewData.Add("Orders.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Orders.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("Orders.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Orders.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
-        return View();
+      return View(order);
+    }
+
+    public IActionResult Detail(long Id)
+    {
+      ProductOrder order = null;
+      List<ProductOrderLineItem> lineItem = null;
+      OrderBillTo billing = null;
+      OrderShipTo shipping = null;
+      CheckoutViewModel checkout = null;
+
+      try
+      {
+        order = _context.ProductOrders.Where(x => x.Id == Id).FirstOrDefault();
+
+        // Check if order belongs to currently logged-in user.
+        if (order.User != _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())
+          return new RedirectToActionResult("Index", "Orders", null);
+
+        lineItem = _context.ProductOrderLineItems.Where(x => x.ProductOrder == Id).ToList<ProductOrderLineItem>();
+        billing = _context.OrderBillTos.Where(x => x.Order == Id).FirstOrDefault();
+        shipping = _context.OrderShipTos.Where(x => x.Order == Id).FirstOrDefault();
+
+        checkout = new CheckoutViewModel()
+        {
+          BilledOn = billing.BillingDate == null ? DateTime.MinValue : billing.BillingDate.Value,
+          BillingAddress1 = billing.AddressLine1,
+          BillingAddress2 = billing.AddressLine2,
+          BillingCity = billing.CityName,
+          BillingCountry = billing.CountryName,
+          BillingName = billing.NameOnCreditCard,
+          BillingPostalCode = billing.PostalCode,
+          BillingState = billing.StateName,
+          CodeDiscount = order.CodeDiscount,
+          CouponDiscount = order.CouponDiscount,
+          ShippedOn = shipping.ShipDate == null ? DateTime.MinValue : shipping.ShipDate.Value,
+          ShippingName = shipping.RecipientName,
+          ShippingCountry = shipping.CountryName,
+          ShippingAddress1 = shipping.AddressLine1,
+          ShippingAddress2 = shipping.AddressLine2,
+          ShippingAddressSame = billing.NameOnCreditCard.Equals(shipping.RecipientName),
+          CreditCardCVC = null,
+          CreditCardExpirationDate = DateTime.MinValue,
+          CreditCardNumber = null,
+          ExpectedToArrive = shipping.Arrives == null ? DateTime.MinValue : shipping.Arrives.Value,
+          IsGift = order.GiftOrder,
+          OrderId = Id,
+          ShippingCarrier = shipping.CarrierName,
+          ShippingCharges = order.ShippingCost,
+          ShippingCity = shipping.CityName,
+          ShippingPostalCode = shipping.PostalCode,
+          ShippingState = shipping.StateName,
+          ShopifyId = order.ShopifyId == null ? long.MinValue : order.ShopifyId.Value,
+          SubTotal = order.Subtotal,
+          Taxes = order.ApplicableTaxes,
+          Total = order.Total,
+          TrackingNumber = shipping.TrackingNumber
+        };
+
+        checkout.LineItem = new List<ShoppingCartLineItemViewModel>();
+
+        foreach (ProductOrderLineItem li in lineItem)
+        {
+          checkout.LineItem.Add(new ShoppingCartLineItemViewModel()
+          {
+            Id = li.Id,
+            ImageSource = li.ImageSource,
+            ProductDescription = _context.Products.Where(x => x.Id == li.Product).Select(x => x.Description).FirstOrDefault(),
+            ProductId = li.Product,
+            ProductName = _context.Products.Where(x => x.Id == li.Product).Select(x => x.Name).FirstOrDefault(),
+            Quantity = li.Quantity,
+            Total = li.Total
+          });
+        }
       }
-   }
+      catch (Exception ex)
+      {
+        throw new Exception("An error was encountered while retrieving order details.", ex);
+      }
+
+      return View(checkout);
+    }
+  }
 }

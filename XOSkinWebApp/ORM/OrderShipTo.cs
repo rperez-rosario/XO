@@ -19,6 +19,7 @@ namespace XOSkinWebApp.ORM
         public string CarrierName { get; set; }
         public string TrackingNumber { get; set; }
         public DateTime? ShipDate { get; set; }
+        public DateTime? Arrives { get; set; }
 
         public virtual ProductOrder OrderNavigation { get; set; }
     }

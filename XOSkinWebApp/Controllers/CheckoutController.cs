@@ -75,7 +75,7 @@ namespace XOSkinWebApp.Controllers
     public IActionResult PlaceOrder(CheckoutViewModel Model)
     {
       ProductOrder order = null;
-      
+
       Model.ShippingCarrier = "UPS"; // TODO: Map this.
       Model.TrackingNumber = "0123456789"; // TODO: Map this.
       Model.ShippedOn = DateTime.UtcNow; // TODO: Map this.
@@ -192,7 +192,9 @@ namespace XOSkinWebApp.Controllers
             ShipDate = Model.ShippedOn,
             CarrierName = Model.ShippingCarrier,
             TrackingNumber = Model.TrackingNumber,
-            Order = order.Id
+            Order = order.Id,
+            Arrives = Model.ExpectedToArrive
+            
           });
           _context.SaveChanges();
         }
@@ -210,7 +212,8 @@ namespace XOSkinWebApp.Controllers
             ShipDate = Model.ShippedOn,
             CarrierName = Model.ShippingCarrier,
             TrackingNumber = Model.TrackingNumber,
-            Order = order.Id
+            Order = order.Id,
+            Arrives = Model.ExpectedToArrive
           });
           _context.SaveChanges();
         }
