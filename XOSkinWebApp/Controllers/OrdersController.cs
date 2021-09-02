@@ -37,7 +37,8 @@ namespace XOSkinWebApp.Controllers
         });
       }
 
-      ViewData.Add("Orders.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Orders.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("Orders.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("Orders.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
       return View(order);
     }
@@ -118,6 +119,9 @@ namespace XOSkinWebApp.Controllers
       {
         throw new Exception("An error was encountered while retrieving order details.", ex);
       }
+
+      ViewData.Add("OrderArchiveDetail.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("OrderArchiveDetail.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
       return View(checkout);
     }

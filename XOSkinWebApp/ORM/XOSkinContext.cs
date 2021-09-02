@@ -94,19 +94,7 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Apartment)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.CityPr).HasColumnName("CityPR");
-
-                entity.Property(e => e.CityUs).HasColumnName("CityUS");
-
                 entity.Property(e => e.CountryName)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ForeignPostalCode)
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
@@ -116,42 +104,21 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.Line2).IsUnicode(false);
 
+                entity.Property(e => e.PostalCode)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.StateName)
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
                 entity.Property(e => e.User).HasMaxLength(450);
 
-                entity.Property(e => e.ZipCode4)
-                    .HasMaxLength(4)
-                    .IsUnicode(false)
-                    .IsFixedLength(true);
-
-                entity.Property(e => e.ZipCode5)
-                    .HasMaxLength(5)
-                    .IsUnicode(false)
-                    .IsFixedLength(true);
-
                 entity.HasOne(d => d.AddressTypeNavigation)
                     .WithMany(p => p.Addresses)
                     .HasForeignKey(d => d.AddressType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Address_AddressType");
-
-                entity.HasOne(d => d.CityPrNavigation)
-                    .WithMany(p => p.Addresses)
-                    .HasForeignKey(d => d.CityPr)
-                    .HasConstraintName("FK_Address_CityPR");
-
-                entity.HasOne(d => d.CityUsNavigation)
-                    .WithMany(p => p.Addresses)
-                    .HasForeignKey(d => d.CityUs)
-                    .HasConstraintName("FK_Address_CityStateUS");
-
-                entity.HasOne(d => d.CityWorldNavigation)
-                    .WithMany(p => p.Addresses)
-                    .HasForeignKey(d => d.CityWorld)
-                    .HasConstraintName("FK_Address_CityStateCountryWorld");
 
                 entity.HasOne(d => d.UserNavigation)
                     .WithMany(p => p.Addresses)
