@@ -65,7 +65,7 @@ namespace XOSkinWebApp.Controllers
 
         checkout = new CheckoutViewModel()
         {
-          BilledOn = billing.BillingDate == null ? DateTime.MinValue : billing.BillingDate.Value,
+          BilledOn = billing.BillingDate == null ? new DateTime(1754, 1, 1) : billing.BillingDate.Value,
           BillingAddress1 = billing.AddressLine1,
           BillingAddress2 = billing.AddressLine2,
           BillingCity = billing.CityName,
@@ -75,16 +75,16 @@ namespace XOSkinWebApp.Controllers
           BillingState = billing.StateName,
           CodeDiscount = order.CodeDiscount,
           CouponDiscount = order.CouponDiscount,
-          ShippedOn = shipping.ShipDate == null ? DateTime.MinValue : shipping.ShipDate.Value,
+          ShippedOn = shipping.ShipDate == null ? new DateTime(1754, 1, 1) : shipping.ShipDate.Value,
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
           ShippingAddress1 = shipping.AddressLine1,
           ShippingAddress2 = shipping.AddressLine2,
-          ShippingAddressSame = billing.NameOnCreditCard.Equals(shipping.RecipientName),
+          ShippingAddressSame = ShippingAddressSame(billing, shipping),
           CreditCardCVC = null,
-          CreditCardExpirationDate = DateTime.MinValue,
+          CreditCardExpirationDate = new DateTime(1754, 1, 1),
           CreditCardNumber = null,
-          ExpectedToArrive = shipping.Arrives == null ? DateTime.MinValue : shipping.Arrives.Value,
+          ExpectedToArrive = shipping.Arrives == null ? new DateTime(1754, 1, 1) : shipping.Arrives.Value,
           IsGift = order.GiftOrder,
           OrderId = Id,
           ShippingCarrier = shipping.CarrierName,
@@ -124,6 +124,26 @@ namespace XOSkinWebApp.Controllers
         x => x.PlacementPointCode.Equals("OrderArchiveDetail.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
       return View(checkout);
+    }
+
+    private bool ShippingAddressSame(OrderBillTo Billing, OrderShipTo Shipping)
+    {
+      if (!Billing.NameOnCreditCard.Equals(Shipping.RecipientName))
+        return false;
+      if (!Billing.AddressLine1.Equals(Shipping.AddressLine1))
+        return false;
+      if (!Billing.AddressLine2.Equals(Shipping.AddressLine2))
+        return false;
+      if (!Billing.CityName.Equals(Shipping.CityName))
+        return false;
+      if (!Billing.StateName.Equals(Shipping.StateName))
+        return false;
+      if (!Billing.CountryName.Equals(Shipping.CountryName))
+        return false;
+      if (!Billing.PostalCode.Equals(Shipping.PostalCode))
+        return false;
+
+      return true;
     }
   }
 }

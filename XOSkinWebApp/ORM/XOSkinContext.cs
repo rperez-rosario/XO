@@ -92,7 +92,9 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("Address");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.CityName)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.CountryName)
                     .HasMaxLength(100)
@@ -103,6 +105,10 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false);
 
                 entity.Property(e => e.Line2).IsUnicode(false);
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.PostalCode)
                     .HasMaxLength(100)

@@ -153,6 +153,8 @@ else
     <input type="hidden" asp-for="Total" value="@Model.Total.ToString()" />
     <input type="hidden" asp-for="CodeDiscount" value="@Model.CodeDiscount.ToString()" />
     <input type="hidden" asp-for="CouponDiscount" value="@Model.CouponDiscount.ToString()" />
+    <input type="hidden" asp-for="ExpectedToArrive" value="@Model.ExpectedToArrive" />
+    <input type="hidden" asp-for="ShippingCarrier" value="@Model.ShippingCarrier" />
 
     <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(Model.SubTotal.ToString())</div>
     <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(Model.Taxes.ToString())</div>
@@ -173,6 +175,10 @@ else
         sort: false,
         bInfo: false
       });
+
+      if ($('#same-address').prop('checked')) {
+        shippingAddressSame();
+      }
 
       new $.fn.dataTable.Responsive(table, {
         details: true

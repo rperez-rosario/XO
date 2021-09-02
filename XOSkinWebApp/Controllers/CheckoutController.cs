@@ -31,6 +31,8 @@ namespace XOSkinWebApp.Controllers
         x => x.ShoppingCart == _context.ShoppingCarts.Where(x => x.User.Equals(_context.AspNetUsers.Where(
         x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
         .Select(x => x.Id).FirstOrDefault()).ToList();
+      ORM.Address billingAddress = null;
+      ORM.Address shippingAddress = null;
 
       checkoutViewModel.SubTotal = 0.0M;
 
@@ -62,8 +64,48 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.CodeDiscount = 0.0M; // TODO: Map this.
       checkoutViewModel.CouponDiscount = 0.0M; // TODO: Map this.
       checkoutViewModel.IsGift = false; // TODO: Map this.
+      checkoutViewModel.ShippingCarrier = "UPS"; // TODO: Map this.
+      checkoutViewModel.ExpectedToArrive = DateTime.UtcNow.AddDays(2); // TODO: Map this.
       checkoutViewModel.Total = checkoutViewModel.SubTotal + checkoutViewModel.Taxes + checkoutViewModel.ShippingCharges -
         checkoutViewModel.CodeDiscount - checkoutViewModel.CouponDiscount;
+
+      if (_context.Addresses.Where(
+        x => x.User.Equals(_context.AspNetUsers.Where(
+        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Count() == 2)
+      {
+        billingAddress = _context.Addresses.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+          x => x.AddressType == 1).FirstOrDefault();
+
+        checkoutViewModel.BillingName = billingAddress.Name;
+        checkoutViewModel.BillingAddress1 = billingAddress.Line1;
+        checkoutViewModel.BillingAddress2 = billingAddress.Line2;
+        checkoutViewModel.BillingCity = billingAddress.CityName;
+        checkoutViewModel.BillingState = billingAddress.StateName;
+        checkoutViewModel.BillingCountry = billingAddress.CountryName;
+        checkoutViewModel.BillingPostalCode = billingAddress.PostalCode;
+
+        shippingAddress = _context.Addresses.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+          x => x.AddressType == 2).FirstOrDefault();
+
+        if (!ShippingAddressSame(billingAddress, shippingAddress))
+        {
+          checkoutViewModel.ShippingName = shippingAddress.Name;
+          checkoutViewModel.ShippingAddress1 = shippingAddress.Line1;
+          checkoutViewModel.ShippingAddress2 = shippingAddress.Line2;
+          checkoutViewModel.ShippingCity = shippingAddress.CityName;
+          checkoutViewModel.ShippingState = shippingAddress.StateName;
+          checkoutViewModel.ShippingCountry = shippingAddress.CountryName;
+          checkoutViewModel.ShippingPostalCode = shippingAddress.PostalCode;
+        }
+        else
+        {
+          checkoutViewModel.ShippingAddressSame = true;
+        }
+      }
 
       ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
        x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))
@@ -76,11 +118,11 @@ namespace XOSkinWebApp.Controllers
     {
       ProductOrder order = null;
 
-      Model.ShippingCarrier = "UPS"; // TODO: Map this.
+      Model.ShippingCarrier = Model.ShippingCarrier;
       Model.TrackingNumber = "0123456789"; // TODO: Map this.
       Model.ShippedOn = DateTime.UtcNow; // TODO: Map this.
-      Model.ExpectedToArrive = DateTime.UtcNow.AddDays(2); // TODO: Map this.
-      Model.BilledOn = DateTime.UtcNow; // TODO: Map this.
+      Model.ExpectedToArrive = Model.ExpectedToArrive;
+      Model.BilledOn = DateTime.UtcNow;
 
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();      
 
@@ -136,6 +178,7 @@ namespace XOSkinWebApp.Controllers
             Quantity = item.Quantity,
             Total = item.Total
           });
+          
           Model.LineItem.Add(new ShoppingCartLineItemViewModel()
           {
             Id = item.Id,
@@ -178,6 +221,34 @@ namespace XOSkinWebApp.Controllers
 
         _context.SaveChanges();
 
+        if (_context.Addresses.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+          x => x.AddressType == 1).FirstOrDefault() != null)
+        {
+          _context.Addresses.Remove(_context.Addresses.Where(
+            x => x.User.Equals(_context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+            x => x.AddressType == 1).FirstOrDefault());
+          _context.SaveChanges();
+        }
+
+        _context.Addresses.Add(new ORM.Address()
+        {
+          Name = Model.BillingName,
+          AddressType = 1, // Billing.
+          CountryName = Model.BillingCountry,
+          Line1 = Model.BillingAddress1,
+          Line2 = Model.BillingAddress2,
+          PostalCode = Model.BillingPostalCode,
+          StateName = Model.BillingState,
+          CityName = Model.BillingCity,
+          User = _context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
+        });
+
+        _context.SaveChanges();
+
         if (Model.ShippingAddressSame)
         {
           _context.OrderShipTos.Add(new OrderShipTo()
@@ -194,8 +265,36 @@ namespace XOSkinWebApp.Controllers
             TrackingNumber = Model.TrackingNumber,
             Order = order.Id,
             Arrives = Model.ExpectedToArrive
-            
           });
+
+          _context.SaveChanges();
+
+          if (_context.Addresses.Where(
+            x => x.User.Equals(_context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+            x => x.AddressType == 2).FirstOrDefault() != null)
+          {
+            _context.Addresses.Remove(_context.Addresses.Where(
+              x => x.User.Equals(_context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+              x => x.AddressType == 2).FirstOrDefault());
+            _context.SaveChanges();
+          }
+
+          _context.Addresses.Add(new ORM.Address()
+          {
+            Name = Model.BillingName,
+            AddressType = 2, // Shipping.
+            CountryName = Model.BillingCountry,
+            Line1 = Model.BillingAddress1,
+            Line2 = Model.BillingAddress2,
+            PostalCode = Model.BillingPostalCode,
+            CityName = Model.BillingCity,
+            StateName = Model.BillingState,
+            User = _context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
+          });
+
           _context.SaveChanges();
         }
         else
@@ -215,6 +314,35 @@ namespace XOSkinWebApp.Controllers
             Order = order.Id,
             Arrives = Model.ExpectedToArrive
           });
+
+          _context.SaveChanges();
+
+          if (_context.Addresses.Where(
+            x => x.User.Equals(_context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+            x => x.AddressType == 2).FirstOrDefault() != null)
+          {
+            _context.Addresses.Remove(_context.Addresses.Where(
+              x => x.User.Equals(_context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+              x => x.AddressType == 2).FirstOrDefault());
+            _context.SaveChanges();
+          }
+          
+          _context.Addresses.Add(new ORM.Address()
+          {
+            Name = Model.ShippingName,
+            AddressType = 2, // Shipping.
+            CountryName = Model.ShippingCountry,
+            Line1 = Model.ShippingAddress1,
+            Line2 = Model.ShippingAddress2,
+            PostalCode = Model.ShippingPostalCode,
+            CityName = Model.ShippingCity,
+            StateName = Model.ShippingState,
+            User = _context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
+          });
+
           _context.SaveChanges();
         }
       }
@@ -228,6 +356,26 @@ namespace XOSkinWebApp.Controllers
        .Select(x => x.Text).FirstOrDefault());
 
       return View("OrderConfirmation", Model);
+    }
+
+    private bool ShippingAddressSame(ORM.Address Billing, ORM.Address Shipping)
+    {
+      if (!Billing.Name.Equals(Shipping.Name))
+        return false;
+      if (!Billing.Line1.Equals(Shipping.Line1))
+        return false;
+      if (!Billing.Line2.Equals(Shipping.Line2))
+        return false;
+      if (!Billing.CityName.Equals(Shipping.CityName))
+        return false;
+      if (!Billing.StateName.Equals(Shipping.StateName))
+        return false;
+      if (!Billing.CountryName.Equals(Shipping.CountryName))
+        return false;
+      if (!Billing.PostalCode.Equals(Shipping.PostalCode))
+        return false;
+
+      return true;
     }
   }
 }
