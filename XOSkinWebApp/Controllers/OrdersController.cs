@@ -130,21 +130,20 @@ namespace XOSkinWebApp.Controllers
 
     private bool ShippingAddressSame(OrderBillTo Billing, OrderShipTo Shipping)
     {
-      if (!Billing.NameOnCreditCard.Equals(Shipping.RecipientName))
+      if (!Object.Equals(Billing.NameOnCreditCard, Shipping.RecipientName))
         return false;
-      if (!Billing.AddressLine1.Equals(Shipping.AddressLine1))
+      if (!Object.Equals(Billing.AddressLine1, Shipping.AddressLine1))
         return false;
-      if (!Billing.AddressLine2.Equals(Shipping.AddressLine2))
+      if (!Object.Equals(Billing.AddressLine2, Shipping.AddressLine2))
         return false;
-      if (!Billing.CityName.Equals(Shipping.CityName))
+      if (!Object.Equals(Billing.CityName, Shipping.CityName))
         return false;
-      if (!Billing.StateName.Equals(Shipping.StateName))
+      if (!Object.Equals(Billing.StateName, Shipping.StateName))
         return false;
-      if (!Billing.CountryName.Equals(Shipping.CountryName))
+      if (!Object.Equals(Billing.CountryName, Shipping.CountryName))
         return false;
-      if (!Billing.PostalCode.Equals(Shipping.PostalCode))
+      if (!Object.Equals(Billing.PostalCode, Shipping.PostalCode))
         return false;
-
       return true;
     }
 

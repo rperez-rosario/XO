@@ -124,12 +124,12 @@ namespace XOSkinWebApp.Controllers
       Model.ExpectedToArrive = Model.ExpectedToArrive;
       Model.BilledOn = DateTime.UtcNow;
 
-      Model.LineItem = new List<ShoppingCartLineItemViewModel>();      
+      Model.LineItem = new List<ShoppingCartLineItemViewModel>();
 
       try
       {
         order = new ProductOrder();
-        
+
         order.ShippingCost = 0.0M;
         order.Subtotal = 0.0M;
         order.ApplicableTaxes = 0.0M;
@@ -178,7 +178,7 @@ namespace XOSkinWebApp.Controllers
             Quantity = item.Quantity,
             Total = item.Total
           });
-          
+
           Model.LineItem.Add(new ShoppingCartLineItemViewModel()
           {
             Id = item.Id,
@@ -328,7 +328,7 @@ namespace XOSkinWebApp.Controllers
               x => x.AddressType == 2).FirstOrDefault());
             _context.SaveChanges();
           }
-          
+
           _context.Addresses.Add(new ORM.Address()
           {
             Name = Model.ShippingName,
@@ -360,21 +360,20 @@ namespace XOSkinWebApp.Controllers
 
     private bool ShippingAddressSame(ORM.Address Billing, ORM.Address Shipping)
     {
-      if (!Billing.Name.Equals(Shipping.Name))
+      if (!Object.Equals(Billing.Name, Shipping.Name))
         return false;
-      if (!Billing.Line1.Equals(Shipping.Line1))
+      if (!Object.Equals(Billing.Line1, Shipping.Line1))
         return false;
-      if (!Billing.Line2.Equals(Shipping.Line2))
+      if (!Object.Equals(Billing.Line2, Shipping.Line2))
         return false;
-      if (!Billing.CityName.Equals(Shipping.CityName))
+      if (!Object.Equals(Billing.CityName, Shipping.CityName))
         return false;
-      if (!Billing.StateName.Equals(Shipping.StateName))
+      if (!Object.Equals(Billing.StateName, Shipping.StateName))
         return false;
-      if (!Billing.CountryName.Equals(Shipping.CountryName))
+      if (!Object.Equals(Billing.CountryName, Shipping.CountryName))
         return false;
-      if (!Billing.PostalCode.Equals(Shipping.PostalCode))
+      if (!Object.Equals(Billing.PostalCode, Shipping.PostalCode))
         return false;
-
       return true;
     }
   }
