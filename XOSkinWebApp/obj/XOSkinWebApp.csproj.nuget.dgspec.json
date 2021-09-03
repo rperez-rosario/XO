@@ -112,10 +112,6 @@
         "net5.0": {
           "targetAlias": "net5.0",
           "dependencies": {
-            "Microsoft.AspNet.Mvc": {
-              "target": "Package",
-              "version": "[5.2.7, )"
-            },
             "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
               "target": "Package",
               "version": "[5.0.8, )"

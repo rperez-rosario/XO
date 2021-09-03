@@ -1,0 +1,136 @@
+﻿@model XOSkinWebApp.Areas.Administration.Models.ProductViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>Product</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+      <form asp-action="Create" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group form-check">
+          <label class="form-check-label">
+            <input class="form-check-input" asp-for="Active" /> <span class="font-weight-bolder">Product Is Active</span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label asp-for="ImageLarge" class="control-label">Product Image File</label>
+          <input asp-for="ImageLarge" type="file" />
+          <span asp-validation-for="ImageLarge" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="Sku" class="control-label"></label>
+          <input asp-for="Sku" class="form-control" />
+          <span asp-validation-for="Sku" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="Name" class="control-label"></label>
+          <input asp-for="Name" class="form-control" />
+          <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="Description" class="control-label"></label>
+          <input asp-for="Description" class="form-control" />
+          <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        @*<div class="form-group">
+      <label asp-for="ProductCategory" class="control-label">Product Category</label>
+      <select asp-for="ProductCategory" class="form-control" asp-items="ViewBag.ProductCategory"></select>
+      <span asp-validation-for="ProductCategory" class="text-danger"></span>
+    </div>*@
+        <div class="form-group form-check">
+          <label class="form-check-label">
+            <input class="form-check-input" id="Kit" asp-for="Kit" /> Is This Product a Kit?
+          </label>
+        </div>
+        <div class="form-group">
+          <label asp-for="KitType" class="control-label">Kit Type</label>
+          <select asp-for="KitType" class="form-control" asp-items="ViewBag.KitType" disabled id="kit-type"></select>
+          <span asp-validation-for="KitType" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="KitProduct" class="control-label">Kit Products (Press Ctrl to select more than one.)</label>
+          <select asp-for="KitProduct" class="form-control" asp-items="ViewBag.Product" disabled id="kit-products"></select>
+          <span asp-validation-for="KitProduct" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="ProductType" class="control-label">ProductType</label>
+          <select asp-for="ProductType" class="form-control" asp-items="ViewBag.ProductType"></select>
+          <span asp-validation-for="ProductType" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="Ingredient" class="control-label">Ingredients (Press Ctrl to select more than one.)</label>
+          <select asp-for="Ingredient" class="form-control" asp-items="ViewBag.Ingredient" id="ingredient"></select>
+          <span asp-validation-for="Ingredient" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="VolumeInFluidOunces" class="control-label">Volume in Fluid Ounces</label>
+          <input asp-for="VolumeInFluidOunces" class="form-control" id="volume" />
+          <span asp-validation-for="VolumeInFluidOunces" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="Ph" class="control-label"></label>
+          <input asp-for="Ph" class="form-control" id="ph" />
+          <span asp-validation-for="Ph" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="Stock" class="control-label"></label>
+          <input asp-for="Stock" class="form-control" id="stock" />
+          <span asp-validation-for="Stock" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="CurrentPriceId" class="control-label">Current Price</label>
+          <select asp-for="CurrentPriceId" class="form-control" asp-items="ViewBag.Price"></select>
+          <span asp-validation-for="CurrentPriceId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+          <input type="submit" value="Create" class="btn btn-outline-dark" />
+        </div>
+      </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $('#Kit').change(function () {
+      KitToggle();
+    });
+    $('#kit-type').val('0');
+  });
+
+  function KitToggle() {
+    if ($('#Kit').prop('checked')) {
+      $('#volume').val('');
+      $('#volume').attr('readonly', true);
+      $('#ph').val('');
+      $('#ph').attr('readonly', true);
+      $('#stock').val('');
+      $('#stock').attr('readonly', true);
+      $('#ingredient').attr('disabled', true);
+      $('#kit-type').attr('disabled', false);
+      $('#kit-products').attr('disabled', false);
+
+    } else {
+      $('#volume').attr('readonly', false);
+      $('#ph').attr('readonly', false);
+      $('#stock').attr('readonly', false);
+      $('#ingredient').attr('disabled', false);
+      $('#kit-type').attr('disabled', true);
+      $('#kit-type').val('0');
+      $('#kit-products').attr('disabled', true);
+    }
+  }
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

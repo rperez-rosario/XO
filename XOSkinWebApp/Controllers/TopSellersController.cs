@@ -38,8 +38,10 @@ namespace XOSkinWebApp.Controllers
           new ProductModel(sp.Id.ToString(), sp.Images.ElementAt(0).Src, sp.Title, sp.BodyHtml, 
           sp.Variants.ElementAt(0).Price));
       }
+
       ViewData.Add("TopSellers.WelcomeText", _context.LocalizedTexts.Where(
         x => x.PlacementPointCode.Equals("TopSellers.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      
       return View(productModel);
     }
 

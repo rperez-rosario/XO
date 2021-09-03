@@ -1,0 +1,91 @@
+﻿@model IEnumerable<XOSkinWebApp.Areas.Administration.Models.ProductViewModel>
+
+@{
+    ViewData["Title"] = "Products";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Products</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table table-responsive" id="Products">
+  <thead>
+    <tr>
+      <th>
+          Shopify Id
+      </th>
+      <th style="width: 100px">
+          @Html.DisplayNameFor(model => model.Sku)
+      </th>
+      <th>
+          @Html.DisplayNameFor(model => model.Name)
+      </th>
+      <th style="width: 60px">
+          Kit Type
+      </th>
+      <th>
+          @Html.DisplayNameFor(model => model.Stock)
+      </th>
+      <th style="width: 90px">
+          Current Price
+      </th>
+      <th>
+          @Html.DisplayNameFor(model => model.Active)
+      </th>
+      <th>
+          Created By
+      </th>
+      <th>
+          @Html.DisplayNameFor(model => model.Created)
+      </th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+@foreach (var item in Model) {
+    <tr>
+      <td>
+          @Html.DisplayFor(modelItem => item.ShopifyProductId)
+      </td>
+      <td>
+          @Html.DisplayFor(modelItem => item.Sku)
+      </td>
+      <td>
+          @Html.DisplayFor(modelItem => item.Name)
+      </td>
+      <td>
+          @Html.DisplayFor(modelItem => item.KitType)
+      </td>
+      <td>
+          @Html.DisplayFor(modelItem => item.Stock)
+      </td>
+      <td>
+          $@Html.DisplayFor(modelItem => item.CurrentPrice)
+      </td>
+      <td>
+          @Html.DisplayFor(modelItem => item.Active)
+      </td>
+      <td>
+          @Html.DisplayFor(modelItem => item.CreatedBy)
+      </td>
+      <td>
+          @Html.Raw(item.Created.ToShortDateString())
+      </td>
+      <td style="width: 100px">
+          <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> | <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+      </td>
+    </tr>
+}
+    </tbody>
+</table>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#Products').DataTable();
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+</script>
