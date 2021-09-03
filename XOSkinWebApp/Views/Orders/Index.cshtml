@@ -12,13 +12,19 @@
 <thead>
   <tr>
     <th>
-      Order Id
+      Confirmation Number
     </th>
     <th>
       Date Placed
     </th>
     <th>
-      Arrives
+      Recipient
+    </th>
+    <th>
+      Items
+    </th>
+    <th>
+      Arrival
     </th>
     <th>
       Carrier
@@ -30,14 +36,20 @@
   </tr>
 </thead>
 <tbody>
-  @foreach (var item in Model)
-  {
+@foreach (var item in Model)
+{
   <tr>
     <td>
-      @Html.DisplayFor(modelItem => item.OrderId)
+      @Html.Raw("#XO" + (item.OrderId + 10000))
     </td>
     <td>
       @Html.Raw(item.DatePlaced == null ? String.Empty : item.DatePlaced.Value.ToShortDateString())
+    </td>
+    <td>
+      @Html.Raw(item.Recipient)
+    </td>
+    <td>
+      @Html.Raw(item.NumberOfItems)
     </td>
     <td>
       @Html.Raw(item.Arrives == null ? String.Empty : item.Arrives.Value.ToShortDateString())
@@ -49,10 +61,10 @@
       @Html.DisplayFor(modelItem => item.TrackingNumber)
     </td>
     <td>
-      <a asp-action="Detail" asp-route-id="@item.OrderId">Detail</a>
+      <a asp-action="Detail" asp-route-id="@item.OrderId">Details</a>
     </td>
   </tr>
-  }
+}
 </tbody>
 </table>
 <script type="text/javascript">

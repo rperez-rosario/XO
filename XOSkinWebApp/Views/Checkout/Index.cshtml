@@ -116,10 +116,20 @@ else
             <input asp-for="CreditCardExpirationDate" class="form-control" type="Month" />
             <span asp-validation-for="CreditCardExpirationDate" class="text-danger"></span>
           </div>
+          <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(Model.SubTotal.ToString())</div>
+          <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(Model.Taxes.ToString())</div>
+          <div style="text-align: right; margin-right: 40px">Shipping: +$@Html.Raw(Model.ShippingCharges.ToString())</div>
+          <div style="text-align: right; margin-right: 40px">Code Discount: -$@Html.Raw(Model.CodeDiscount).ToString()</div>
+          <div style="text-align: right; margin-right: 40px">Coupon Discount: -$@Html.Raw(Model.CouponDiscount).ToString()</div>
+          <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(Model.Total).ToString()</div>
+          <br />
+          <div style="text-align: right; margin-right: 40px">
+            <input id="place-order-button" type="submit" value="PlaceOrder" class="btn-outline-dark btn" />
+          </div>
         </div>
       </div>
     </div>
-    <h4>Items in this Order</h4>
+    <h4>Items in Your Order</h4>
     <table class="table table-responsive" id="ShoppingCart" style="margin-left: auto; margin-right: auto">
       <thead>
         <tr>
@@ -134,7 +144,7 @@ else
         @foreach (ShoppingCartLineItemViewModel lineItem in Model.LineItem)
         {
           <tr>
-            <td><img src="@lineItem.ImageSource" style="height: 150px; display: inline; float: left" /></td>
+            <td><img src="@lineItem.ImageSource" style="height: 100px; display: inline; float: left" /></td>
             <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
             <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
             <td style="width: 170px">
@@ -155,17 +165,6 @@ else
     <input type="hidden" asp-for="CouponDiscount" value="@Model.CouponDiscount.ToString()" />
     <input type="hidden" asp-for="ExpectedToArrive" value="@Model.ExpectedToArrive" />
     <input type="hidden" asp-for="ShippingCarrier" value="@Model.ShippingCarrier" />
-
-    <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(Model.SubTotal.ToString())</div>
-    <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(Model.Taxes.ToString())</div>
-    <div style="text-align: right; margin-right: 40px">Shipping: +$@Html.Raw(Model.ShippingCharges.ToString())</div>
-    <div style="text-align: right; margin-right: 40px">Code Discount: -$@Html.Raw(Model.CodeDiscount).ToString()</div>
-    <div style="text-align: right; margin-right: 40px">Coupon Discount: -$@Html.Raw(Model.CouponDiscount).ToString()</div>
-    <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(Model.Total).ToString()</div>
-    <br />
-    <div style="text-align: right; margin-right: 40px">
-      <input id="place-order-button" type="submit" value="PlaceOrder" class="btn-outline-dark btn" />
-    </div>
   </form>
   <script type="text/javascript">
     $(document).ready(function () {

@@ -31,6 +31,8 @@ namespace XOSkinWebApp.Controllers
         {
           OrderId = o.Id,
           Arrives = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.Arrives).FirstOrDefault(),
+          Recipient = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.RecipientName).FirstOrDefault(),
+          NumberOfItems = TotalQuantityOfItems(o.Id),
           Carrier = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.CarrierName).FirstOrDefault(),
           DatePlaced = o.DatePlaced,
           TrackingNumber = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault()
@@ -120,8 +122,8 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while retrieving order details.", ex);
       }
 
-      ViewData.Add("OrderArchiveDetail.WelcomeText", _context.LocalizedTexts.Where(
-        x => x.PlacementPointCode.Equals("OrderArchiveDetail.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("OrderDetails.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("OrderDetails.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
       return View(checkout);
     }
@@ -144,6 +146,17 @@ namespace XOSkinWebApp.Controllers
         return false;
 
       return true;
+    }
+
+    private int TotalQuantityOfItems(long OrderId)
+    {
+      int total = 0;
+
+      foreach (ProductOrderLineItem lineItem in _context.ProductOrderLineItems.Where(
+        x => x.ProductOrder == OrderId))
+        total += lineItem.Quantity;
+
+      return total;
     }
   }
 }

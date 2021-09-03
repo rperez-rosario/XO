@@ -9,6 +9,8 @@ namespace XOSkinWebApp.Models
   {
     public long OrderId { get; set; }
     public DateTime? DatePlaced { get; set; }
+    public String Recipient { get; set; }
+    public  int NumberOfItems { get; set; }
     public DateTime? Arrives { get; set; }
     public String Carrier { get; set; }
     public String TrackingNumber { get; set; }
