@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace XOSkinWebApp.Areas.Administration.Models
     [Required(ErrorMessage ="An SKU is required.")]
     public String Sku { get; set; }
 
+    [Remote("ProductNameAvailable", "Product", ErrorMessage = "Product name already registered.", AdditionalFields = "ActionCreate, OriginalProductName")]
     [Required(ErrorMessage ="A name is required.")]
     public String Name { get; set; }
 
@@ -31,11 +33,15 @@ namespace XOSkinWebApp.Areas.Administration.Models
 
     public short? KitType { get; set; }
 
+    public String KitTypeName { get; set; }
+
     public ICollection<KitProduct> KitProduct { get; set; }
 
     public decimal? VolumeInFluidOunces { get; set; }
 
     public decimal? Ph { get; set; }
+
+    public decimal? ShippingWeightLb { get; set; }
 
     public ICollection<ProductIngredient> Ingredient { get; set; }
 

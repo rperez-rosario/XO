@@ -27,15 +27,18 @@ namespace XOSkinWebApp.Controllers
     public IActionResult Index()
     {
       List<ProductModel> productModel = new List<ProductModel>();
+      List<ORM.Product> product = null;
 
-      IEnumerable<ShopifySharp.Product> product = GetShopifyProducts(_option.Value.ShopifyUrl,
-        _option.Value.ShopifyStoreFrontAccessToken).Result;
+      product = _context.Products.Where(
+        x => x.Active == true).Where(
+        x => x.ProductType == 1).Where( // 1 = "Lip Cream."
+        x => x.KitType == null).ToList<ORM.Product>();
 
-      foreach (ShopifySharp.Product sp in product)
+      foreach (ORM.Product p in product)
       {
         productModel.Add(
-          new ProductModel(sp.Id.ToString(), sp.Images.ElementAt(0).Src, sp.Title, sp.BodyHtml,
-          sp.Variants.ElementAt(0).Price));
+          new ProductModel(p.Id.ToString(), p.ImagePathLarge, p.Name, p.Description,
+          _context.Prices.Where(x => x.Id == p.CurrentPrice).Select(x => x.Amount).FirstOrDefault()));
       }
 
       ViewData.Add("YourLipsAndSmile.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("YourLipsAndSmile.WelcomeText")).Select(x => x.Text).FirstOrDefault());
@@ -58,7 +61,7 @@ namespace XOSkinWebApp.Controllers
         try
         {
           user = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
-          product = _context.Products.Where(x => x.ShopifyProductId.Equals(id)).FirstOrDefault();
+          product = _context.Products.Where(x => x.Id == id).FirstOrDefault();
           cartHistory = new ShoppingCartHistory();
           shoppingCart = _context.ShoppingCarts.Where(x => x.User.Equals(user.Id)).FirstOrDefault();
           cartLineItemList = _context.ShoppingCartLineItems.Where(x => x.ShoppingCart == shoppingCart.Id).ToList();

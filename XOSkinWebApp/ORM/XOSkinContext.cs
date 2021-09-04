@@ -915,6 +915,8 @@ namespace XOSkinWebApp.ORM
                     .HasColumnType("decimal(18, 2)")
                     .HasColumnName("PH");
 
+                entity.Property(e => e.ShippingWeightLb).HasColumnType("decimal(18, 2)");
+
                 entity.Property(e => e.Sku)
                     .IsRequired()
                     .IsUnicode(false)

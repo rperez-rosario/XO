@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -58,6 +59,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           Ingredient = p.ProductIngredients,
           KitProduct = p.KitProducts,
           KitType = p.KitType,
+          KitTypeName = _context.KitTypes.Where(x => x.Id == p.KitType).Select(x => x.Name).FirstOrDefault(),
           LastUpdated = p.LastUpdated,
           LastUpdatedBy = p.LastUpdatedBy,
           Name = p.Name,
@@ -103,12 +105,111 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     public async Task<IActionResult> Create([Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,Stock,CurrentPrice,CurrentPriceId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
       IFormFile ImageLarge, long[] KitProduct, long[] Ingredient)
     {
+      Product product = null;
+      String filePathPrefix = "wwwroot/img/product/xo-img-pid-";
+      String srcPathPrefix = "/img/product/xo-img-pid-";
+      FileStream stream = null;
+      int i = 0;
+
       if (ModelState.IsValid)
       {
-        //_context.Add(productViewModel);
-        //await _context.SaveChangesAsync();
-        //return RedirectToAction(nameof(Index));
+        try
+        {
+          product = new Product()
+          {
+            Active = productViewModel.Active,
+            Created = DateTime.UtcNow,
+            CreatedBy = _context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+            CurrentPrice = productViewModel.CurrentPriceId,
+            Description = productViewModel.Description,
+            LastUpdated = null,
+            LastUpdatedBy = null,
+            Name = productViewModel.Name.Trim(),
+            Ph = productViewModel.Ph,
+            ProductType = productViewModel.ProductType,
+            ProductCategory = 6, // General product category.
+            ShopifyProductId = 1234567890, // TODO: Map this.
+            Sku = productViewModel.Sku,
+            Stock = productViewModel.Stock,
+            VolumeInFluidOunces = productViewModel.VolumeInFluidOunces,
+            ShippingWeightLb = productViewModel.ShippingWeightLb
+          };
+          _context.Add(product);
+          _context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while writing the product entity to the database.", ex);
+        }
+        
+        try
+        {
+          if (ImageLarge != null && ImageLarge.Length > 0)
+          {
+            if (ImageLarge.FileName.LastIndexOf(".jpg") + 4 == ImageLarge.FileName.Length 
+              || ImageLarge.FileName.LastIndexOf(".jpeg") + 5 == ImageLarge.FileName.Length)
+            {
+              using (stream = System.IO.File.Create(filePathPrefix + product.Id.ToString() + ".jpg"))
+              {
+                await ImageLarge.CopyToAsync(stream);
+              }
+              product.ImagePathLarge = srcPathPrefix + product.Id.ToString() + ".jpg";
+              _context.Update(product);
+              _context.SaveChanges();
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while saving the attached image.", ex);
+        }
+
+        try
+        {
+          if (productViewModel.Kit)
+          {
+            product.KitType = productViewModel.KitType;
+
+            for (; i < KitProduct.Length; i++)
+            {
+              _context.KitProducts.Add(new KitProduct()
+              {
+                Kit = product.Id,
+                Product = KitProduct[i]
+              });
+            }
+            await _context.SaveChangesAsync();
+          }
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while writing the kit products to the database.", ex);
+        }
+
+        try
+        {
+          if (!productViewModel.Kit)
+          {
+            for (i = 0; i < Ingredient.Length; i++)
+            {
+              _context.ProductIngredients.Add(new ProductIngredient()
+              {
+                Product = product.Id,
+                Ingredient = Ingredient[i]
+              });
+            }
+            await _context.SaveChangesAsync();
+          }
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while writing the product ingredients to the database.", ex);
+        }
+
+        return RedirectToAction(nameof(Index));
       }
+
       return View(productViewModel);
     }
 
@@ -163,38 +264,20 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       return View(productViewModel);
     }
 
-    // GET: Administration/Product/Delete/5
-    public async Task<IActionResult> Delete(long? id)
-    {
-      if (id == null)
-      {
-        return NotFound();
-      }
-
-      var productViewModel = await _context.Products
-          .FirstOrDefaultAsync(m => m.Id == id);
-      if (productViewModel == null)
-      {
-        return NotFound();
-      }
-
-      return View(productViewModel);
-    }
-
-    // POST: Administration/Product/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(long id)
-    {
-      var productViewModel = await _context.Products.FindAsync(id);
-      _context.Products.Remove(productViewModel);
-      await _context.SaveChangesAsync();
-      return RedirectToAction(nameof(Index));
-    }
-
     private bool ProductViewModelExists(long id)
     {
       return _context.Products.Any(e => e.Id == id);
+    }
+
+    public JsonResult ProductNameAvailable(String Name, bool ActionCreate, String OriginalProductName)
+    {
+      if (OriginalProductName == null)
+        OriginalProductName = String.Empty;
+      if (ActionCreate || (!ActionCreate && !Name.Equals(OriginalProductName)))
+      {
+        return Json(!_context.Products.Any(x => x.Name.Equals(Name.Trim())));
+      }
+      return Json(true);
     }
   }
 }

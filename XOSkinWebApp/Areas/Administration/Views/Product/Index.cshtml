@@ -28,7 +28,7 @@
       <th>
           @Html.DisplayNameFor(model => model.Stock)
       </th>
-      <th style="width: 130px">
+      <th style="width: 95px">
           Current Price
       </th>
       <th>
@@ -56,7 +56,7 @@
           @Html.DisplayFor(modelItem => item.Name)
       </td>
       <td>
-          @Html.DisplayFor(modelItem => item.KitType)
+          @Html.DisplayFor(modelItem => item.KitTypeName)
       </td>
       <td>
           @Html.DisplayFor(modelItem => item.Stock)
@@ -73,8 +73,8 @@
       <td>
           @Html.Raw(item.Created.ToShortDateString())
       </td>
-      <td style="width: 100px">
-          <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> | <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+      <td style="width: 60px">
+          <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
       </td>
     </tr>
 }

@@ -10,7 +10,6 @@ namespace XOSkinWebApp.ORM
         public int Id { get; set; }
         public long? Kit { get; set; }
         public long Product { get; set; }
-        public short Quantity { get; set; }
 
         public virtual Product KitNavigation { get; set; }
     }

@@ -30,6 +30,7 @@ namespace XOSkinWebApp.ORM
         public short? KitType { get; set; }
         public decimal? VolumeInFluidOunces { get; set; }
         public decimal? Ph { get; set; }
+        public decimal? ShippingWeightLb { get; set; }
         public long? Stock { get; set; }
         public long CurrentPrice { get; set; }
         public string ImagePathSmall { get; set; }
