@@ -51,6 +51,8 @@ namespace XOSkinWebApp.Areas.Administration.Models
 
     public decimal CurrentPrice { get; set; }
 
+    public decimal CurrentCost { get; set; }
+
     public String ImagePathSmall { get; set; }
 
     public String ImagePathMedium { get; set; }

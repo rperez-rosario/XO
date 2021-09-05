@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using XOSkinWebApp.Areas.Administration.Models;
 using XOSkinWebApp.ORM;
+using ShopifySharp;
+using Microsoft.Extensions.Options;
+using XOSkinWebApp.ConfigurationHelper;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
@@ -18,16 +21,18 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
   public class ProductController : Controller
   {
     private readonly XOSkinContext _context;
+    private readonly IOptions<Option> _option;
 
-    public ProductController(XOSkinContext context)
+    public ProductController(XOSkinContext context, IOptions<Option> option)
     {
       _context = context;
+      _option = option;
     }
 
     // GET: Administration/Product
     public async Task<IActionResult> Index()
     {
-      List<Product> product = null;
+      List<ORM.Product> product = null;
       List<ProductViewModel> productViewModel = null;
 
       try
@@ -41,7 +46,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
       productViewModel = new List<ProductViewModel>();
 
-      foreach (Product p in product)
+      foreach (ORM.Product p in product)
       {
         productViewModel.Add(new ProductViewModel()
         {
@@ -106,20 +111,93 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,Stock,CurrentPrice,CurrentPriceId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
+    public async Task<IActionResult> Create([Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurrentPriceId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
       IFormFile ImageLarge, long[] KitProduct, long[] Ingredient)
     {
-      Product product = null;
+      ORM.Product product = null;
+      ShopifySharp.Product sProduct = null;
+      ProductService sProductService = null;
+      ProductVariantService sProductVariantService = null;
+      InventoryLevelService sInventoryLevelService = null;
+      ShopifySharp.InventoryItemService sInventoryItemService = null;
+      ProductVariant sProductVariant = null;
+      LocationService sLocationService = null;
+      List<Location> sLocation = null;
+      InventoryItem sInventoryItem = null;
+
       String filePathPrefix = "wwwroot/img/product/xo-img-pid-";
       String srcPathPrefix = "/img/product/xo-img-pid-";
       FileStream stream = null;
       int i = 0;
-
+      
       if (ModelState.IsValid)
       {
         try
         {
-          product = new Product()
+          sProductService = new ProductService(_option.Value.ShopifyUrl, 
+            _option.Value.ShopifyStoreFrontAccessToken);
+          sProductVariantService = new ProductVariantService(_option.Value.ShopifyUrl, 
+            _option.Value.ShopifyStoreFrontAccessToken);
+          sInventoryLevelService = new InventoryLevelService(_option.Value.ShopifyUrl, 
+            _option.Value.ShopifyStoreFrontAccessToken);
+          sLocationService = new LocationService(_option.Value.ShopifyUrl, 
+            _option.Value.ShopifyStoreFrontAccessToken);
+          sInventoryItemService = new InventoryItemService(_option.Value.ShopifyUrl,
+            _option.Value.ShopifyStoreFrontAccessToken);
+
+          sProduct = new ShopifySharp.Product()
+          {
+            BodyHtml = productViewModel.Description,
+            CreatedAt = productViewModel.Created,
+            ProductType = _context.ProductTypes.Where(
+              x => x.Id == productViewModel.Id).Select(x => x.Name).FirstOrDefault(),
+            Status = productViewModel.Active ? "active" : "draft",
+            Title = productViewModel.Name,
+            PublishedAt = DateTime.UtcNow
+          };
+
+          sProduct = await sProductService.CreateAsync(sProduct);
+
+          sProductVariant = sProduct.Variants.First();
+          sProductVariant.Price = _context.Prices.Where(
+            x => x.Id == productViewModel.CurrentPriceId).Select(x => x.Amount).FirstOrDefault();
+          sProductVariant.SKU = productViewModel.Sku;
+          sProductVariant.Taxable = true;
+          sProductVariant.TaxCode = "92127";
+          sProductVariant.Weight = productViewModel.ShippingWeightLb;
+          sProductVariant.WeightUnit = "lb";
+          sProductVariant.RequiresShipping = true;
+          sProductVariant.UpdatedAt = DateTime.UtcNow;
+          sProductVariant.InventoryQuantity = null;
+
+          await sProductVariantService.UpdateAsync((long)sProductVariant.Id, sProductVariant);
+
+          sLocation = (List<Location>)await sLocationService.ListAsync();
+
+          sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
+          
+          sInventoryItem.Tracked = true;
+          sInventoryItem.Cost = _context.Prices.Where(
+            x => x.Id == productViewModel.CurrentPriceId).Select(
+            x => x.Amount).FirstOrDefault(); // Map this to a cost field once scaffolded.
+
+          await sInventoryItemService.UpdateAsync((long)sProductVariant.InventoryItemId, sInventoryItem);
+
+          await sInventoryLevelService.SetAsync(new InventoryLevel()
+          {
+            Available = (int)productViewModel.Stock,
+            InventoryItemId = sProductVariant.InventoryItemId,
+            LocationId = sLocation.First().Id // Map this to future additional locations.
+          });
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while writing the product entity to Shopify.", ex);
+        }
+
+        try
+        {
+          product = new ORM.Product()
           {
             Active = productViewModel.Active,
             Created = DateTime.UtcNow,
@@ -132,9 +210,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             Name = productViewModel.Name.Trim(),
             Ph = productViewModel.Ph,
             ProductType = productViewModel.ProductType,
-            ProductCategory = 6, // General product category.
-            ShopifyProductId = 1234567890, // TODO: Map this.
-            Sku = productViewModel.Sku,
+            ProductCategory = 6, // General product category, we can write categories, sub-categories and sub-under-categories.
+            ShopifyProductId = sProduct.Id,
+            Sku = productViewModel.Sku.Trim(),
             Stock = productViewModel.Stock,
             VolumeInFluidOunces = productViewModel.VolumeInFluidOunces,
             ShippingWeightLb = productViewModel.ShippingWeightLb
@@ -146,7 +224,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         {
           throw new Exception("An error was encountered while writing the product entity to the database.", ex);
         }
-        
+
         try
         {
           if (ImageLarge != null && ImageLarge.Length > 0)
