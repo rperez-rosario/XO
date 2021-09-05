@@ -25,7 +25,7 @@ namespace XOSkinWebApp.Controllers
 
       foreach (ProductOrder o in _context.ProductOrders.Where(
         x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())))
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).OrderByDescending(x => x.DatePlaced))
       {
         order.Add(new OrderViewModel()
         {

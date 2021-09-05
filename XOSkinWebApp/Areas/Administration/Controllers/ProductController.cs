@@ -32,7 +32,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
       try
       {
-        product = await _context.Products.ToListAsync();
+        product = await _context.Products.OrderByDescending(x => x.Created).ToListAsync();
       }
       catch (Exception ex)
       {
@@ -85,9 +85,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         ViewData["Price"] = new SelectList(_context.Prices.Where(
           x => x.ValidFrom <= DateTime.UtcNow).Where(
           x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
-        ViewData["Ingredient"] = new MultiSelectList(_context.Ingredients, "Id", "Name");
+        ViewData["Ingredient"] = new MultiSelectList(_context.Ingredients.OrderBy(x => x.Name), "Id", "Name");
         ViewData["KitType"] = new SelectList(_context.KitTypes, "Id", "Name");
-        ViewData["Product"] = new SelectList(_context.Products.Where(x => x.Active == true), "Id", "Name");
+        ViewData["Product"] = new SelectList(_context.Products.Where(
+          x => x.Active == true).Where(
+          x => x.KitType == null).OrderBy(x => x.Name), "Id", "Name");
       }
       catch (Exception ex)
       {

@@ -15,7 +15,7 @@
       <div class="col-sm-6">
         <div class="form-group">
           <label asp-for="ImageLarge" class="control-label font-weight-bolder" id="image-large">Product Image File (Only .jpg or .jpeg files admitted.)</label>
-          <input asp-for="ImageLarge" type="file" /><br />
+          <input asp-for="ImageLarge" class="btn btn-outline-dark" type="file" /><br />
           <span asp-validation-for="ImageLarge" class="text-danger"></span>
         </div>
         <div class="form-group form-check">
@@ -49,19 +49,19 @@
           <span asp-validation-for="KitType" class="text-danger"></span>
         </div>
         <div class="form-group">
-          <label asp-for="KitProduct" class="control-label">Kit Products (Press Ctrl to select more than one.)</label>
+          <label asp-for="KitProduct" class="control-label font-weight-bolder">Kit Products (Hold-down the Ctrl key to select or deselect more than one.)</label>
           <select asp-for="KitProduct" class="form-control" asp-items="ViewBag.Product" disabled id="kit-products" size="6"></select>
           <span asp-validation-for="KitProduct" class="text-danger"></span>
         </div>
       </div>
       <div class="col-sm-6" style="padding-left: 10px; padding-right: 10px">
         <div class="form-group">
-          <label asp-for="ProductType" class="control-label">ProductType</label>
-          <select asp-for="ProductType" class="form-control" asp-items="ViewBag.ProductType"></select>
+          <label asp-for="ProductType" class="control-label font-weight-bolder">ProductType</label>
+          <select asp-for="ProductType" class="form-control" asp-items="ViewBag.ProductType" id="product-type"></select>
           <span asp-validation-for="ProductType" class="text-danger"></span>
         </div>
         <div class="form-group">
-          <label asp-for="Ingredient" class="control-label">Ingredients (Press Ctrl to select more than one.)</label>
+          <label asp-for="Ingredient" class="control-label font-weight-bolder">Ingredients (Hold-down the Ctrl key to select or deselect more than one.)</label>
           <select asp-for="Ingredient" class="form-control" asp-items="ViewBag.Ingredient" id="ingredient" size="8"></select>
           <span asp-validation-for="Ingredient" class="text-danger"></span>
         </div>
@@ -71,22 +71,22 @@
           <span asp-validation-for="VolumeInFluidOunces" class="text-danger"></span>
         </div>
         <div class="form-group">
-          <label asp-for="Ph" class="control-label"></label>
+          <label asp-for="Ph" class="control-label">pH Balance</label>
           <input asp-for="Ph" class="form-control" id="ph" />
           <span asp-validation-for="Ph" class="text-danger"></span>
         </div>
         <div class="form-group">
-          <label asp-for="ShippingWeightLb" class="control-label">Shipping Weight in Pounds (lb)</label>
-          <input asp-for="ShippingWeightLb" class="form-control" id="shipping-weight" />
+          <label asp-for="ShippingWeightLb" class="control-label font-weight-bolder">Shipping Weight in Pounds (lb)</label>
+          <input asp-for="ShippingWeightLb" class="form-control" type="text" id="shipping-weight" />
           <span asp-validation-for="ShippingWeightLb" class="text-danger"></span>
         </div>
         <div class="form-group">
           <label asp-for="Stock" class="control-label">Original Stock</label>
-          <input asp-for="Stock" class="form-control" id="stock" />
+          <input asp-for="Stock" class="form-control" type="text" id="stock" />
           <span asp-validation-for="Stock" class="text-danger"></span>
         </div>
         <div class="form-group">
-          <label asp-for="CurrentPriceId" class="control-label">Current Price</label>
+          <label asp-for="CurrentPriceId" class="control-label font-weight-bolder">Current Price</label>
           <select asp-for="CurrentPriceId" class="form-control" asp-items="ViewBag.Price"></select>
           <span asp-validation-for="CurrentPriceId" class="text-danger"></span>
         </div>
@@ -110,40 +110,31 @@
       KitToggle();
     });
     $('#kit-type').val('0');
+    $('#product-type').val('0');
   });
-
-  $('#create').submit(function (e) {
-    validateImagePath(e);
-  });
-
-  alert($("#image-large").size());
-
-  function validateImagePath(e) {
-    ($("#image-large").prop('size').trim() == '')
-    {
-      e.preventDefault();
-    }
-  }
 
   function KitToggle() {
     if ($('#Kit').prop('checked')) {
-      $('#volume').val('');
-      $('#volume').attr('readonly', true);
-      $('#ph').val('');
-      $('#ph').attr('readonly', true);
-      $('#stock').val('');
-      $('#stock').attr('readonly', true);
-      $('#shipping-weight').val('');
-      $('#shipping-weight').attr('readonly', true);
+      $('#volume').val('Will be calculated based on selected kit products.');
+      $('#volume').attr('disabled', true);
+      $('#ph').val('Will be calculated based on selected kit products.');
+      $('#ph').attr('disabled', true);
+      $('#stock').val('Will be calculated based on selected kit products.');
+      $('#stock').attr('disabled', true);
+      $('#shipping-weight').val('Will be calculated based on selected kit products');
+      $('#shipping-weight').attr('disabled', true);
       $('#ingredient').attr('disabled', true);
       $('#kit-type').attr('disabled', false);
       $('#kit-products').attr('disabled', false);
-
     } else {
-      $('#volume').attr('readonly', false);
-      $('#ph').attr('readonly', false);
-      $('#shipping-weight').attr('readonly', false);
-      $('#stock').attr('readonly', false);
+      $('#volume').attr('disabled', false);
+      $('#volume').val('');
+      $('#ph').attr('disabled', false);
+      $('#ph').val('');
+      $('#shipping-weight').attr('disabled', false);
+      $('#shipping-weight').val('');
+      $('#stock').attr('disabled', false);
+      $('#stock').val('');
       $('#ingredient').attr('disabled', false);
       $('#kit-type').attr('disabled', true);
       $('#kit-type').val('0');

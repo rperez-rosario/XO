@@ -69,7 +69,9 @@
 </table>
 <script type="text/javascript">
   $(document).ready(function () {
-    var table = $('#Orders').DataTable();
+    var table = $('#Orders').DataTable({
+      'order': [[ 1, 'desc']]
+    });
 
     new $.fn.dataTable.Responsive(table, {
       details: true

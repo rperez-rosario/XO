@@ -82,7 +82,9 @@
 </table>
 <script type="text/javascript">
   $(document).ready(function () {
-    var table = $('#Products').DataTable();
+    var table = $('#Products').DataTable({
+      'order': [[8, 'desc']]
+    });
 
     new $.fn.dataTable.Responsive(table, {
       details: true
