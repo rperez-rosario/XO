@@ -68,7 +68,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           ProductType = p.ProductType,
           Sku = p.Sku,
           Stock = p.Stock,
-          VolumeInFluidOunces = p.VolumeInFluidOunces
+          VolumeInFluidOunces = p.VolumeInFluidOunces,
+          ShippingWeightLb = p.ShippingWeightLb
+          
         });
       }
 
