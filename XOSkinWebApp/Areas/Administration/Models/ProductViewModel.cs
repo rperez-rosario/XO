@@ -15,6 +15,7 @@ namespace XOSkinWebApp.Areas.Administration.Models
 
     public long? ShopifyProductId { get; set; }
 
+    [Remote("SkuAvailable", "Product", ErrorMessage = "SKU already registered.", AdditionalFields = "ActionCreate, OriginalSku")]
     [Required(ErrorMessage ="An SKU is required.")]
     public String Sku { get; set; }
 

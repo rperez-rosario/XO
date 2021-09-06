@@ -75,7 +75,6 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           Stock = p.Stock,
           VolumeInFluidOunces = p.VolumeInFluidOunces,
           ShippingWeightLb = p.ShippingWeightLb
-          
         });
       }
 
@@ -161,7 +160,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           sProductVariant = sProduct.Variants.First();
           sProductVariant.Price = _context.Prices.Where(
             x => x.Id == productViewModel.CurrentPriceId).Select(x => x.Amount).FirstOrDefault();
-          sProductVariant.SKU = productViewModel.Sku;
+          sProductVariant.SKU = productViewModel.Sku.Trim();
           sProductVariant.Taxable = true;
           sProductVariant.TaxCode = "92127";
           sProductVariant.Weight = productViewModel.ShippingWeightLb;
@@ -358,6 +357,17 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       if (ActionCreate || (!ActionCreate && !Name.Equals(OriginalProductName)))
       {
         return Json(!_context.Products.Any(x => x.Name.Equals(Name.Trim())));
+      }
+      return Json(true);
+    }
+
+    public JsonResult SkuAvailable(String Sku, bool ActionCreate, String OriginalSku)
+    {
+      if (OriginalSku == null)
+        OriginalSku = String.Empty;
+      if (ActionCreate || (!ActionCreate && !Sku.Equals(OriginalSku)))
+      {
+        return Json(!_context.Products.Any(x => x.Sku.Equals(Sku.Trim())));
       }
       return Json(true);
     }

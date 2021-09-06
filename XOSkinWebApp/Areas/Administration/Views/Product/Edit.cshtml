@@ -114,6 +114,7 @@
         </div>
         @Html.Hidden("ActionCreate", "False")
         @Html.Hidden("OriginalProductName", "")
+        @Html.Hidden("OriginalSku", "")
       </form>
     </div>
 </div>
@@ -123,6 +124,7 @@
 <script type="text/javascript">
   $(document).ready(function () {
     $("#OriginalProductName").val($("#Name").val());
+    $("#OriginalSku").val($("#Sku").val());
   });
 </script>
 
