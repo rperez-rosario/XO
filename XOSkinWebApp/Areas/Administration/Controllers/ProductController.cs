@@ -316,7 +316,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 productIngredient.Add(new ProductIngredient()
                 {
                   Ingredient = pi.Ingredient,
-                  Product = KitProduct[i]
+                  Product = product.Id
                 });
               }
             }
