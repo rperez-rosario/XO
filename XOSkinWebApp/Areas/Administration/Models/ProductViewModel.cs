@@ -16,11 +16,11 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public long? ShopifyProductId { get; set; }
 
     [Remote("SkuAvailable", "Product", ErrorMessage = "SKU already registered.", AdditionalFields = "ActionCreate, OriginalSku")]
-    [Required(ErrorMessage ="An SKU is required.")]
+    [Required(ErrorMessage = "An SKU is required.")]
     public String Sku { get; set; }
 
     [Remote("ProductNameAvailable", "Product", ErrorMessage = "Product name already registered.", AdditionalFields = "ActionCreate, OriginalProductName")]
-    [Required(ErrorMessage ="A name is required.")]
+    [Required(ErrorMessage = "A name is required.")]
     public String Name { get; set; }
 
     [Required(ErrorMessage = "A description is required.")]
@@ -51,6 +51,8 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public long CurrentPriceId { get; set; }
 
     public decimal CurrentPrice { get; set; }
+
+    public decimal CurrentCostId { get; set; }
 
     public decimal CurrentCost { get; set; }
 

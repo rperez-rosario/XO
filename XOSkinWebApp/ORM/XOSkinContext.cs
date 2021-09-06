@@ -32,6 +32,7 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<CityStateU> CityStateUs { get; set; }
         public virtual DbSet<CommonAllergen> CommonAllergens { get; set; }
         public virtual DbSet<ContradictingIngredient> ContradictingIngredients { get; set; }
+        public virtual DbSet<Cost> Costs { get; set; }
         public virtual DbSet<DiscountCode> DiscountCodes { get; set; }
         public virtual DbSet<DiscountCodeProduct> DiscountCodeProducts { get; set; }
         public virtual DbSet<DiscountCoupon> DiscountCoupons { get; set; }
@@ -333,6 +334,23 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.IngredientB)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ContradictingIngredient_Ingredient1");
+            });
+
+            modelBuilder.Entity<Cost>(entity =>
+            {
+                entity.ToTable("Cost");
+
+                entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.CreatedBy)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(e => e.CreatedOn).HasColumnType("datetime");
+
+                entity.Property(e => e.ValidFrom).HasColumnType("datetime");
+
+                entity.Property(e => e.ValidTo).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<DiscountCode>(entity =>
@@ -923,6 +941,11 @@ namespace XOSkinWebApp.ORM
                     .HasColumnName("SKU");
 
                 entity.Property(e => e.VolumeInFluidOunces).HasColumnType("decimal(18, 2)");
+
+                entity.HasOne(d => d.CostNavigation)
+                    .WithMany(p => p.Products)
+                    .HasForeignKey(d => d.Cost)
+                    .HasConstraintName("FK_Product_Cost1");
 
                 entity.HasOne(d => d.CreatedByNavigation)
                     .WithMany(p => p.ProductCreatedByNavigations)

@@ -33,6 +33,7 @@ namespace XOSkinWebApp.ORM
         public decimal? ShippingWeightLb { get; set; }
         public long? Stock { get; set; }
         public long CurrentPrice { get; set; }
+        public long? Cost { get; set; }
         public string ImagePathSmall { get; set; }
         public string ImagePathMedium { get; set; }
         public string ImagePathLarge { get; set; }
@@ -42,6 +43,7 @@ namespace XOSkinWebApp.ORM
         public string LastUpdatedBy { get; set; }
         public DateTime? LastUpdated { get; set; }
 
+        public virtual Cost CostNavigation { get; set; }
         public virtual AspNetUser CreatedByNavigation { get; set; }
         public virtual Price CurrentPriceNavigation { get; set; }
         public virtual KitType KitTypeNavigation { get; set; }

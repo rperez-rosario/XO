@@ -91,6 +91,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         ViewData["Price"] = new SelectList(_context.Prices.Where(
           x => x.ValidFrom <= DateTime.UtcNow).Where(
           x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
+        ViewData["Cost"] = new SelectList(_context.Costs.Where(
+          x => x.ValidFrom <= DateTime.UtcNow).Where(
+          x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
         ViewData["Ingredient"] = new MultiSelectList(_context.Ingredients.OrderBy(x => x.Name), "Id", "Name");
         ViewData["KitType"] = new SelectList(_context.KitTypes, "Id", "Name");
         ViewData["Product"] = new SelectList(_context.Products.Where(
@@ -110,7 +113,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurrentPriceId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
+    public async Task<IActionResult> Create([Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
       IFormFile ImageLarge, long[] KitProduct, long[] Ingredient)
     {
       ORM.Product product = null;
@@ -118,11 +121,17 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       ProductService sProductService = null;
       ProductVariantService sProductVariantService = null;
       InventoryLevelService sInventoryLevelService = null;
-      ShopifySharp.InventoryItemService sInventoryItemService = null;
+      InventoryItemService sInventoryItemService = null;
       ProductVariant sProductVariant = null;
       LocationService sLocationService = null;
       List<Location> sLocation = null;
       InventoryItem sInventoryItem = null;
+      decimal weight = 0.0M;
+      decimal pH = 0.0M;
+      decimal volume = 0.0M;
+      List<ProductIngredient> productIngredient = null;
+      bool emptyStock = false;
+      long minStock = long.MaxValue;
 
       String filePathPrefix = "wwwroot/img/product/xo-img-pid-";
       String srcPathPrefix = "/img/product/xo-img-pid-";
@@ -157,13 +166,19 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
           sProduct = await sProductService.CreateAsync(sProduct);
 
+          for (; i < KitProduct.Length; i++)
+          {
+            weight += (decimal)_context.Products.Where(
+              x => x.Id == KitProduct[i]).Select(x => x.ShippingWeightLb).FirstOrDefault();
+          }
+
           sProductVariant = sProduct.Variants.First();
           sProductVariant.Price = _context.Prices.Where(
             x => x.Id == productViewModel.CurrentPriceId).Select(x => x.Amount).FirstOrDefault();
           sProductVariant.SKU = productViewModel.Sku.Trim();
           sProductVariant.Taxable = true;
           sProductVariant.TaxCode = "92127";
-          sProductVariant.Weight = productViewModel.ShippingWeightLb;
+          sProductVariant.Weight = weight;
           sProductVariant.WeightUnit = "lb";
           sProductVariant.RequiresShipping = true;
           sProductVariant.UpdatedAt = DateTime.UtcNow;
@@ -176,15 +191,28 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
           
           sInventoryItem.Tracked = true;
-          sInventoryItem.Cost = _context.Prices.Where(
-            x => x.Id == productViewModel.CurrentPriceId).Select(
-            x => x.Amount).FirstOrDefault(); // Map this to a cost field once scaffolded.
+          sInventoryItem.Cost = _context.Costs.Where(
+            x => x.Id == productViewModel.CurrentCostId).Select(
+            x => x.Amount).FirstOrDefault();
+          sInventoryItem.CountryCodeOfOrigin = "US";
 
           await sInventoryItemService.UpdateAsync((long)sProductVariant.InventoryItemId, sInventoryItem);
 
+          if (productViewModel.Kit)
+          {
+            for (i = 0; i < KitProduct.Length; i++)
+            {
+              if (_context.Products.Where(x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault() == 0)
+                emptyStock = true;
+              if (_context.Products.Where(x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault()
+                < minStock)
+                minStock = (long)_context.Products.Where(x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault();
+            }
+          }
+
           await sInventoryLevelService.SetAsync(new InventoryLevel()
           {
-            Available = (int)productViewModel.Stock,
+            Available = emptyStock ? 0 : minStock,
             InventoryItemId = sProductVariant.InventoryItemId,
             LocationId = sLocation.First().Id // Map this to future additional locations.
           });
@@ -203,6 +231,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             CreatedBy = _context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
             CurrentPrice = productViewModel.CurrentPriceId,
+            Cost = (long)productViewModel.CurrentCostId,
             Description = productViewModel.Description,
             LastUpdated = null,
             LastUpdatedBy = null,
@@ -252,7 +281,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           {
             product.KitType = productViewModel.KitType;
 
-            for (; i < KitProduct.Length; i++)
+            for (i = 0; i < KitProduct.Length; i++)
             {
               _context.KitProducts.Add(new KitProduct()
               {
@@ -266,6 +295,48 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         catch (Exception ex)
         {
           throw new Exception("An error was encountered while writing the kit products to the database.", ex);
+        }
+
+        try
+        {
+          if (productViewModel.Kit)
+          {
+            productIngredient = new List<ProductIngredient>();
+
+            for (i = 0; i < KitProduct.Length; i++)
+            {
+              volume += (decimal)_context.Products.Where(
+                x => x.Id == KitProduct[i]).Select(x => x.VolumeInFluidOunces).FirstOrDefault();
+              pH += (decimal)_context.Products.Where(
+                x => x.Id == KitProduct[i]).Select(x => x.Ph).FirstOrDefault() *
+                (decimal)_context.Products.Where(
+                x => x.Id == KitProduct[i]).Select(x => x.VolumeInFluidOunces).FirstOrDefault();
+              foreach (ProductIngredient pi in _context.ProductIngredients.Where(x => x.Product == KitProduct[i]))
+              {
+                productIngredient.Add(new ProductIngredient()
+                {
+                  Ingredient = pi.Ingredient,
+                  Product = KitProduct[i]
+                });
+              }
+            }
+
+            pH = pH / volume;
+            productIngredient = productIngredient.Distinct().ToList();
+            product.ShippingWeightLb = weight;
+            product.VolumeInFluidOunces = volume;
+            product.Ph = pH;
+            product.Stock = emptyStock ? 0 : minStock;
+
+            _context.Products.Update(product);
+            _context.SaveChanges();
+            _context.ProductIngredients.AddRange(productIngredient);
+            _context.SaveChanges();
+          }
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while calculating kit product data and updating the product.", ex);
         }
 
         try
