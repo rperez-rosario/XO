@@ -209,15 +209,10 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 minStock = (long)_context.Products.Where(x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault();
             }
           }
-          else
-          {
-            emptyStock = false;
-            minStock = (long)productViewModel.Stock;
-          }
 
           await sInventoryLevelService.SetAsync(new InventoryLevel()
           {
-            Available = emptyStock ? 0 : minStock,
+            Available = productViewModel.Kit ? emptyStock ? 0 : minStock : (long)productViewModel.Stock,
             InventoryItemId = sProductVariant.InventoryItemId,
             LocationId = sLocation.First().Id // Map this to future additional locations.
           });
@@ -241,14 +236,14 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             LastUpdated = null,
             LastUpdatedBy = null,
             Name = productViewModel.Name.Trim(),
-            Ph = productViewModel.Ph,
             ProductType = productViewModel.ProductType,
             ProductCategory = 6, // General product category, we can write categories, sub-categories and sub-under-categories.
             ShopifyProductId = sProduct.Id,
             Sku = productViewModel.Sku.Trim(),
-            Stock = productViewModel.Stock,
             VolumeInFluidOunces = productViewModel.VolumeInFluidOunces,
-            ShippingWeightLb = productViewModel.ShippingWeightLb
+            ShippingWeightLb = productViewModel.ShippingWeightLb,
+            Ph = productViewModel.Ph,
+            Stock = productViewModel.Stock
           };
           _context.Add(product);
           _context.SaveChanges();
@@ -330,6 +325,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             }
 
             pH = pH / volume;
+
             product.ShippingWeightLb = weight;
             product.VolumeInFluidOunces = volume;
             product.Ph = pH;

@@ -35,9 +35,6 @@
           @Html.DisplayNameFor(model => model.Active)
       </th>
       <th>
-          Created By
-      </th>
-      <th>
           @Html.DisplayNameFor(model => model.Created)
       </th>
       <th></th>
@@ -68,9 +65,6 @@
           @Html.DisplayFor(modelItem => item.Active)
       </td>
       <td>
-          @Html.DisplayFor(modelItem => item.CreatedBy)
-      </td>
-      <td>
           @Html.Raw(item.Created.ToShortDateString())
       </td>
       <td style="width: 60px">
@@ -83,7 +77,7 @@
 <script type="text/javascript">
   $(document).ready(function () {
     var table = $('#Products').DataTable({
-      'order': [[8, 'desc']]
+      'order': [[7, 'desc']]
     });
 
     new $.fn.dataTable.Responsive(table, {
