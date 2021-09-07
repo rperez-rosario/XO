@@ -178,7 +178,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           sProductVariant.SKU = productViewModel.Sku.Trim();
           sProductVariant.Taxable = true;
           sProductVariant.TaxCode = "92127";
-          sProductVariant.Weight = weight;
+          sProductVariant.Weight = productViewModel.Kit ? weight : productViewModel.ShippingWeightLb;
           sProductVariant.WeightUnit = "lb";
           sProductVariant.RequiresShipping = true;
           sProductVariant.UpdatedAt = DateTime.UtcNow;
@@ -208,6 +208,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 < minStock)
                 minStock = (long)_context.Products.Where(x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault();
             }
+          }
+          else
+          {
+            emptyStock = false;
+            minStock = (long)productViewModel.Stock;
           }
 
           await sInventoryLevelService.SetAsync(new InventoryLevel()
@@ -313,16 +318,18 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 x => x.Id == KitProduct[i]).Select(x => x.VolumeInFluidOunces).FirstOrDefault();
               foreach (ProductIngredient pi in _context.ProductIngredients.Where(x => x.Product == KitProduct[i]))
               {
-                productIngredient.Add(new ProductIngredient()
+                if (productIngredient.FindAll(x => x.Ingredient == pi.Ingredient).Count == 0)
                 {
-                  Ingredient = pi.Ingredient,
-                  Product = product.Id
-                });
+                  productIngredient.Add(new ProductIngredient()
+                  {
+                    Ingredient = pi.Ingredient,
+                    Product = product.Id
+                  });
+                }
               }
             }
 
             pH = pH / volume;
-            productIngredient = productIngredient.Distinct().ToList();
             product.ShippingWeightLb = weight;
             product.VolumeInFluidOunces = volume;
             product.Ph = pH;
@@ -368,16 +375,92 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     // GET: Administration/Product/Edit/5
     public async Task<IActionResult> Edit(long? id)
     {
+      ORM.Product product = null;
+      ProductViewModel productViewModel = null;
+      List<Ingredient> ingredientList = null;
+      List<ORM.Product> productList = null;
+
       if (id == null)
       {
         return NotFound();
       }
 
-      var productViewModel = await _context.Products.FindAsync(id);
-      if (productViewModel == null)
+      try
+      {
+        product = await _context.Products.FindAsync(id);
+
+        productList = new List<ORM.Product>();
+
+        if (product.KitType != null)
+        {
+          foreach (KitProduct kp in _context.KitProducts.Where(x => x.Kit == id).ToList())
+            productList.Add(_context.Products.Where(x => x.Id == kp.Product).FirstOrDefault());
+          productList = productList.OrderBy(x => x.Name).ToList();
+        }
+
+        ingredientList = new List<Ingredient>();
+        foreach (ProductIngredient ingredient in _context.ProductIngredients.Where(x => x.Product == id).ToList())
+          ingredientList.Add(_context.Ingredients.Where(
+            x => x.Id == ingredient.Ingredient).FirstOrDefault());
+        ingredientList = ingredientList.OrderBy(x => x.Name).ToList();
+        
+        ViewData["ProductType"] = new MultiSelectList(_context.ProductTypes, "Id", "Name");
+        //ViewData["ProductCategory"] = new SelectList(_context.ProductCategories, "Id", "Name");
+        ViewData["Price"] = new SelectList(_context.Prices.Where(
+          x => x.ValidFrom <= DateTime.UtcNow).Where(
+          x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
+        ViewData["Cost"] = new SelectList(_context.Costs.Where(
+          x => x.ValidFrom <= DateTime.UtcNow).Where(
+          x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
+        ViewData["Ingredient"] = new MultiSelectList(ingredientList, "Id", "Name");
+        ViewData["KitType"] = new SelectList(_context.KitTypes, "Id", "Name");
+        ViewData["Product"] = new SelectList(productList, "Id", "Name");
+      }
+      catch (Exception ex)
+      {
+        throw new Exception("An error was encountered while loading product update form data.", ex);
+      }
+
+      if (product == null)
       {
         return NotFound();
       }
+
+      productViewModel = new ProductViewModel()
+      {
+        Id = (long)id,
+        Active = product.Active,
+        Created = product.Created,
+        CreatedByName = _context.AspNetUsers.Where(
+          x => x.Id.Equals(product.CreatedBy)).Select(x => x.Email).FirstOrDefault(),
+        CreatedBy = product.CreatedBy,
+        CurrentCostId = (long)product.Cost,
+        CurrentPriceId = (long)product.CurrentPrice,
+        Description = product.Description,
+        ImagePathLarge = product.ImagePathLarge,
+        ImagePathMedium = null,
+        ImagePathSmall = null,
+        Ingredient = await _context.ProductIngredients.Where(
+          x => x.Product == id).ToListAsync(),
+        Kit = product.KitType != null ? true : false,
+        KitProduct = await _context.KitProducts.Where(
+          x => x.Kit == id).ToListAsync(),
+        KitType = product.KitType,
+        LastUpdated = product.LastUpdated,
+        LastUpdatedBy = product.LastUpdatedBy,
+        LastUpdateByName = _context.AspNetUsers.Where(
+          x => x.Id.Equals(product.LastUpdatedBy)).Select(x => x.Email).FirstOrDefault(),
+        Name = product.Name,
+        Ph = product.Ph,
+        ProductCategory = product.ProductCategory,
+        ProductType = product.ProductType,
+        ShippingWeightLb = product.ShippingWeightLb,
+        ShopifyProductId = product.ShopifyProductId,
+        Sku = product.Sku,
+        Stock = product.Stock,
+        VolumeInFluidOunces = product.VolumeInFluidOunces
+      };
+
       return View(productViewModel);
     }
 

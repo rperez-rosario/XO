@@ -24,13 +24,13 @@
           </label>
         </div>
         <div class="form-group">
-          <label asp-for="Sku" class="control-label"></label>
-          <input asp-for="Sku" class="form-control" />
+          <label asp-for="Sku" class="control-label font-weight-bolder">SKU</label>
+          <input asp-for="Sku" class="form-control font-weight-bolder" />
           <span asp-validation-for="Sku" class="text-danger"></span>
         </div>
         <div class="form-group">
-          <label asp-for="Name" class="control-label"></label>
-          <input asp-for="Name" class="form-control" />
+          <label asp-for="Name" class="control-label font-weight-bolder"></label>
+          <input asp-for="Name" class="form-control font-weight-bolder" />
           <span asp-validation-for="Name" class="text-danger"></span>
         </div>
         <div class="form-group">
@@ -115,38 +115,39 @@
     $('#Kit').change(function () {
       KitToggle();
     });
+
     $('#kit-type').val('0');
     $('#product-type').val('0');
-  });
 
-  function KitToggle() {
-    if ($('#Kit').prop('checked')) {
-      $('#volume').val('Will be calculated based on selected kit products.');
-      $('#volume').attr('disabled', true);
-      $('#ph').val('Will be calculated based on selected kit products.');
-      $('#ph').attr('disabled', true);
-      $('#stock').val('Will be calculated based on selected kit products.');
-      $('#stock').attr('disabled', true);
-      $('#shipping-weight').val('Will be calculated based on selected kit products');
-      $('#shipping-weight').attr('disabled', true);
-      $('#ingredient').attr('disabled', true);
-      $('#kit-type').attr('disabled', false);
-      $('#kit-products').attr('disabled', false);
-    } else {
-      $('#volume').attr('disabled', false);
-      $('#volume').val('');
-      $('#ph').attr('disabled', false);
-      $('#ph').val('');
-      $('#shipping-weight').attr('disabled', false);
-      $('#shipping-weight').val('');
-      $('#stock').attr('disabled', false);
-      $('#stock').val('');
-      $('#ingredient').attr('disabled', false);
-      $('#kit-type').attr('disabled', true);
-      $('#kit-type').val('0');
-      $('#kit-products').attr('disabled', true);
+    function KitToggle() {
+      if ($('#Kit').prop('checked')) {
+        $('#volume').val('Will be calculated based on selected kit products.');
+        $('#volume').attr('disabled', true);
+        $('#ph').val('Will be calculated based on selected kit products.');
+        $('#ph').attr('disabled', true);
+        $('#stock').val('Will be calculated based on selected kit products.');
+        $('#stock').attr('disabled', true);
+        $('#shipping-weight').val('Will be calculated based on selected kit products');
+        $('#shipping-weight').attr('disabled', true);
+        $('#ingredient').attr('disabled', true);
+        $('#kit-type').attr('disabled', false);
+        $('#kit-products').attr('disabled', false);
+      } else {
+        $('#volume').attr('disabled', false);
+        $('#volume').val('');
+        $('#ph').attr('disabled', false);
+        $('#ph').val('');
+        $('#shipping-weight').attr('disabled', false);
+        $('#shipping-weight').val('');
+        $('#stock').attr('disabled', false);
+        $('#stock').val('');
+        $('#ingredient').attr('disabled', false);
+        $('#kit-type').attr('disabled', true);
+        $('#kit-type').val('0');
+        $('#kit-products').attr('disabled', true);
+      }
     }
-  }
+  });
 </script>
 
 @section Scripts {

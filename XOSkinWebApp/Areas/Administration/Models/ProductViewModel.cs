@@ -67,10 +67,14 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public bool Active { get; set; }
 
     public String CreatedBy { get; set; }
+    
+    public String CreatedByName { get; set; }
 
     public DateTime Created { get; set; }
 
     public String LastUpdatedBy { get; set; }
+
+    public String LastUpdateByName { get; set; }
 
     public DateTime? LastUpdated { get; set; }
   }

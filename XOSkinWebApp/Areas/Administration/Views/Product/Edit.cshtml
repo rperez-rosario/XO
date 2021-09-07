@@ -9,115 +9,124 @@
 
 <h4>Product</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-      <form asp-action="Edit">
+
+  <form asp-action="Edit" enctype="multipart/form-data" id="edit">
+    <div class="container-fluid">
+      <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input type="hidden" asp-for="Id" />
-        <div class="form-group">
-          <label asp-for="ShopifyProductId" class="control-label"></label>
-          <input asp-for="ShopifyProductId" class="form-control" />
-          <span asp-validation-for="ShopifyProductId" class="text-danger"></span>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label asp-for="CreatedByName" class="control-label font-weight-bolder">Created By</label>
+            <input asp-for="CreatedByName" class="form-control" disabled />
+            <span asp-validation-for="CreatedByName" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="Created" class="control-label font-weight-bolder">Created</label>
+            <input asp-for="Created" class="form-control" disabled />
+            <span asp-validation-for="Created" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="LastUpdateByName" class="control-label">Last Updated By</label>
+            <input asp-for="LastUpdateByName" class="form-control" disabled />
+            <span asp-validation-for="LastUpdateByName" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="LastUpdated" class="control-label">Last Updated</label>
+            <input asp-for="LastUpdated" class="form-control" disabled />
+            <span asp-validation-for="LastUpdated" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="ImageLarge" class="control-label font-weight-bolder" id="image-large">Product Image File (Only .jpg or .jpeg files admitted.)<br />Works best with square (1:1) aspect ratio images.</label>
+            <input asp-for="ImageLarge" class="btn btn-outline-dark" type="file" /><br />
+            <span asp-validation-for="ImageLarge" class="text-danger"></span>
+          </div>
+          <div class="form-group form-check">
+            <label class="form-check-label">
+              <input class="form-check-input" asp-for="Active" checked /> <span class="font-weight-bolder">Product Is Active</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label asp-for="Sku" class="control-label font-weight-bolder">SKU</label>
+            <input asp-for="Sku" class="form-control font-weight-bolder" />
+            <span asp-validation-for="Sku" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="Name" class="control-label font-weight-bolder"></label>
+            <input asp-for="Name" class="form-control font-weight-bolder" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="Description" class="control-label"></label>
+            <input asp-for="Description" class="form-control" />
+            <span asp-validation-for="Description" class="text-danger"></span>
+          </div>
+          <div class="form-group form-check">
+            <label class="form-check-label">
+              <input class="form-check-input" id="kit" asp-for="Kit" /> <span class="font-weight-bolder">Is This Product a Kit?</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label asp-for="KitType" class="control-label">Kit Type</label>
+            <select asp-for="KitType" class="form-control" asp-items="ViewBag.KitType" disabled id="kit-type"></select>
+            <span asp-validation-for="KitType" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="KitProduct" class="control-label font-weight-bolder">Kit Products</label>
+            <select asp-for="KitProduct" class="form-control" asp-items="ViewBag.Product" disabled id="kit-product" size="6"></select>
+            <span asp-validation-for="KitProduct" class="text-danger"></span>
+          </div>
         </div>
-        <div class="form-group">
-          <label asp-for="Sku" class="control-label"></label>
-          <input asp-for="Sku" class="form-control" />
-          <span asp-validation-for="Sku" class="text-danger"></span>
+        <div class="col-sm-6" style="padding-left: 10px; padding-right: 10px">
+          <div class="form-group">
+            <label asp-for="ProductType" class="control-label font-weight-bolder">ProductType</label>
+            <select asp-for="ProductType" class="form-control" asp-items="ViewBag.ProductType" id="product-type"></select>
+            <span asp-validation-for="ProductType" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="Ingredient" class="control-label font-weight-bolder">Ingredients)</label>
+            <select asp-for="Ingredient" class="form-control" asp-items="ViewBag.Ingredient" id="ingredient" size="8"></select>
+            <span asp-validation-for="Ingredient" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="VolumeInFluidOunces" class="control-label">Volume in Fluid Ounces</label>
+            <input asp-for="VolumeInFluidOunces" class="form-control" id="volume" />
+            <span asp-validation-for="VolumeInFluidOunces" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="Ph" class="control-label">pH Balance</label>
+            <input asp-for="Ph" class="form-control" id="ph" />
+            <span asp-validation-for="Ph" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="ShippingWeightLb" class="control-label font-weight-bolder">Shipping Weight in Pounds (lb)</label>
+            <input asp-for="ShippingWeightLb" class="form-control" type="text" id="shipping-weight" />
+            <span asp-validation-for="ShippingWeightLb" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="Stock" class="control-label">Original Stock</label>
+            <input asp-for="Stock" class="form-control" type="text" id="original-stock" />
+            <span asp-validation-for="Stock" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="CurrentPriceId" class="control-label font-weight-bolder">Current Price</label>
+            <select asp-for="CurrentPriceId" class="form-control" asp-items="ViewBag.Price"></select>
+            <span asp-validation-for="CurrentPriceId" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <label asp-for="CurrentCostId" class="control-label font-weight-bolder">Current Cost</label>
+            <select asp-for="CurrentCostId" class="form-control" asp-items="ViewBag.Cost"></select>
+            <span asp-validation-for="CurrentCostId" class="text-danger"></span>
+          </div>
+          <div class="form-group">
+            <input type="submit" value="Update" class="btn btn-outline-dark" />
+          </div>
         </div>
-        <div class="form-group">
-          <label asp-for="Name" class="control-label"></label>
-          <input asp-for="Name" class="form-control" />
-          <span asp-validation-for="Name" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="Description" class="control-label"></label>
-          <input asp-for="Description" class="form-control" />
-          <span asp-validation-for="Description" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="ProductType" class="control-label"></label>
-          <input asp-for="ProductType" class="form-control" />
-          <span asp-validation-for="ProductType" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="ProductCategory" class="control-label"></label>
-          <input asp-for="ProductCategory" class="form-control" />
-          <span asp-validation-for="ProductCategory" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="KitType" class="control-label"></label>
-          <input asp-for="KitType" class="form-control" />
-          <span asp-validation-for="KitType" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="VolumeInFluidOunces" class="control-label"></label>
-          <input asp-for="VolumeInFluidOunces" class="form-control" />
-          <span asp-validation-for="VolumeInFluidOunces" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="Ph" class="control-label"></label>
-          <input asp-for="Ph" class="form-control" />
-          <span asp-validation-for="Ph" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="Stock" class="control-label"></label>
-          <input asp-for="Stock" class="form-control" />
-          <span asp-validation-for="Stock" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="CurrentPrice" class="control-label"></label>
-          <input asp-for="CurrentPrice" class="form-control" />
-          <span asp-validation-for="CurrentPrice" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="ImagePathSmall" class="control-label"></label>
-          <input asp-for="ImagePathSmall" class="form-control" />
-          <span asp-validation-for="ImagePathSmall" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="ImagePathMedium" class="control-label"></label>
-          <input asp-for="ImagePathMedium" class="form-control" />
-          <span asp-validation-for="ImagePathMedium" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="ImagePathLarge" class="control-label"></label>
-          <input asp-for="ImagePathLarge" class="form-control" />
-          <span asp-validation-for="ImagePathLarge" class="text-danger"></span>
-        </div>
-        <div class="form-group form-check">
-          <label class="form-check-label">
-            <input class="form-check-input" asp-for="Active" /> @Html.DisplayNameFor(model => model.Active)
-          </label>
-        </div>
-        <div class="form-group">
-          <label asp-for="CreatedBy" class="control-label"></label>
-          <input asp-for="CreatedBy" class="form-control" />
-          <span asp-validation-for="CreatedBy" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="Created" class="control-label"></label>
-          <input asp-for="Created" class="form-control" />
-          <span asp-validation-for="Created" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="LastUpdatedBy" class="control-label"></label>
-          <input asp-for="LastUpdatedBy" class="form-control" />
-          <span asp-validation-for="LastUpdatedBy" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <label asp-for="LastUpdated" class="control-label"></label>
-          <input asp-for="LastUpdated" class="form-control" />
-          <span asp-validation-for="LastUpdated" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-          <input type="submit" value="Save" class="btn btn-primary" />
-        </div>
-        @Html.Hidden("ActionCreate", "False")
-        @Html.Hidden("OriginalProductName", "")
-        @Html.Hidden("OriginalSku", "")
-      </form>
+      </div>
     </div>
-</div>
+    @Html.Hidden("ActionCreate", "False")
+    @Html.Hidden("OriginalProductName", "")
+    @Html.Hidden("OriginalSku", "")
+  </form>
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
@@ -125,6 +134,25 @@
   $(document).ready(function () {
     $("#OriginalProductName").val($("#Name").val());
     $("#OriginalSku").val($("#Sku").val());
+
+    $('#kit').attr('disabled', true);
+    $('#kit-product').attr('disabled', true);
+    $('#ingredient').attr('disabled', true);
+    $('#original-stock').attr('disabled', true);
+
+    if ($('#kit').prop('checked')) {
+      $('#kit-type').attr('disabled', false);
+      $('#product-type').attr('disabled', false);
+      $('#volume').attr('disabled', true);
+      $('#ph').attr('disabled', true);
+      $('#shipping-weight').attr('disabled', true);
+    } else {
+      $('#kit-type').attr('disabled', true);
+      $('#product-type').attr('disabled', false);
+      $('#volume').attr('disabled', false);
+      $('#ph').attr('disabled', false);
+      $('#shipping-weight').attr('disabled', false);
+    }
   });
 </script>
 
