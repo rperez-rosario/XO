@@ -231,7 +231,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             CreatedBy = _context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
             CurrentPrice = productViewModel.CurrentPriceId,
-            Cost = (long)productViewModel.CurrentCostId,
+            Cost = productViewModel.CurrentCostId,
             Description = productViewModel.Description,
             LastUpdated = null,
             LastUpdatedBy = null,
@@ -465,8 +465,24 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(long id, [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,KitType,VolumeInFluidOunces,Ph,Stock,CurrentPrice,ImagePathSmall,ImagePathMedium,ImagePathLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel)
+    public async Task<IActionResult> Edit(long id, [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
+      IFormFile ImageLarge)
     {
+      ORM.Product product = null;
+      String filePathPrefix = "wwwroot/img/product/xo-img-pid-";
+      String srcPathPrefix = "/img/product/xo-img-pid-";
+      FileStream stream = null;
+      ProductService sProductService = null;
+      ProductVariantService sProductVariantService = null;
+      InventoryItemService sInventoryItemService = null;
+      ShopifySharp.Product sProduct = null;
+      ProductVariant sProductVariant = null;
+      InventoryItem sInventoryItem = null;
+      decimal weight = 0.0M;
+      decimal pH = 0.0M;
+      decimal volume = 0.0M;
+      ORM.Product kit = null;
+
       if (id != productViewModel.Id)
       {
         return NotFound();
@@ -476,10 +492,42 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       {
         try
         {
-          _context.Update(productViewModel);
+          product = _context.Products.Where(x => x.Id == id).FirstOrDefault();
+
+          product.LastUpdatedBy = _context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
+          product.LastUpdated = DateTime.UtcNow;
+          product.Active = productViewModel.Active;
+          if (ImageLarge != null && ImageLarge.Length > 0)
+          {
+            if (ImageLarge.FileName.LastIndexOf(".jpg") + 4 == ImageLarge.FileName.Length
+              || ImageLarge.FileName.LastIndexOf(".jpeg") + 5 == ImageLarge.FileName.Length)
+            {
+              using (stream = System.IO.File.Create(filePathPrefix + product.Id.ToString() + ".jpg"))
+              {
+                await ImageLarge.CopyToAsync(stream);
+              }
+              product.ImagePathLarge = srcPathPrefix + productViewModel.Id.ToString() + ".jpg";
+            }
+          }
+          product.Sku = productViewModel.Sku;
+          product.Name = productViewModel.Name;
+          product.Description = productViewModel.Description;
+          product.KitType = productViewModel.KitType;
+          product.ProductType = productViewModel.ProductType;
+          if (!productViewModel.Kit)
+          {
+            product.VolumeInFluidOunces = productViewModel.VolumeInFluidOunces;
+            product.Ph = productViewModel.Ph;
+            product.ShippingWeightLb = productViewModel.ShippingWeightLb;
+          }
+          product.CurrentPrice = productViewModel.CurrentPriceId;
+          product.Cost = productViewModel.CurrentCostId;
+
+          _context.Update(product);
           await _context.SaveChangesAsync();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (Exception ex)
         {
           if (!ProductViewModelExists(productViewModel.Id))
           {
@@ -487,8 +535,97 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           }
           else
           {
-            throw;
+            throw new Exception("An error was encountered while writing the updated product information to the database.", ex);
           }
+        }
+
+        try
+        {
+          foreach(KitProduct kp in _context.KitProducts.ToList())
+          {
+            if (kp.Product == id)
+            {
+              kit = _context.Products.Where(x => x.Id == kp.Kit).FirstOrDefault();
+              weight = 0.0M;
+              volume = 0.0M;
+              pH = 0.0M;
+
+              foreach (KitProduct kpB in kit.KitProducts)
+              {
+                weight += (decimal)_context.Products.Where(
+                  x => x.Id == kpB.Product).Select(x => x.ShippingWeightLb).FirstOrDefault();
+                volume += (decimal)_context.Products.Where(
+                  x => x.Id == kpB.Product).Select(x => x.VolumeInFluidOunces).FirstOrDefault();
+                pH += (decimal)_context.Products.Where(
+                  x => x.Id == kpB.Product).Select(x => x.Ph).FirstOrDefault() *
+                  (decimal)_context.Products.Where(
+                  x => x.Id == kpB.Product).Select(x => x.VolumeInFluidOunces).FirstOrDefault();
+              }
+
+              pH = pH / volume;
+
+              kit.ShippingWeightLb = weight;
+              kit.VolumeInFluidOunces = volume;
+              kit.Ph = pH;
+
+              _context.Products.Update(kit);
+              _context.SaveChanges();
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while updating kits containing this product", ex);
+        }
+
+        try
+        {
+          sProductService = new ProductService(_option.Value.ShopifyUrl,
+            _option.Value.ShopifyStoreFrontAccessToken);
+          sProductVariantService = new ProductVariantService(_option.Value.ShopifyUrl,
+            _option.Value.ShopifyStoreFrontAccessToken);
+          sInventoryItemService = new InventoryItemService(_option.Value.ShopifyUrl,
+            _option.Value.ShopifyStoreFrontAccessToken);
+
+          sProduct = sProductService.GetAsync((long)product.ShopifyProductId).Result;
+          
+          if (!sProduct.Status.Equals(productViewModel.Active ? "active" : "draft") || 
+            !sProduct.Title.Equals(productViewModel.Name) || !sProduct.BodyHtml.Equals(productViewModel.Description))  
+          {
+            sProduct.Status = productViewModel.Active ? "active" : "draft";
+            sProduct.Title = productViewModel.Name;
+            sProduct.BodyHtml = productViewModel.Description;
+            await sProductService.UpdateAsync((long)product.ShopifyProductId, sProduct);
+          }
+
+          sProductVariant = sProductVariantService.GetAsync((long)sProduct.Variants.First().Id).Result;
+
+          if (sProductVariant.Weight != productViewModel.ShippingWeightLb || 
+            sProductVariant.Price != _context.Prices.Where(
+              x => x.Id == productViewModel.CurrentPriceId).Select(x => x.Amount).FirstOrDefault() ||
+            !sProductVariant.SKU.Equals(productViewModel.Sku))
+          {
+            sProductVariant.Weight = productViewModel.ShippingWeightLb;
+            sProductVariant.Price = _context.Prices.Where(
+              x => x.Id == productViewModel.CurrentPriceId).Select(x => x.Amount).FirstOrDefault();
+            sProductVariant.SKU = productViewModel.Sku;
+            sProductVariant.InventoryQuantity = null;
+            await sProductVariantService.UpdateAsync((long)sProduct.Variants.First().Id, sProductVariant);
+          }
+
+          sInventoryItem = sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId).Result;
+
+          if (sInventoryItem.Cost != _context.Costs.Where(
+            x => x.Id == productViewModel.CurrentCostId).Select(x => x.Amount).FirstOrDefault())
+          {
+            sInventoryItem.Cost = _context.Costs.Where(
+              x => x.Id == productViewModel.CurrentCostId).Select(x => x.Amount).FirstOrDefault();
+            await sInventoryItemService.UpdateAsync((long)sProductVariant.InventoryItemId, sInventoryItem);
+          }
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while writing the updated product information to Shopify.", ex);
         }
         return RedirectToAction(nameof(Index));
       }

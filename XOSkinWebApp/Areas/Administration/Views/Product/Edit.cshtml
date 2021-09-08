@@ -36,7 +36,11 @@
             <span asp-validation-for="LastUpdated" class="text-danger"></span>
           </div>
           <div class="form-group">
-            <label asp-for="ImageLarge" class="control-label font-weight-bolder" id="image-large">Product Image File (Only .jpg or .jpeg files admitted.)<br />Works best with square (1:1) aspect ratio images.</label>
+            <label asp-for="ImageLarge" class="control-label font-weight-bolder">Product Image</label>
+            <img style="width: 180px;" src="@Model.ImagePathLarge" />
+          </div>
+          <div class="form-group">
+            <label asp-for="ImageLarge" class="control-label font-weight-bolder" id="image-large">Product Image File (Only .jpg or .jpeg files admitted.)<br />Works best with square (1:1) aspect ratio images.<br /> Preferred Image Size is 540px by 540px.</label>
             <input asp-for="ImageLarge" class="btn btn-outline-dark" type="file" /><br />
             <span asp-validation-for="ImageLarge" class="text-danger"></span>
           </div>
@@ -143,9 +147,9 @@
     if ($('#kit').prop('checked')) {
       $('#kit-type').attr('disabled', false);
       $('#product-type').attr('disabled', false);
-      $('#volume').attr('disabled', true);
-      $('#ph').attr('disabled', true);
-      $('#shipping-weight').attr('disabled', true);
+      $('#volume').attr('readonly', true);
+      $('#ph').attr('readonly', true);
+      $('#shipping-weight').attr('readonly', true);
     } else {
       $('#kit-type').attr('disabled', true);
       $('#product-type').attr('disabled', false);

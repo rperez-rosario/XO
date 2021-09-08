@@ -52,7 +52,7 @@ namespace XOSkinWebApp.Areas.Administration.Models
 
     public decimal CurrentPrice { get; set; }
 
-    public decimal CurrentCostId { get; set; }
+    public long CurrentCostId { get; set; }
 
     public decimal CurrentCost { get; set; }
 

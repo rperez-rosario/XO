@@ -14,7 +14,7 @@
       <div asp-validation-summary="ModelOnly" class="text-danger"></div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label asp-for="ImageLarge" class="control-label font-weight-bolder" id="image-large">Product Image File (Only .jpg or .jpeg files admitted.)<br />Works best with square (1:1) aspect ratio images.</label>
+          <label asp-for="ImageLarge" class="control-label font-weight-bolder" id="image-large">Product Image File (Only .jpg or .jpeg files admitted.)<br />Works best with square (1:1) aspect ratio images.<br /> Preferred Image Size is 540px by 540px.</label>
           <input asp-for="ImageLarge" class="btn btn-outline-dark" type="file" /><br />
           <span asp-validation-for="ImageLarge" class="text-danger"></span>
         </div>
