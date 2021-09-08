@@ -74,6 +74,7 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<SubscriptionShipmentSchedule> SubscriptionShipmentSchedules { get; set; }
         public virtual DbSet<SubscriptionType> SubscriptionTypes { get; set; }
         public virtual DbSet<SynergeticIngredient> SynergeticIngredients { get; set; }
+        public virtual DbSet<TransactionConcept> TransactionConcepts { get; set; }
         public virtual DbSet<UserAnswer> UserAnswers { get; set; }
         public virtual DbSet<UserCommonAllergen> UserCommonAllergens { get; set; }
         public virtual DbSet<UserLedgerTransaction> UserLedgerTransactions { get; set; }
@@ -497,9 +498,15 @@ namespace XOSkinWebApp.ORM
                 entity.ToTable("KitProduct");
 
                 entity.HasOne(d => d.KitNavigation)
-                    .WithMany(p => p.KitProducts)
+                    .WithMany(p => p.KitProductKitNavigations)
                     .HasForeignKey(d => d.Kit)
                     .HasConstraintName("FK_KitProduct_Product");
+
+                entity.HasOne(d => d.ProductNavigation)
+                    .WithMany(p => p.KitProductProductNavigations)
+                    .HasForeignKey(d => d.Product)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_KitProduct_Product1");
             });
 
             modelBuilder.Entity<KitType>(entity =>
@@ -1019,6 +1026,14 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.ApplicableTaxes).HasColumnType("decimal(18, 0)");
 
+                entity.Property(e => e.CancelReason).IsUnicode(false);
+
+                entity.Property(e => e.CancelledBy)
+                    .HasMaxLength(450)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CancelledOn).HasColumnType("datetime");
+
                 entity.Property(e => e.CodeDiscount).HasColumnType("decimal(18, 0)");
 
                 entity.Property(e => e.CouponDiscount).HasColumnType("decimal(18, 0)");
@@ -1080,9 +1095,23 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("ProductOrderLineItem");
 
+                entity.Property(e => e.Description).IsUnicode(false);
+
                 entity.Property(e => e.ImageSource).IsUnicode(false);
 
+                entity.Property(e => e.Name).IsUnicode(false);
+
+                entity.Property(e => e.PhBalance).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.ShippingWeightLb).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Sku)
+                    .IsUnicode(false)
+                    .HasColumnName("SKU");
+
                 entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.VolumeInFluidOunces).HasColumnType("decimal(18, 2)");
 
                 entity.HasOne(d => d.ProductNavigation)
                     .WithMany(p => p.ProductOrderLineItems)
@@ -1359,6 +1388,19 @@ namespace XOSkinWebApp.ORM
                     .HasConstraintName("FK_SynergeticIngredient_Ingredient1");
             });
 
+            modelBuilder.Entity<TransactionConcept>(entity =>
+            {
+                entity.ToTable("TransactionConcept");
+
+                entity.HasIndex(e => e.Name, "IX_TransactionConcept")
+                    .IsUnique();
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<UserAnswer>(entity =>
             {
                 entity.ToTable("UserAnswer");
@@ -1413,9 +1455,9 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.AmountAfterTransaction).HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.BalanceAfterTransaction).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.AmountBeforeTransaction).HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.BalanceBeforeTransaction).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.Created).HasColumnType("datetime");
 
@@ -1431,11 +1473,22 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(450);
 
+                entity.HasOne(d => d.ConceptNavigation)
+                    .WithMany(p => p.UserLedgerTransactions)
+                    .HasForeignKey(d => d.Concept)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_UserLedgerTransaction_TransactionConcept");
+
                 entity.HasOne(d => d.CreatedByNavigation)
                     .WithMany(p => p.UserLedgerTransactionCreatedByNavigations)
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserLedgerTransaction_AspNetUsers1");
+
+                entity.HasOne(d => d.ProductOrderNavigation)
+                    .WithMany(p => p.UserLedgerTransactions)
+                    .HasForeignKey(d => d.ProductOrder)
+                    .HasConstraintName("FK_UserLedgerTransaction_ProductOrder");
 
                 entity.HasOne(d => d.TransactionTypeNavigation)
                     .WithMany(p => p.UserLedgerTransactions)

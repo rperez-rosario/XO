@@ -59,13 +59,14 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.LineItem = lineItemViewModel;
       checkoutViewModel.CreditCardExpirationDate = DateTime.Now;
 
-      checkoutViewModel.Taxes = 0.0M; // TODO: Map this.
-      checkoutViewModel.ShippingCharges = 0.0M; // TODO: Map this.
-      checkoutViewModel.CodeDiscount = 0.0M; // TODO: Map this.
-      checkoutViewModel.CouponDiscount = 0.0M; // TODO: Map this.
+      checkoutViewModel.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+      checkoutViewModel.ShippingCharges = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+      checkoutViewModel.CodeDiscount = 0.0M; // TODO: CALCULATE.
+      checkoutViewModel.CouponDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.IsGift = false; // TODO: Map this.
-      checkoutViewModel.ShippingCarrier = "UPS"; // TODO: Map this.
-      checkoutViewModel.ExpectedToArrive = DateTime.UtcNow.AddDays(2); // TODO: Map this.
+      checkoutViewModel.ShippingCarrier = "UPS"; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+      checkoutViewModel.ExpectedToArrive = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
+        DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(3); // TODO: Map this.
       checkoutViewModel.Total = checkoutViewModel.SubTotal + checkoutViewModel.Taxes + checkoutViewModel.ShippingCharges -
         checkoutViewModel.CodeDiscount - checkoutViewModel.CouponDiscount;
 
@@ -117,11 +118,23 @@ namespace XOSkinWebApp.Controllers
     public IActionResult PlaceOrder(CheckoutViewModel Model)
     {
       ProductOrder order = null;
+      ORM.Product product = null;
+      decimal balanceBeforeTransaction = 0.00M;
+      decimal subTotal = 0.0M;
+      decimal applicableTaxes = 0.0M;
+      decimal codeDiscount = 0.0M;
+      decimal couponDiscount = 0.0M;
+      decimal shippingCost = 0.0M;
+      decimal total = 0.0M;
+      ORM.Product kit = null;
+      List<KitProduct> kitProduct = null;
+      long stock = long.MaxValue;
 
       Model.ShippingCarrier = Model.ShippingCarrier;
-      Model.TrackingNumber = "9374889738005587894488"; // TODO: Map this.
-      Model.ShippedOn = DateTime.UtcNow; // TODO: Map this.
-      Model.ExpectedToArrive = Model.ExpectedToArrive;
+      Model.TrackingNumber = "1000000000000000000001"; // TODO: IMPORTANT, GET FROM SHOPIFY.
+      Model.ShippedOn = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ? 
+        DateTime.UtcNow : DateTime.UtcNow.AddDays(1); // 5:00 PM PTDT.
+      Model.ExpectedToArrive = new DateTime(9999, 12, 31); // TODO: IMPORTANT, GET FROM SHOPIFY.
       Model.BilledOn = DateTime.UtcNow;
 
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();
@@ -130,24 +143,34 @@ namespace XOSkinWebApp.Controllers
       {
         order = new ProductOrder();
 
-        order.ShippingCost = 0.0M;
-        order.Subtotal = 0.0M;
-        order.ApplicableTaxes = 0.0M;
-        order.CodeDiscount = 0.0M;
-        order.CouponDiscount = 0.0M;
-        order.ShippingCost = 0.0M;
-        order.Total = 0.0M;
+        foreach (ShoppingCartLineItem cli in _context.ShoppingCartLineItems.Where(
+          x => x.ShoppingCart == _context.ShoppingCarts.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Select(x => x.Id).FirstOrDefault()).ToList())
+        {
+          subTotal += _context.Prices.Where(
+            x => x.Id == _context.Products.Where(
+              x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault() *
+              cli.Quantity;
+        }
+
+        shippingCost = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+        codeDiscount = 0.0M; // TODO: CALCULATE.
+        couponDiscount = 0.0M; // TODO : CALCULATE.
+        applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+        
+        total = subTotal + shippingCost - codeDiscount - couponDiscount  + applicableTaxes;
 
         order.User = _context.AspNetUsers.Where(
           x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
-        order.DatePlaced = DateTime.Now;
-        order.Subtotal = (decimal)Model.SubTotal;
-        order.ApplicableTaxes = (decimal)Model.Taxes;
-        order.CodeDiscount = (decimal)Model.CodeDiscount;
-        order.CouponDiscount = (decimal)Model.CouponDiscount;
+        order.DatePlaced = DateTime.UtcNow;
+        order.Subtotal = subTotal;
+        order.ApplicableTaxes = applicableTaxes;
+        order.CodeDiscount = codeDiscount;
+        order.CouponDiscount = couponDiscount;
         order.GiftOrder = Model.IsGift;
-        order.ShippingCost = (decimal)Model.ShippingCharges;
-        order.Total = (decimal)Model.Total;
+        order.ShippingCost = shippingCost;
+        order.Total = total;
 
         _context.ProductOrders.Add(order);
 
@@ -159,43 +182,205 @@ namespace XOSkinWebApp.Controllers
       }
 
       Model.OrderId = order.Id;
-      Model.ShopifyId = 123456789; // TODO: Map this.
+      Model.ShopifyId = 123456789; // TODO: IMPORTANT, GET FROM SHOPIFY API.
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();
 
       try
       {
         foreach (ShoppingCartLineItem item in _context.ShoppingCartLineItems.Where(
-        x => x.ShoppingCart.Equals(_context.ShoppingCarts.Where(
+          x => x.ShoppingCart.Equals(_context.ShoppingCarts.Where(
           x => x.User.Equals(_context.AspNetUsers.Where(
-            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Select(x => x.Id).FirstOrDefault())))
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Select(
+          x => x.Id).FirstOrDefault())).ToList())
         {
           _context.ProductOrderLineItems.Add(new ProductOrderLineItem()
           {
             ImageSource = _context.Products.Where(
               x => x.Id.Equals(item.Product)).Select(x => x.ImagePathLarge).FirstOrDefault(),
             Product = item.Product,
+            Sample = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Sample).FirstOrDefault(),
+            Sku = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Sku).FirstOrDefault(),
+            Name = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Name).FirstOrDefault(),
+            Description = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Description).FirstOrDefault(),
+            ProductType = _context.Products.Where(x => x.Id == item.Product).Select(x => x.ProductType).FirstOrDefault(),
+            KitType = _context.Products.Where(x => x.Id == item.Product).Select(x => x.KitType).FirstOrDefault(),
+            VolumeInFluidOunces = _context.Products.Where(
+              x => x.Id == item.Product).Select(x => x.VolumeInFluidOunces).FirstOrDefault(),
+            PhBalance = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Ph).FirstOrDefault(),
+            ShippingWeightLb = _context.Products.Where(
+              x => x.Id == item.Product).Select(x => x.ShippingWeightLb).FirstOrDefault(),
+            Price = _context.Products.Where(x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault(),
+            Cost = (long)_context.Products.Where(x => x.Id == item.Product).Select(x => x.Cost).FirstOrDefault(),
             ProductOrder = order.Id,
             Quantity = item.Quantity,
             Total = item.Total
           });
 
+          _context.SaveChanges();
+
+          if (_context.Products.Where(x => x.Id == item.Product).Select(x => x.KitType).FirstOrDefault() == null)
+          {
+            product = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
+            product.Stock -= item.Quantity;
+            _context.Products.Update(product);
+            _context.SaveChanges();
+
+            foreach (KitProduct kp in _context.KitProducts.ToList())
+            {
+              if (kp.Product == product.Id)
+              {
+                kit = _context.Products.Where(x => x.Id == kp.Kit).FirstOrDefault();
+                kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
+                stock = long.MaxValue;
+
+                foreach (KitProduct kpB in kitProduct)
+                {
+                  if (_context.Products.Where(
+                    x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault() < stock)
+                  {
+                    stock = (long)_context.Products.Where(
+                      x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault();
+                  }
+                }
+
+                kit.Stock = stock;
+
+                _context.Products.Update(kit);
+                _context.SaveChanges();
+              }
+            }
+          }
+          else
+          {
+            kit = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
+            kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
+
+            foreach (KitProduct kp in kitProduct)
+            {
+              product = _context.Products.Where(x => x.Id == kp.Product).FirstOrDefault();
+              product.Stock -= 1;
+              _context.Products.Update(product);
+              _context.SaveChanges();
+            }
+
+            foreach (KitProduct kp in kitProduct)
+            {
+              foreach (KitProduct kpB in _context.KitProducts.ToList())
+              {
+                if (kpB.Product == kp.Product)
+                {
+                  kit = _context.Products.Where(x => x.Id == kpB.Kit).FirstOrDefault();
+                  kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
+                  stock = long.MaxValue;
+
+                  foreach (KitProduct kpC in kitProduct)
+                  {
+                    if (_context.Products.Where(
+                      x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault() < stock)
+                    {
+                      stock = (long)_context.Products.Where(
+                        x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault();
+                    }
+                  }
+
+                  kit.Stock = stock;
+
+                  _context.Products.Update(kit);
+                  _context.SaveChanges();
+                }
+              }
+            }
+          }
+          
           Model.LineItem.Add(new ShoppingCartLineItemViewModel()
           {
             Id = item.Id,
             ProductId = item.Product,
             ImageSource = _context.Products.Where(
               x => x.Id.Equals(item.Product)).Select(x => x.ImagePathLarge).FirstOrDefault(),
-            ProductName = _context.Products.Where(
-              x => x.Id == item.Product)
-              .Select(x => x.Name).FirstOrDefault(),
-            ProductDescription = _context.Products.Where(
-              x => x.Id == item.Product)
-              .Select(x => x.Description).FirstOrDefault(),
+            ProductName = _context.ProductOrderLineItems.Where(
+              x => x.ProductOrder == order.Id).Where(
+              x => x.Product == item.Product).Select(x => x.Name).FirstOrDefault(),
+            ProductDescription = _context.ProductOrderLineItems.Where(
+              x => x.ProductOrder == order.Id).Where(
+              x => x.Product == item.Product).Select(x => x.Description).FirstOrDefault(),
             Quantity = item.Quantity,
             Total = item.Total
           });
+
+          _context.SaveChanges();
+
           _context.ShoppingCartLineItems.Remove(item);
+          _context.SaveChanges();
         }
+
+        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          ProductOrder = order.Id,
+          TransactionType = 2, // Debit.
+          Description = "Order #" + order.Id + ". Taxes.",
+          Concept = 3, // Taxation.
+          Amount = applicableTaxes,
+          BalanceBeforeTransaction = balanceBeforeTransaction,
+          BalanceAfterTransaction = balanceBeforeTransaction - applicableTaxes,
+          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          Created = DateTime.UtcNow
+        });
+
+        _context.SaveChanges();
+
+        balanceBeforeTransaction -= applicableTaxes;
+
+        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          ProductOrder = order.Id,
+          TransactionType = 2, // Debit.
+          Description = "Order #" + order.Id + ". Shipping.",
+          Concept = 2, // Shipping.
+          Amount = shippingCost,
+          BalanceBeforeTransaction = balanceBeforeTransaction,
+          BalanceAfterTransaction = balanceBeforeTransaction - shippingCost,
+          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          Created = DateTime.UtcNow
+        });
+
+        _context.SaveChanges();
+
+        balanceBeforeTransaction -= shippingCost;
+
+        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          ProductOrder = order.Id,
+          TransactionType = 2, // Debit.
+          Description = "Order #" + order.Id + ". Product.",
+          Concept = 1, // Product.
+          Amount = subTotal,
+          BalanceBeforeTransaction = balanceBeforeTransaction,
+          BalanceAfterTransaction = balanceBeforeTransaction - subTotal,
+          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          Created = DateTime.UtcNow
+        });
+
+        _context.SaveChanges();
+
+        balanceBeforeTransaction -= subTotal;
+
+        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          ProductOrder = order.Id,
+          TransactionType = 1, // Credit.
+          Description = "Order #" + order.Id + ". Payment.",
+          Concept = 4, // Total.
+          Amount = total,
+          BalanceBeforeTransaction = balanceBeforeTransaction,
+          BalanceAfterTransaction = balanceBeforeTransaction + total,
+          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          Created = DateTime.UtcNow
+        });
 
         _context.SaveChanges();
       }

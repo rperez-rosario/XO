@@ -62,7 +62,6 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           ImagePathMedium = p.ImagePathMedium,
           ImagePathSmall = p.ImagePathSmall,
           Ingredient = p.ProductIngredients,
-          KitProduct = p.KitProducts,
           KitType = p.KitType,
           KitTypeName = _context.KitTypes.Where(x => x.Id == p.KitType).Select(x => x.Name).FirstOrDefault(),
           LastUpdated = p.LastUpdated,
@@ -74,7 +73,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           Sku = p.Sku,
           Stock = p.Stock,
           VolumeInFluidOunces = p.VolumeInFluidOunces,
-          ShippingWeightLb = p.ShippingWeightLb
+          ShippingWeightLb = p.ShippingWeightLb,
+          Sample = (bool)p.Sample
         });
       }
 
@@ -113,7 +113,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
+    public async Task<IActionResult> Create([Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
       IFormFile ImageLarge, long[] KitProduct, long[] Ingredient)
     {
       ORM.Product product = null;
@@ -243,7 +243,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             VolumeInFluidOunces = productViewModel.VolumeInFluidOunces,
             ShippingWeightLb = productViewModel.ShippingWeightLb,
             Ph = productViewModel.Ph,
-            Stock = productViewModel.Stock
+            Stock = productViewModel.Stock,
+            Sample = productViewModel.Sample
           };
           _context.Add(product);
           _context.SaveChanges();
@@ -454,7 +455,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         ShopifyProductId = product.ShopifyProductId,
         Sku = product.Sku,
         Stock = product.Stock,
-        VolumeInFluidOunces = product.VolumeInFluidOunces
+        VolumeInFluidOunces = product.VolumeInFluidOunces,
+        Sample = (bool)product.Sample
       };
 
       return View(productViewModel);
@@ -465,7 +467,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(long id, [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
+    public async Task<IActionResult> Edit(long id, [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
       IFormFile ImageLarge)
     {
       ORM.Product product = null;
@@ -482,6 +484,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       decimal pH = 0.0M;
       decimal volume = 0.0M;
       ORM.Product kit = null;
+      List<KitProduct> kitProduct = null;
 
       if (id != productViewModel.Id)
       {
@@ -498,6 +501,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
           product.LastUpdated = DateTime.UtcNow;
           product.Active = productViewModel.Active;
+          
           if (ImageLarge != null && ImageLarge.Length > 0)
           {
             if (ImageLarge.FileName.LastIndexOf(".jpg") + 4 == ImageLarge.FileName.Length
@@ -510,17 +514,21 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
               product.ImagePathLarge = srcPathPrefix + productViewModel.Id.ToString() + ".jpg";
             }
           }
+          
           product.Sku = productViewModel.Sku;
           product.Name = productViewModel.Name;
           product.Description = productViewModel.Description;
           product.KitType = productViewModel.KitType;
           product.ProductType = productViewModel.ProductType;
+          product.Sample = productViewModel.Sample;
+
           if (!productViewModel.Kit)
           {
             product.VolumeInFluidOunces = productViewModel.VolumeInFluidOunces;
             product.Ph = productViewModel.Ph;
             product.ShippingWeightLb = productViewModel.ShippingWeightLb;
           }
+
           product.CurrentPrice = productViewModel.CurrentPriceId;
           product.Cost = productViewModel.CurrentCostId;
 
@@ -546,11 +554,12 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             if (kp.Product == id)
             {
               kit = _context.Products.Where(x => x.Id == kp.Kit).FirstOrDefault();
+              kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
               weight = 0.0M;
               volume = 0.0M;
               pH = 0.0M;
 
-              foreach (KitProduct kpB in kit.KitProducts)
+              foreach (KitProduct kpB in kitProduct)
               {
                 weight += (decimal)_context.Products.Where(
                   x => x.Id == kpB.Product).Select(x => x.ShippingWeightLb).FirstOrDefault();

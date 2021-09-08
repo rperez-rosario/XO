@@ -12,5 +12,6 @@ namespace XOSkinWebApp.ORM
         public long Product { get; set; }
 
         public virtual Product KitNavigation { get; set; }
+        public virtual Product ProductNavigation { get; set; }
     }
 }

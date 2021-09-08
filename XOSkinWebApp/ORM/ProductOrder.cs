@@ -15,6 +15,7 @@ namespace XOSkinWebApp.ORM
             ProductOrderDiscountCodes = new HashSet<ProductOrderDiscountCode>();
             ProductOrderDiscountCoupons = new HashSet<ProductOrderDiscountCoupon>();
             ProductOrderLineItems = new HashSet<ProductOrderLineItem>();
+            UserLedgerTransactions = new HashSet<UserLedgerTransaction>();
         }
 
         public long Id { get; set; }
@@ -28,6 +29,10 @@ namespace XOSkinWebApp.ORM
         public decimal ApplicableTaxes { get; set; }
         public decimal Total { get; set; }
         public bool GiftOrder { get; set; }
+        public bool? Cancelled { get; set; }
+        public DateTime? CancelledOn { get; set; }
+        public string CancelReason { get; set; }
+        public string CancelledBy { get; set; }
 
         public virtual AspNetUser UserNavigation { get; set; }
         public virtual ICollection<OrderBillTo> OrderBillTos { get; set; }
@@ -36,5 +41,6 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<ProductOrderDiscountCode> ProductOrderDiscountCodes { get; set; }
         public virtual ICollection<ProductOrderDiscountCoupon> ProductOrderDiscountCoupons { get; set; }
         public virtual ICollection<ProductOrderLineItem> ProductOrderLineItems { get; set; }
+        public virtual ICollection<UserLedgerTransaction> UserLedgerTransactions { get; set; }
     }
 }

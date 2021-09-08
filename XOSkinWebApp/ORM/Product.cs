@@ -11,7 +11,8 @@ namespace XOSkinWebApp.ORM
         {
             DiscountCodeProducts = new HashSet<DiscountCodeProduct>();
             DiscountCouponProducts = new HashSet<DiscountCouponProduct>();
-            KitProducts = new HashSet<KitProduct>();
+            KitProductKitNavigations = new HashSet<KitProduct>();
+            KitProductProductNavigations = new HashSet<KitProduct>();
             ProductIngredients = new HashSet<ProductIngredient>();
             ProductOrderLineItems = new HashSet<ProductOrderLineItem>();
             ShoppingCartHistories = new HashSet<ShoppingCartHistory>();
@@ -38,6 +39,7 @@ namespace XOSkinWebApp.ORM
         public string ImagePathMedium { get; set; }
         public string ImagePathLarge { get; set; }
         public bool Active { get; set; }
+        public bool? Sample { get; set; }
         public string CreatedBy { get; set; }
         public DateTime Created { get; set; }
         public string LastUpdatedBy { get; set; }
@@ -52,7 +54,8 @@ namespace XOSkinWebApp.ORM
         public virtual ProductType ProductTypeNavigation { get; set; }
         public virtual ICollection<DiscountCodeProduct> DiscountCodeProducts { get; set; }
         public virtual ICollection<DiscountCouponProduct> DiscountCouponProducts { get; set; }
-        public virtual ICollection<KitProduct> KitProducts { get; set; }
+        public virtual ICollection<KitProduct> KitProductKitNavigations { get; set; }
+        public virtual ICollection<KitProduct> KitProductProductNavigations { get; set; }
         public virtual ICollection<ProductIngredient> ProductIngredients { get; set; }
         public virtual ICollection<ProductOrderLineItem> ProductOrderLineItems { get; set; }
         public virtual ICollection<ShoppingCartHistory> ShoppingCartHistories { get; set; }

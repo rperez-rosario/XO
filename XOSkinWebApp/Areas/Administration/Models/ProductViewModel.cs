@@ -66,6 +66,8 @@ namespace XOSkinWebApp.Areas.Administration.Models
 
     public bool Active { get; set; }
 
+    public bool Sample { get; set; }
+
     public String CreatedBy { get; set; }
     
     public String CreatedByName { get; set; }
