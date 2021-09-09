@@ -118,21 +118,20 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     {
       ORM.Product product = null;
       ShopifySharp.Product sProduct = null;
+      ProductVariant sProductVariant = null;
+      List<Location> sLocation = null;
+      InventoryItem sInventoryItem = null;
       ProductService sProductService = null;
       ProductVariantService sProductVariantService = null;
       InventoryLevelService sInventoryLevelService = null;
       InventoryItemService sInventoryItemService = null;
-      ProductVariant sProductVariant = null;
       LocationService sLocationService = null;
-      List<Location> sLocation = null;
-      InventoryItem sInventoryItem = null;
       decimal weight = 0.0M;
       decimal pH = 0.0M;
       decimal volume = 0.0M;
       List<ProductIngredient> productIngredient = null;
       bool emptyStock = false;
       long minStock = long.MaxValue;
-
       String filePathPrefix = "wwwroot/img/product/xo-img-pid-";
       String srcPathPrefix = "/img/product/xo-img-pid-";
       FileStream stream = null;
@@ -194,7 +193,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           sInventoryItem.Cost = _context.Costs.Where(
             x => x.Id == productViewModel.CurrentCostId).Select(
             x => x.Amount).FirstOrDefault();
-          sInventoryItem.CountryCodeOfOrigin = "US";
+          sInventoryItem.CountryCodeOfOrigin = "US"; // Map this if we use products not made in the U.S.
 
           await sInventoryItemService.UpdateAsync((long)sProductVariant.InventoryItemId, sInventoryItem);
 

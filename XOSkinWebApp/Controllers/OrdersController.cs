@@ -25,7 +25,8 @@ namespace XOSkinWebApp.Controllers
 
       foreach (ProductOrder o in _context.ProductOrders.Where(
         x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).OrderByDescending(x => x.DatePlaced))
+          x => x.Email.Equals(User.Identity.Name)).Select(
+          x => x.Id).FirstOrDefault())).OrderByDescending(x => x.DatePlaced).ToList())
       {
         order.Add(new OrderViewModel()
         {
@@ -58,7 +59,8 @@ namespace XOSkinWebApp.Controllers
         order = _context.ProductOrders.Where(x => x.Id == Id).FirstOrDefault();
 
         // Check if order belongs to currently logged-in user.
-        if (order.User != _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())
+        if (!order.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
           return new RedirectToActionResult("Index", "Orders", null);
 
         lineItem = _context.ProductOrderLineItems.Where(x => x.ProductOrder == Id).ToList<ProductOrderLineItem>();
@@ -152,7 +154,7 @@ namespace XOSkinWebApp.Controllers
       int total = 0;
 
       foreach (ProductOrderLineItem lineItem in _context.ProductOrderLineItems.Where(
-        x => x.ProductOrder == OrderId))
+        x => x.ProductOrder == OrderId).ToList())
         total += lineItem.Quantity;
 
       return total;

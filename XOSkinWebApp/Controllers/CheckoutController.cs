@@ -18,9 +18,10 @@ namespace XOSkinWebApp.Controllers
     private readonly XOSkinContext _context;
     private readonly IOptions<Option> _option;
 
-    public CheckoutController(XOSkinContext context)
+    public CheckoutController(XOSkinContext context, IOptions<Option> option)
     {
       _context = context;
+      _option = option;
     }
 
     public IActionResult Index()
@@ -115,7 +116,7 @@ namespace XOSkinWebApp.Controllers
       return View(checkoutViewModel);
     }
 
-    public IActionResult PlaceOrder(CheckoutViewModel Model)
+    public async Task<IActionResult> PlaceOrder(CheckoutViewModel Model)
     {
       ProductOrder order = null;
       ORM.Product product = null;
@@ -129,6 +130,37 @@ namespace XOSkinWebApp.Controllers
       ORM.Product kit = null;
       List<KitProduct> kitProduct = null;
       long stock = long.MaxValue;
+      ProductService sProductService = null;
+      ProductVariantService sProductVariantService = null;
+      InventoryLevelService sInventoryLevelService = null;
+      InventoryItemService sInventoryItemService = null;
+      LocationService sLocationService = null;
+      ShopifySharp.Product sProduct = null;
+      ProductVariant sProductVariant = null;
+      List<Location> sLocation = null;
+      InventoryItem sInventoryItem = null;
+      long originalProductStock = 0L;
+      long originalKitStock = 0L;
+      List<long> updatedKit = null;
+
+      try
+      {
+        sProductService = new ProductService(_option.Value.ShopifyUrl,
+            _option.Value.ShopifyStoreFrontAccessToken);
+        sProductVariantService = new ProductVariantService(_option.Value.ShopifyUrl,
+          _option.Value.ShopifyStoreFrontAccessToken);
+        sInventoryLevelService = new InventoryLevelService(_option.Value.ShopifyUrl,
+          _option.Value.ShopifyStoreFrontAccessToken);
+        sLocationService = new LocationService(_option.Value.ShopifyUrl,
+          _option.Value.ShopifyStoreFrontAccessToken);
+        sInventoryItemService = new InventoryItemService(_option.Value.ShopifyUrl,
+          _option.Value.ShopifyStoreFrontAccessToken);
+      }
+      catch (Exception ex)
+      {
+        throw new Exception("An error was encountered while initializing Shopify services.", ex);
+      }
+      
 
       Model.ShippingCarrier = Model.ShippingCarrier;
       Model.TrackingNumber = "1000000000000000000001"; // TODO: IMPORTANT, GET FROM SHOPIFY.
@@ -221,32 +253,80 @@ namespace XOSkinWebApp.Controllers
           if (_context.Products.Where(x => x.Id == item.Product).Select(x => x.KitType).FirstOrDefault() == null)
           {
             product = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
+            originalProductStock = (long)product.Stock;
             product.Stock -= item.Quantity;
             _context.Products.Update(product);
             _context.SaveChanges();
+
+            try
+            {
+              sProduct = await sProductService.GetAsync((long)product.ShopifyProductId);
+              sProductVariant = await sProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+              sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
+              sLocation = (List<Location>)await sLocationService.ListAsync();
+              
+              await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+              {
+                AvailableAdjustment = (int?)(-1 * item.Quantity),
+                InventoryItemId = sInventoryItem.Id,
+                LocationId = sLocation.First().Id
+              });
+            }
+            catch (Exception ex)
+            {
+              throw new Exception("An error was encountered while updating Shopify product inventory levels.", ex);
+            }
+
+            updatedKit = new List<long>();
 
             foreach (KitProduct kp in _context.KitProducts.ToList())
             {
               if (kp.Product == product.Id)
               {
                 kit = _context.Products.Where(x => x.Id == kp.Kit).FirstOrDefault();
-                kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
-                stock = long.MaxValue;
 
-                foreach (KitProduct kpB in kitProduct)
+                if (!updatedKit.Any(x => x.Equals(kit.Id)))
                 {
-                  if (_context.Products.Where(
-                    x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault() < stock)
+                  kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
+                  stock = long.MaxValue;
+
+                  foreach (KitProduct kpB in kitProduct)
                   {
-                    stock = (long)_context.Products.Where(
-                      x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault();
+                    if (_context.Products.Where(
+                      x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault() < stock)
+                    {
+                      stock = (long)_context.Products.Where(
+                        x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault();
+                    }
+                  }
+
+                  originalKitStock = (long)kit.Stock;
+                  kit.Stock = stock;
+
+                  _context.Products.Update(kit);
+                  _context.SaveChanges();
+
+                  try
+                  {
+                    sProduct = await sProductService.GetAsync((long)kit.ShopifyProductId);
+                    sProductVariant = await sProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                    sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
+                    sLocation = (List<Location>)await sLocationService.ListAsync();
+
+                    await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                    {
+                      AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
+                      InventoryItemId = sInventoryItem.Id,
+                      LocationId = sLocation.First().Id
+                    });
+
+                    updatedKit.Add(kit.Id);
+                  }
+                  catch (Exception ex)
+                  {
+                    throw new Exception("An error was encountered while updating Shopify kit inventory levels.", ex);
                   }
                 }
-
-                kit.Stock = stock;
-
-                _context.Products.Update(kit);
-                _context.SaveChanges();
               }
             }
           }
@@ -261,7 +341,28 @@ namespace XOSkinWebApp.Controllers
               product.Stock -= 1;
               _context.Products.Update(product);
               _context.SaveChanges();
+
+              try
+              {
+                sProduct = await sProductService.GetAsync((long)product.ShopifyProductId);
+                sProductVariant = await sProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
+                sLocation = (List<Location>)await sLocationService.ListAsync();
+                
+                await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                {
+                  AvailableAdjustment = -1,
+                  InventoryItemId = sInventoryItem.Id,
+                  LocationId = sLocation.First().Id
+                });
+              }
+              catch (Exception ex)
+              {
+                throw new Exception("An error was encountered while updating Shopify kit-product inventory levels.", ex);
+              }
             }
+
+            updatedKit = new List<long>();
 
             foreach (KitProduct kp in kitProduct)
             {
@@ -270,23 +371,49 @@ namespace XOSkinWebApp.Controllers
                 if (kpB.Product == kp.Product)
                 {
                   kit = _context.Products.Where(x => x.Id == kpB.Kit).FirstOrDefault();
-                  kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
-                  stock = long.MaxValue;
 
-                  foreach (KitProduct kpC in kitProduct)
+                  if (!updatedKit.Any(x => x.Equals(kit.Id)))
                   {
-                    if (_context.Products.Where(
-                      x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault() < stock)
+                    kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
+                    stock = long.MaxValue;
+
+                    foreach (KitProduct kpC in kitProduct)
                     {
-                      stock = (long)_context.Products.Where(
-                        x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault();
+                      if (_context.Products.Where(
+                        x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault() < stock)
+                      {
+                        stock = (long)_context.Products.Where(
+                          x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault();
+                      }
                     }
+
+                    originalKitStock = (long)kit.Stock;
+                    kit.Stock = stock;
+
+                    try
+                    {
+                      sProduct = await sProductService.GetAsync((long)kit.ShopifyProductId);
+                      sProductVariant = await sProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                      sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
+                      sLocation = (List<Location>)await sLocationService.ListAsync();
+
+                      await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                      {
+                        AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
+                        InventoryItemId = sInventoryItem.Id,
+                        LocationId = sLocation.First().Id
+                      });
+                    }
+                    catch (Exception ex)
+                    {
+                      throw new Exception("An error was encountered while updating Shopify kit inventory levels.", ex);
+                    }
+
+                    updatedKit.Add(kit.Id);
+
+                    _context.Products.Update(kit);
+                    _context.SaveChanges();
                   }
-
-                  kit.Stock = stock;
-
-                  _context.Products.Update(kit);
-                  _context.SaveChanges();
                 }
               }
             }
