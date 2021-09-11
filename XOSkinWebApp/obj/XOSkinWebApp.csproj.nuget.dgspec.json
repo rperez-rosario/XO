@@ -184,6 +184,10 @@
               "target": "Package",
               "version": "[9.24.1, )"
             },
+            "ServiceStack.Text": {
+              "target": "Package",
+              "version": "[5.12.0, )"
+            },
             "ShopifySharp": {
               "target": "Package",
               "version": "[5.12.0, )"
