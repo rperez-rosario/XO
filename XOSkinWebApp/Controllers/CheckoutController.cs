@@ -9,6 +9,7 @@ using ShopifySharp;
 using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -24,7 +25,7 @@ namespace XOSkinWebApp.Controllers
       _option = option;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
       CheckoutViewModel checkoutViewModel = new CheckoutViewModel();
       List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
@@ -34,8 +35,16 @@ namespace XOSkinWebApp.Controllers
         .Select(x => x.Id).FirstOrDefault()).ToList();
       ORM.Address billingAddress = null;
       ORM.Address shippingAddress = null;
+      CarrierService sCarrierService = null;
+      List<Carrier> sCarrierList = null;
+      CarrierShippingRateProvider sCarrierShippingRateProvider = null;
+      ShippingZoneService sShippingZoneService = null;
+
+      
+      decimal totalOrderShippingWeightInPounds = 0.0M;
 
       checkoutViewModel.SubTotal = 0.0M;
+      totalOrderShippingWeightInPounds = 0.0M;
 
       foreach (ShoppingCartLineItem li in lineItem)
       {
@@ -55,17 +64,38 @@ namespace XOSkinWebApp.Controllers
           Total = li.Total
         });
         checkoutViewModel.SubTotal += li.Total;
+        totalOrderShippingWeightInPounds += (decimal)(_context.Products.Where(
+          x => x.Id == li.Product).Select(x => x.ShippingWeightLb).FirstOrDefault() * li.Quantity);
       }
 
       checkoutViewModel.LineItem = lineItemViewModel;
       checkoutViewModel.CreditCardExpirationDate = DateTime.Now;
 
-      checkoutViewModel.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
-      checkoutViewModel.ShippingCharges = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+      try
+      {
+        // TODO: Integrate ShipEngine API calls here.
+
+        sCarrierService = new CarrierService(_option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+        sShippingZoneService = new ShippingZoneService(_option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+
+        sCarrierList = (List<Carrier>)await sCarrierService.ListAsync();
+        ViewData["Carrier"] = new SelectList(sCarrierList, "Id", "Name", sCarrierList.Last());
+
+        sCarrierShippingRateProvider = new CarrierShippingRateProvider();
+        sCarrierShippingRateProvider.CarrierServiceId = sCarrierList.Last().Id;
+        
+      }
+      catch (Exception ex)
+      {
+        // TODO: Integrate ShipEngine API calls here.
+      }
+
+      checkoutViewModel.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax API.
+      checkoutViewModel.ShippingCharges = 0.0M; // TODO: IMPORTANT, GET FROM ShipEngine API.
       checkoutViewModel.CodeDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.CouponDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.IsGift = false; // TODO: Map this.
-      checkoutViewModel.ShippingCarrier = "UPS"; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+      checkoutViewModel.ShippingCarrier = "UPS"; // TODO: IMPORTANT, GET FROM ShipEngine API.
       checkoutViewModel.ExpectedToArrive = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
         DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(3); // TODO: Map this.
       checkoutViewModel.Total = checkoutViewModel.SubTotal + checkoutViewModel.Taxes + checkoutViewModel.ShippingCharges -
@@ -135,6 +165,8 @@ namespace XOSkinWebApp.Controllers
       InventoryLevelService sInventoryLevelService = null;
       InventoryItemService sInventoryItemService = null;
       LocationService sLocationService = null;
+      CustomerService sCustomerService = null;
+      OrderService sOrderService = null;
       ShopifySharp.Product sProduct = null;
       ProductVariant sProductVariant = null;
       List<Location> sLocation = null;
@@ -142,6 +174,8 @@ namespace XOSkinWebApp.Controllers
       long originalProductStock = 0L;
       long originalKitStock = 0L;
       List<long> updatedKit = null;
+      Order sOrder = null;
+      List<LineItem> sLineItemList = null;
 
       try
       {
@@ -155,25 +189,22 @@ namespace XOSkinWebApp.Controllers
           _option.Value.ShopifyStoreFrontAccessToken);
         sInventoryItemService = new InventoryItemService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
+        sOrderService = new OrderService(_option.Value.ShopifyUrl,
+          _option.Value.ShopifyStoreFrontAccessToken);
+        sCustomerService = new CustomerService(_option.Value.ShopifyUrl,
+          _option.Value.ShopifyStoreFrontAccessToken);
       }
       catch (Exception ex)
       {
         throw new Exception("An error was encountered while initializing Shopify services.", ex);
       }
-      
-
-      Model.ShippingCarrier = Model.ShippingCarrier;
-      Model.TrackingNumber = "1000000000000000000001"; // TODO: IMPORTANT, GET FROM SHOPIFY.
-      Model.ShippedOn = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ? 
-        DateTime.UtcNow : DateTime.UtcNow.AddDays(1); // 5:00 PM PTDT.
-      Model.ExpectedToArrive = new DateTime(9999, 12, 31); // TODO: IMPORTANT, GET FROM SHOPIFY.
-      Model.BilledOn = DateTime.UtcNow;
 
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();
 
       try
       {
         order = new ProductOrder();
+        sLineItemList = new List<LineItem>();
 
         foreach (ShoppingCartLineItem cli in _context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -184,7 +215,77 @@ namespace XOSkinWebApp.Controllers
             x => x.Id == _context.Products.Where(
               x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault() *
               cli.Quantity;
+          
+          if (_context.Products.Where(x => x.Id == cli.Product).Select(x => x.KitType).FirstOrDefault() == null)
+          {
+            sLineItemList.Add(new LineItem()
+            {
+              ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault(),
+              VariantId = sProductService.GetAsync((long)_context.Products.Where(
+                x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault()).Result.Variants.First().Id,
+              Quantity = cli.Quantity,
+              Taxable = true,
+              RequiresShipping = true
+            });
+          }
+          else
+          {
+            // TODO: Add Kit products.
+          }
         }
+
+        try
+        {
+          sOrder = new Order()
+          {
+            BillingAddress = new ShopifySharp.Address()
+            {
+              Address1 = Model.BillingAddress1,
+              Address2 = Model.BillingAddress2,
+              City = Model.BillingCity,
+              Province = Model.BillingState,
+              Zip = Model.BillingPostalCode,
+              Phone = _context.AspNetUsers.Where(
+                x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
+              Name = Model.BillingName,
+              Country = Model.BillingCountry
+            },
+            ShippingAddress = new ShopifySharp.Address()
+            {
+              Address1 = Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1,
+              Address2 = Model.ShippingAddressSame ? Model.BillingAddress2 : Model.ShippingAddress2,
+              City = Model.ShippingAddressSame ? Model.BillingCity : Model.ShippingCity,
+              Province = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+              Zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+              Phone = _context.AspNetUsers.Where(
+                x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
+              Name = Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName,
+              Country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry
+            }
+          };
+
+          // TODO: Set taxes From Model.
+          sOrder.CreatedAt = DateTime.UtcNow;
+          sOrder.LineItems = sLineItemList;
+          sOrder.Test = false;
+          sOrder.TaxesIncluded = false;
+          sOrder.Test = false;  // Switch to "true" for testing against a production store.
+          sOrder.Customer = await sCustomerService.GetAsync((long)_context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.ShopifyCustomerId).FirstOrDefault());
+
+          sOrder = await sOrderService.CreateAsync(sOrder);
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while writing order to Shopify.", ex);
+        }
+
+        Model.ShippingCarrier = Model.ShippingCarrier;
+        Model.TrackingNumber = "1000000000000000000001"; // TODO: IMPORTANT, GET FROM SHOPIFY.
+        Model.ShippedOn = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
+          DateTime.UtcNow : DateTime.UtcNow.AddDays(1); // 5:00 PM PTDT.
+        Model.ExpectedToArrive = new DateTime(9999, 12, 31); // TODO: IMPORTANT, GET FROM SHOPIFY.
+        Model.BilledOn = DateTime.UtcNow;
 
         shippingCost = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
         codeDiscount = 0.0M; // TODO: CALCULATE.
