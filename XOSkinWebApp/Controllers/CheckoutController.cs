@@ -205,10 +205,24 @@ namespace XOSkinWebApp.Controllers
       }
 
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();
+      order = new ProductOrder()
+      {
+        User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+        DatePlaced = DateTime.MaxValue,
+        Subtotal = 0.0M,
+        CouponDiscount = 0.0M,
+        CodeDiscount = 0.0M,
+        ApplicableTaxes = 0.0M,
+        Total = 0.0M,
+        GiftOrder = false
+      };
+
+      _context.ProductOrders.Add(order);
+      _context.SaveChanges();
 
       try
       {
-        order = new ProductOrder();
+
         sLineItemList = new List<LineItem>();
 
         foreach (ShoppingCartLineItem cli in _context.ShoppingCartLineItems.Where(
@@ -270,6 +284,8 @@ namespace XOSkinWebApp.Controllers
           };
 
           // TODO: Set taxes From Model.
+          sOrder.Name = "#XO-10" + order.Id.ToString();
+          sOrder.OrderStatusUrl = "https://xoskinqatest.azurewebsites.net/Orders/Detail/" + order.Id.ToString();
           sOrder.CreatedAt = DateTime.UtcNow;
           sOrder.LineItems = sLineItemList;
           sOrder.Test = false;
@@ -286,21 +302,19 @@ namespace XOSkinWebApp.Controllers
         }
 
         Model.ShippingCarrier = Model.ShippingCarrier;
-        Model.TrackingNumber = "1000000000000000000001"; // TODO: IMPORTANT, GET FROM SHOPIFY.
+        Model.TrackingNumber = "1000000000000000000001"; // TODO: IMPORTANT, GET FROM ShipEngine.
         Model.ShippedOn = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
           DateTime.UtcNow : DateTime.UtcNow.AddDays(1); // 5:00 PM PTDT.
-        Model.ExpectedToArrive = new DateTime(9999, 12, 31); // TODO: IMPORTANT, GET FROM SHOPIFY.
+        Model.ExpectedToArrive = new DateTime(9999, 12, 31); // TODO: IMPORTANT, GET FROM ShipEngine.
         Model.BilledOn = DateTime.UtcNow;
 
-        shippingCost = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+        shippingCost = 0.0M; // TODO: IMPORTANT, GET FROM ShipEngine.
         codeDiscount = 0.0M; // TODO: CALCULATE.
         couponDiscount = 0.0M; // TODO : CALCULATE.
-        applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+        applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax.
         
         total = subTotal + shippingCost - codeDiscount - couponDiscount  + applicableTaxes;
 
-        order.User = _context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
         order.DatePlaced = DateTime.UtcNow;
         order.Subtotal = subTotal;
         order.ApplicableTaxes = applicableTaxes;
@@ -310,7 +324,7 @@ namespace XOSkinWebApp.Controllers
         order.ShippingCost = shippingCost;
         order.Total = total;
 
-        _context.ProductOrders.Add(order);
+        _context.ProductOrders.Update(order);
 
         _context.SaveChanges();
       }
