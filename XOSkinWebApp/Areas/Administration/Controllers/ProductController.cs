@@ -588,6 +588,36 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
         try
         {
+          foreach(ShoppingCartLineItem scli in _context.ShoppingCartLineItems.ToList())
+          {
+            if (scli.Product == id)
+            {
+              scli.Total = _context.Prices.Where(x => x.Id == _context.Products.Where(
+                x => x.Id == id).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+                x => x.Amount).FirstOrDefault() * scli.Quantity;
+              _context.ShoppingCartLineItems.Update(scli);
+              _context.SaveChanges();
+            }
+          }
+          foreach (ProductOrderLineItem poli in _context.ProductOrderLineItems.ToList())
+          {
+            if (poli.Product == id)
+            {
+              poli.Total = _context.Prices.Where(x => x.Id == _context.Products.Where(
+                x => x.Id == id).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+                x => x.Amount).FirstOrDefault() * poli.Quantity;
+              _context.ProductOrderLineItems.Update(poli);
+              _context.SaveChanges();
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while updating shopping cart and order line item totals.", ex);
+        }
+
+        try
+        {
           sProductService = new ProductService(_option.Value.ShopifyUrl,
             _option.Value.ShopifyStoreFrontAccessToken);
           sProductVariantService = new ProductVariantService(_option.Value.ShopifyUrl,

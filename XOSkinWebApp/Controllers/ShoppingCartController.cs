@@ -42,9 +42,14 @@ namespace XOSkinWebApp.Controllers
             x => x.Id == li.Product)
             .Select(x => x.Description).FirstOrDefault(),
           Quantity = li.Quantity,
-          Total = li.Total
+          Total = _context.Prices.Where(
+            x => x.Id ==_context.Products.Where(
+            x => x.Id == li.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+            x => x.Amount).FirstOrDefault() * li.Quantity
         });
       }
+
+
 
       ViewData.Add("ShoppingCart.WelcomeText", _context.LocalizedTexts.Where(
         x => x.PlacementPointCode.Equals("ShoppingCart.WelcomeText"))

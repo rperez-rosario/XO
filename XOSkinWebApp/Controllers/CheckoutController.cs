@@ -40,7 +40,6 @@ namespace XOSkinWebApp.Controllers
       CarrierShippingRateProvider sCarrierShippingRateProvider = null;
       ShippingZoneService sShippingZoneService = null;
 
-      
       decimal totalOrderShippingWeightInPounds = 0.0M;
 
       checkoutViewModel.SubTotal = 0.0M;
@@ -61,9 +60,15 @@ namespace XOSkinWebApp.Controllers
             x => x.Id == li.Product)
             .Select(x => x.Description).FirstOrDefault(),
           Quantity = li.Quantity,
-          Total = li.Total
+          Total = _context.Prices.Where(
+            x => x.Id == _context.Products.Where(
+            x => x.Id == li.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+            x => x.Amount).FirstOrDefault() * li.Quantity
         });
-        checkoutViewModel.SubTotal += li.Total;
+        checkoutViewModel.SubTotal += _context.Prices.Where(
+          x => x.Id == _context.Products.Where(
+          x => x.Id == li.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+          x => x.Amount).FirstOrDefault() * li.Quantity;
         totalOrderShippingWeightInPounds += (decimal)(_context.Products.Where(
           x => x.Id == li.Product).Select(x => x.ShippingWeightLb).FirstOrDefault() * li.Quantity);
       }
@@ -346,7 +351,10 @@ namespace XOSkinWebApp.Controllers
             Cost = (long)_context.Products.Where(x => x.Id == item.Product).Select(x => x.Cost).FirstOrDefault(),
             ProductOrder = order.Id,
             Quantity = item.Quantity,
-            Total = item.Total
+            Total = _context.Prices.Where(
+              x => x.Id == _context.Products.Where(
+              x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+              x => x.Amount).FirstOrDefault() * item.Quantity
           });
 
           _context.SaveChanges();
@@ -533,7 +541,10 @@ namespace XOSkinWebApp.Controllers
               x => x.ProductOrder == order.Id).Where(
               x => x.Product == item.Product).Select(x => x.Description).FirstOrDefault(),
             Quantity = item.Quantity,
-            Total = item.Total
+            Total = _context.Prices.Where(
+              x => x.Id == _context.Products.Where(
+              x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+              x => x.Amount).FirstOrDefault() * item.Quantity
           });
 
           _context.SaveChanges();
