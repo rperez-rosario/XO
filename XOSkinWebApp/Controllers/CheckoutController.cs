@@ -10,6 +10,9 @@ using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ServiceStack;
+using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -35,11 +38,8 @@ namespace XOSkinWebApp.Controllers
         .Select(x => x.Id).FirstOrDefault()).ToList();
       ORM.Address billingAddress = null;
       ORM.Address shippingAddress = null;
-      CarrierService sCarrierService = null;
-      List<Carrier> sCarrierList = null;
-      CarrierShippingRateProvider sCarrierShippingRateProvider = null;
-      ShippingZoneService sShippingZoneService = null;
-
+      List<Models.Carrier> seCarrierList = null;
+      String seCarrierJson = null;
       decimal totalOrderShippingWeightInPounds = 0.0M;
 
       checkoutViewModel.SubTotal = 0.0M;
@@ -79,20 +79,36 @@ namespace XOSkinWebApp.Controllers
       try
       {
         // TODO: Integrate ShipEngine API calls here.
+        seCarrierJson = _option.Value.ShipEngineCarriersUrl.GetJsonFromUrl(requestFilter: webReq =>
+         {
+           webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+         });
 
-        sCarrierService = new CarrierService(_option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
-        sShippingZoneService = new ShippingZoneService(_option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+        seCarrierList = new List<Models.Carrier>();
 
-        sCarrierList = (List<Carrier>)await sCarrierService.ListAsync();
-        ViewData["Carrier"] = new SelectList(sCarrierList, "Id", "Name", sCarrierList.Last());
+        using (JsonDocument seCarrier = JsonDocument.Parse(seCarrierJson))
+        {
+          JsonElement root = seCarrier.RootElement;
+          JsonElement carriersElement = root.GetProperty("carriers");
+          foreach (JsonElement carrier in carriersElement.EnumerateArray())
+          {
+            if (carrier.TryGetProperty("carrier_id", out JsonElement idElement))
+            {
 
-        sCarrierShippingRateProvider = new CarrierShippingRateProvider();
-        sCarrierShippingRateProvider.CarrierServiceId = sCarrierList.Last().Id;
+              seCarrierList.Add(new Models.Carrier()
+              {
+                Id = carrier.GetProperty("carrier_id").ToString(),
+                Name = carrier.GetProperty("friendly_name").ToString()
+              });
+            }
+          }
+        }
         
+        ViewData["Carrier"] = new SelectList(seCarrierList, "Id", "Name", null);
       }
       catch (Exception ex)
       {
-        // TODO: Integrate ShipEngine API calls here.
+        throw new Exception("An error was encountered while setting shipping information.", ex);
       }
 
       checkoutViewModel.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax API.
