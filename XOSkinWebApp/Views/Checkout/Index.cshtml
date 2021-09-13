@@ -123,8 +123,12 @@ else
             <label id="carrier" class="control-label">Please Choose a Shipping Carrier</label>
             <select asp-for="SelectedCarrierId" class="form-control" asp-items="ViewBag.Carrier"></select>
           </div>*@
-        <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
-        <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
+          <div style="text-align: right; margin-right: 40px">Carrier: @Html.Raw(Model.CarrierName)</div>
+          <div style="text-align: right; margin-right: 40px">Shipping: @Html.Raw(Model.ShippedOn.ToShortDateString())</div>
+          <div style="text-align: right; margin-right: 40px">Arrival: @Html.Raw(Model.ExpectedToArrive.ToShortDateString())</div>
+          <br />
+          <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
+          <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
           <div style="text-align: right; margin-right: 40px">USPS Priority Mail: +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</div>
           <div style="text-align: right; margin-right: 40px">Code Discount: -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</div>
           <div style="text-align: right; margin-right: 40px">Coupon Discount: -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
@@ -173,8 +177,10 @@ else
     <input type="hidden" asp-for="CouponDiscount" value="@Model.CouponDiscount.ToString()" />
     <input type="hidden" asp-for="ExpectedToArrive" value="@Model.ExpectedToArrive" />
     <input type="hidden" asp-for="ShippingCarrier" value="@Model.ShippingCarrier" />
+    <input type="hidden" asp-for="CarrierName" value="@Model.CarrierName" />
     <input type="hidden" asp-for="CalculatedShipping" value="@Model.CalculatedShipping" />
     <input type="hidden" asp-for="TotalWeightInPounds" value="@Model.TotalWeightInPounds" />
+    <input type="hidden" asp-for="ShippedOn" value="@Model.ShippedOn" />
   </form>
   <script type="text/javascript">
     $(document).ready(function () {

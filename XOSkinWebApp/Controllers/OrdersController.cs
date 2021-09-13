@@ -91,7 +91,7 @@ namespace XOSkinWebApp.Controllers
           ExpectedToArrive = shipping.Arrives == null ? new DateTime(1754, 1, 1) : shipping.Arrives.Value,
           IsGift = order.GiftOrder,
           OrderId = Id,
-          ShippingCarrier = shipping.CarrierName,
+          CarrierName = shipping.CarrierName,
           ShippingCharges = order.ShippingCost,
           ShippingCity = shipping.CityName,
           ShippingPostalCode = shipping.PostalCode,

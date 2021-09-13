@@ -119,8 +119,10 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.CouponDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.IsGift = false; // TODO: Map this.
       checkoutViewModel.ShippingCarrier = "se-750817"; // Stamps.com.
-      checkoutViewModel.ExpectedToArrive = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
-        DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(3); // TODO: Map this.
+      checkoutViewModel.CarrierName = "USPS Priority Mail";
+      checkoutViewModel.ShippedOn = DateTime.UtcNow.TimeOfDay > new TimeSpan(10, 0, 0) ? // 5:00 PM PTDT.
+         DateTime.UtcNow.AddDays(1) : DateTime.UtcNow.AddDays(2);
+      checkoutViewModel.ExpectedToArrive = checkoutViewModel.ShippedOn.AddDays(3);
       checkoutViewModel.Total = checkoutViewModel.SubTotal + checkoutViewModel.Taxes + checkoutViewModel.ShippingCharges -
         checkoutViewModel.CodeDiscount - checkoutViewModel.CouponDiscount;
 
@@ -159,6 +161,13 @@ namespace XOSkinWebApp.Controllers
         else
         {
           checkoutViewModel.ShippingAddressSame = true;
+          checkoutViewModel.ShippingName = billingAddress.Name;
+          checkoutViewModel.ShippingAddress1 = billingAddress.Line1;
+          checkoutViewModel.ShippingAddress2 = billingAddress.Line2;
+          checkoutViewModel.ShippingCity = billingAddress.CityName;
+          checkoutViewModel.ShippingState = billingAddress.StateName;
+          checkoutViewModel.ShippingCountry = billingAddress.CountryName;
+          checkoutViewModel.ShippingPostalCode = billingAddress.PostalCode;
         }
       }
 
@@ -178,8 +187,6 @@ namespace XOSkinWebApp.Controllers
         x => x.ShoppingCart == _context.ShoppingCarts.Where(x => x.User.Equals(_context.AspNetUsers.Where(
         x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
         .Select(x => x.Id).FirstOrDefault()).ToList();
-      ORM.Address billingAddress = null;
-      ORM.Address shippingAddress = null;
       decimal totalOrderShippingWeightInPounds = 0.0M;
 
       Model.SubTotal = 0.0M;
@@ -214,59 +221,13 @@ namespace XOSkinWebApp.Controllers
       }
 
       Model.LineItem = lineItemViewModel;
-      Model.CreditCardExpirationDate = DateTime.Now;
-      Model.TotalWeightInPounds = totalOrderShippingWeightInPounds;
-
-      Model.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax API.
-      Model.CodeDiscount = 0.0M; // TODO: CALCULATE.
-      Model.CouponDiscount = 0.0M; // TODO: CALCULATE.
-      Model.IsGift = false; // TODO: Map this.
       
-      if (_context.Addresses.Where(
-        x => x.User.Equals(_context.AspNetUsers.Where(
-        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Count() == 2)
-      {
-        billingAddress = _context.Addresses.Where(
-          x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-          x => x.AddressType == 1).FirstOrDefault();
-
-        Model.BillingName = billingAddress.Name;
-        Model.BillingAddress1 = billingAddress.Line1;
-        Model.BillingAddress2 = billingAddress.Line2;
-        Model.BillingCity = billingAddress.CityName;
-        Model.BillingState = billingAddress.StateName;
-        Model.BillingCountry = billingAddress.CountryName;
-        Model.BillingPostalCode = billingAddress.PostalCode;
-
-        shippingAddress = _context.Addresses.Where(
-          x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-          x => x.AddressType == 2).FirstOrDefault();
-
-        if (!ShippingAddressSame(billingAddress, shippingAddress))
-        {
-          Model.ShippingName = shippingAddress.Name;
-          Model.ShippingAddress1 = shippingAddress.Line1;
-          Model.ShippingAddress2 = shippingAddress.Line2;
-          Model.ShippingCity = shippingAddress.CityName;
-          Model.ShippingState = shippingAddress.StateName;
-          Model.ShippingCountry = shippingAddress.CountryName;
-          Model.ShippingPostalCode = shippingAddress.PostalCode;
-        }
-        else
-        {
-          Model.ShippingAddressSame = true;
-        }
-      }
-
       ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
        x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))
        .Select(x => x.Text).FirstOrDefault());
 
       Model.ShippingCarrier = "se-750817"; // Stamps.com.
-      Model.ExpectedToArrive = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
-        DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(3); // TODO: Map this.
+      Model.ExpectedToArrive = Model.ExpectedToArrive;
       
       try
       {
@@ -366,7 +327,7 @@ namespace XOSkinWebApp.Controllers
       }
       catch (Exception ex)
       {
-        throw new Exception("An error was encountered while calculating shipping cost.", ex);
+        throw new Exception("An error was encountered while calculating shipping cost. " + seShipmentDetailsJson, ex);
       }
 
       Model.Total = Model.SubTotal + Model.Taxes + Model.ShippingCharges -
@@ -519,11 +480,7 @@ namespace XOSkinWebApp.Controllers
           throw new Exception("An error was encountered while writing order to Shopify.", ex);
         }
 
-        Model.ShippingCarrier = String.Empty; // TODO: IMPORTANT GET FROM ShipEngine.
-        Model.TrackingNumber = String.Empty; // TODO: IMPORTANT GET FROM ShipEngine.
-        Model.ShippedOn = DateTime.UtcNow.TimeOfDay > new TimeSpan(10, 0, 0) ? // 5:00 PM PTDT.
-          DateTime.UtcNow : DateTime.UtcNow.AddDays(1); 
-        Model.ExpectedToArrive =DateTime.MaxValue; // TODO: IMPORTANT GET FROM ShipEngine.
+        Model.ShippingCarrier = "USPS Priority Mail"; // Can also get from ShipEngine if multi-options enabled.
         Model.BilledOn = DateTime.UtcNow;
 
         shippingCost = 0.0M; // TODO: IMPORTANT, GET FROM ShipEngine.
@@ -917,7 +874,7 @@ namespace XOSkinWebApp.Controllers
             CountryName = Model.BillingCountry,
             PostalCode = Model.BillingPostalCode,
             ShipDate = Model.ShippedOn,
-            CarrierName = Model.ShippingCarrier,
+            CarrierName = Model.CarrierName,
             TrackingNumber = Model.TrackingNumber,
             Order = order.Id,
             Arrives = Model.ExpectedToArrive
@@ -965,7 +922,7 @@ namespace XOSkinWebApp.Controllers
             CountryName = Model.ShippingCountry,
             PostalCode = Model.ShippingPostalCode,
             ShipDate = Model.ShippedOn,
-            CarrierName = Model.ShippingCarrier,
+            CarrierName = Model.CarrierName,
             TrackingNumber = Model.TrackingNumber,
             Order = order.Id,
             Arrives = Model.ExpectedToArrive

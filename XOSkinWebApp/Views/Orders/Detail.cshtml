@@ -156,7 +156,7 @@
         </div>
         <div style="display: inline;">&nbsp;</div>
         <div style="display: inline;">
-          <span>@Html.Raw(Model.ShippingCarrier)</span>
+          <span>@Html.Raw(Model.CarrierName)</span>
         </div>
       </div>
       <div class="form-group">
@@ -165,12 +165,12 @@
         </div>
         <div style="display: inline;">&nbsp;</div>
         <div style="display: inline;">
-          <span class="font-weight-bolder">@Html.Raw(Model.TrackingNumber)</span>
+          <span class="font-weight-bolder">@Html.Raw(Model.TrackingNumber.Equals(String.Empty) ? "To Be Updated Soon" : Model.TrackingNumber)</span>
         </div>
       </div>
       <div class="form-group">
         <div style="display: inline;">
-          <label class="control-label">Shipped:</label>
+          <label class="control-label">Shipping:</label>
         </div>
         <div style="display: inline;">&nbsp;</div>
         <div style="display: inline;">
