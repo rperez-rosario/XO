@@ -16,5 +16,6 @@ namespace XOSkinWebApp.ConfigurationHelper
 		public String ShopifyYourLipsAndSmileCollectionId { get; set; }
 		public String ShipEngineApiKey { get; set; }
 		public String ShipEngineCarriersUrl { get; set; }
+		public String ShipEngineShippingCostUrl { get; set; }
 	}
 }

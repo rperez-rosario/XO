@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using ServiceStack;
 using Newtonsoft.Json;
 using System.Text.Json;
+using System.IO;
+using System.Text;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -38,8 +40,8 @@ namespace XOSkinWebApp.Controllers
         .Select(x => x.Id).FirstOrDefault()).ToList();
       ORM.Address billingAddress = null;
       ORM.Address shippingAddress = null;
-      List<Models.Carrier> seCarrierList = null;
-      String seCarrierJson = null;
+      //List<Models.Carrier> seCarrierList = null;
+      //String seCarrierJson = null;
       decimal totalOrderShippingWeightInPounds = 0.0M;
 
       checkoutViewModel.SubTotal = 0.0M;
@@ -75,40 +77,40 @@ namespace XOSkinWebApp.Controllers
 
       checkoutViewModel.LineItem = lineItemViewModel;
       checkoutViewModel.CreditCardExpirationDate = DateTime.Now;
+      checkoutViewModel.TotalWeightInPounds = totalOrderShippingWeightInPounds;
 
       try
       {
-        // TODO: Integrate ShipEngine API calls here.
-        seCarrierJson = _option.Value.ShipEngineCarriersUrl.GetJsonFromUrl(requestFilter: webReq =>
-         {
-           webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
-         });
+        //seCarrierJson = _option.Value.ShipEngineCarriersUrl.GetJsonFromUrl(requestFilter: webReq =>
+        // {
+        //   webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+        // });
 
-        seCarrierList = new List<Models.Carrier>();
+        //seCarrierList = new List<Models.Carrier>();
 
-        using (JsonDocument seCarrier = JsonDocument.Parse(seCarrierJson))
-        {
-          JsonElement root = seCarrier.RootElement;
-          JsonElement carriersElement = root.GetProperty("carriers");
-          foreach (JsonElement carrier in carriersElement.EnumerateArray())
-          {
-            if (carrier.TryGetProperty("carrier_id", out JsonElement idElement))
-            {
+        //using (JsonDocument seCarrier = JsonDocument.Parse(seCarrierJson))
+        //{
+        //  JsonElement root = seCarrier.RootElement;
+        //  JsonElement carriersElement = root.GetProperty("carriers");
+        //  foreach (JsonElement carrier in carriersElement.EnumerateArray())
+        //  {
+        //    if (carrier.TryGetProperty("carrier_id", out JsonElement idElement))
+        //    {
 
-              seCarrierList.Add(new Models.Carrier()
-              {
-                Id = carrier.GetProperty("carrier_id").ToString(),
-                Name = carrier.GetProperty("friendly_name").ToString()
-              });
-            }
-          }
-        }
-        
-        ViewData["Carrier"] = new SelectList(seCarrierList, "Id", "Name", null);
+        //      seCarrierList.Add(new Models.Carrier()
+        //      {
+        //        Id = carrier.GetProperty("carrier_id").ToString(),
+        //        Name = carrier.GetProperty("friendly_name").ToString()
+        //      });
+        //    }
+        //  }
+        //}
+
+        //ViewData["Carrier"] = new SelectList(seCarrierList, "Id", "Name", seCarrierList.First());
       }
       catch (Exception ex)
       {
-        throw new Exception("An error was encountered while setting shipping information.", ex);
+        throw new Exception("An error was encountered while setting available shipping carrier information.", ex);
       }
 
       checkoutViewModel.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax API.
@@ -116,7 +118,7 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.CodeDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.CouponDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.IsGift = false; // TODO: Map this.
-      checkoutViewModel.ShippingCarrier = "UPS"; // TODO: IMPORTANT, GET FROM ShipEngine API.
+      checkoutViewModel.ShippingCarrier = "se-750817"; // Stamps.com.
       checkoutViewModel.ExpectedToArrive = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
         DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(3); // TODO: Map this.
       checkoutViewModel.Total = checkoutViewModel.SubTotal + checkoutViewModel.Taxes + checkoutViewModel.ShippingCharges -
@@ -165,6 +167,213 @@ namespace XOSkinWebApp.Controllers
        .Select(x => x.Text).FirstOrDefault());
 
       return View(checkoutViewModel);
+    }
+
+    public async Task<IActionResult> CalculateShippingCost(CheckoutViewModel Model)
+    {
+      String seShipmentDetailsJson = null;
+      String seShipmentCostJson = null;
+      List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
+      List<ShoppingCartLineItem> lineItem = _context.ShoppingCartLineItems.Where(
+        x => x.ShoppingCart == _context.ShoppingCarts.Where(x => x.User.Equals(_context.AspNetUsers.Where(
+        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
+        .Select(x => x.Id).FirstOrDefault()).ToList();
+      ORM.Address billingAddress = null;
+      ORM.Address shippingAddress = null;
+      decimal totalOrderShippingWeightInPounds = 0.0M;
+
+      Model.SubTotal = 0.0M;
+      totalOrderShippingWeightInPounds = 0.0M;
+
+      foreach (ShoppingCartLineItem li in lineItem)
+      {
+        lineItemViewModel.Add(new ShoppingCartLineItemViewModel()
+        {
+          Id = li.Id,
+          ProductId = li.Product,
+          ImageSource = _context.Products.Where(
+            x => x.Id.Equals(li.Product)).Select(x => x.ImagePathLarge).FirstOrDefault(),
+          ProductName = _context.Products.Where(
+            x => x.Id == li.Product)
+            .Select(x => x.Name).FirstOrDefault(),
+          ProductDescription = _context.Products.Where(
+            x => x.Id == li.Product)
+            .Select(x => x.Description).FirstOrDefault(),
+          Quantity = li.Quantity,
+          Total = _context.Prices.Where(
+            x => x.Id == _context.Products.Where(
+            x => x.Id == li.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+            x => x.Amount).FirstOrDefault() * li.Quantity
+        });
+        Model.SubTotal += _context.Prices.Where(
+          x => x.Id == _context.Products.Where(
+          x => x.Id == li.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+          x => x.Amount).FirstOrDefault() * li.Quantity;
+        totalOrderShippingWeightInPounds += (decimal)(_context.Products.Where(
+          x => x.Id == li.Product).Select(x => x.ShippingWeightLb).FirstOrDefault() * li.Quantity);
+      }
+
+      Model.LineItem = lineItemViewModel;
+      Model.CreditCardExpirationDate = DateTime.Now;
+      Model.TotalWeightInPounds = totalOrderShippingWeightInPounds;
+
+      Model.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax API.
+      Model.CodeDiscount = 0.0M; // TODO: CALCULATE.
+      Model.CouponDiscount = 0.0M; // TODO: CALCULATE.
+      Model.IsGift = false; // TODO: Map this.
+      
+      if (_context.Addresses.Where(
+        x => x.User.Equals(_context.AspNetUsers.Where(
+        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Count() == 2)
+      {
+        billingAddress = _context.Addresses.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+          x => x.AddressType == 1).FirstOrDefault();
+
+        Model.BillingName = billingAddress.Name;
+        Model.BillingAddress1 = billingAddress.Line1;
+        Model.BillingAddress2 = billingAddress.Line2;
+        Model.BillingCity = billingAddress.CityName;
+        Model.BillingState = billingAddress.StateName;
+        Model.BillingCountry = billingAddress.CountryName;
+        Model.BillingPostalCode = billingAddress.PostalCode;
+
+        shippingAddress = _context.Addresses.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+          x => x.AddressType == 2).FirstOrDefault();
+
+        if (!ShippingAddressSame(billingAddress, shippingAddress))
+        {
+          Model.ShippingName = shippingAddress.Name;
+          Model.ShippingAddress1 = shippingAddress.Line1;
+          Model.ShippingAddress2 = shippingAddress.Line2;
+          Model.ShippingCity = shippingAddress.CityName;
+          Model.ShippingState = shippingAddress.StateName;
+          Model.ShippingCountry = shippingAddress.CountryName;
+          Model.ShippingPostalCode = shippingAddress.PostalCode;
+        }
+        else
+        {
+          Model.ShippingAddressSame = true;
+        }
+      }
+
+      ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
+       x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))
+       .Select(x => x.Text).FirstOrDefault());
+
+      Model.ShippingCarrier = "se-750817"; // Stamps.com.
+      Model.ExpectedToArrive = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
+        DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(3); // TODO: Map this.
+      
+      try
+      {
+        var options = new JsonWriterOptions
+        {
+          Indented = true
+        };
+
+        using var stream = new MemoryStream();
+        using var writer = new Utf8JsonWriter(stream, options);
+        
+        writer.WriteStartObject();
+          writer.WriteStartObject("rate_options");
+            writer.WriteStartArray("carrier_ids");
+              writer.WriteStringValue(Model.ShippingCarrier);
+            writer.WriteEndArray();
+          writer.WriteEndObject(); // rate_options.
+          writer.WriteStartObject("shipment");
+            writer.WritePropertyName("validate_address");
+            writer.WriteStringValue("validate_and_clean");
+            writer.WriteStartObject("ship_to");
+              writer.WritePropertyName("name");
+              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName);
+              writer.WritePropertyName("phone");
+              writer.WriteStringValue(_context.AspNetUsers.Where(
+                  x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault());
+              writer.WritePropertyName("address_line1");
+              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1);
+              writer.WritePropertyName("address_line2");
+              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress2 : Model.ShippingAddress2);
+              writer.WritePropertyName("city_locality");
+              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingCity : Model.ShippingCity);
+              writer.WritePropertyName("state_province");
+              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState);
+              writer.WritePropertyName("postal_code");
+              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode);
+              writer.WritePropertyName("country_code");
+              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingCountry: Model.ShippingCountry);
+            writer.WriteEndObject(); // ship_to.
+            writer.WriteStartObject("ship_from");
+              writer.WritePropertyName("company_name");
+              writer.WriteStringValue("XO Skin, Corp.");
+              writer.WritePropertyName("name");
+              writer.WriteStringValue("XO Skin Shipping");
+              writer.WritePropertyName("phone");
+              writer.WriteStringValue("xxx-xxx-xxxx");
+              writer.WritePropertyName("address_line1");
+              writer.WriteStringValue("10815 Rancho Bernardo Road Suite 300");
+              writer.WritePropertyName("city_locality");
+              writer.WriteStringValue("San Diego");
+              writer.WritePropertyName("state_province");
+              writer.WriteStringValue("CA");
+              writer.WritePropertyName("postal_code");
+              writer.WriteStringValue("92127");
+              writer.WritePropertyName("country_code");
+              writer.WriteStringValue("US");
+            writer.WriteEndObject(); // ship_from.
+            writer.WriteStartArray("packages");
+              writer.WriteStartObject();
+                writer.WriteStartObject("weight");
+                  writer.WritePropertyName("value");
+                  writer.WriteNumberValue(Model.TotalWeightInPounds);
+                  writer.WritePropertyName("unit");
+                  writer.WriteStringValue("pound");
+                writer.WriteEndObject(); // weight.
+              writer.WriteEndObject(); // packages.
+            writer.WriteEndArray(); // packages.
+          writer.WriteEndObject();  // shipment.
+        writer.WriteEndObject(); // root.
+        
+        writer.Flush();
+
+        seShipmentDetailsJson = Encoding.UTF8.GetString(stream.ToArray());
+
+        seShipmentCostJson = _option.Value.ShipEngineShippingCostUrl.PostJsonToUrlAsync(seShipmentDetailsJson, 
+          requestFilter: webReq =>
+        {
+          webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+        }).Result;
+
+        using (JsonDocument document = JsonDocument.Parse(seShipmentCostJson))
+        {
+          JsonElement root = document.RootElement;
+          JsonElement ratesElement = root.GetProperty("rate_response").GetProperty("rates");
+          foreach (JsonElement rate in ratesElement.EnumerateArray())
+          {
+            if (rate.GetProperty("carrier_id").ValueEquals("se-750817") &&
+              rate.GetProperty("rate_type").ValueEquals("shipment") &&
+              rate.GetProperty("package_type").ValueEquals("package") &&
+              rate.GetProperty("service_code").ValueEquals("usps_priority_mail"))
+            {
+              Model.ShippingCharges = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
+              break;
+            }
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        throw new Exception("An error was encountered while calculating shipping cost.", ex);
+      }
+
+      Model.Total = Model.SubTotal + Model.Taxes + Model.ShippingCharges -
+        Model.CodeDiscount - Model.CouponDiscount;
+      Model.CalculatedShipping = true;
+      
+      return View("Index", Model);
     }
 
     public async Task<IActionResult> PlaceOrder(CheckoutViewModel Model)
@@ -251,22 +460,15 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault() *
               cli.Quantity;
           
-          if (_context.Products.Where(x => x.Id == cli.Product).Select(x => x.KitType).FirstOrDefault() == null)
+          sLineItemList.Add(new LineItem()
           {
-            sLineItemList.Add(new LineItem()
-            {
-              ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault(),
-              VariantId = sProductService.GetAsync((long)_context.Products.Where(
-                x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault()).Result.Variants.First().Id,
-              Quantity = cli.Quantity,
-              Taxable = true,
-              RequiresShipping = true
-            });
-          }
-          else
-          {
-            // TODO: Add Kit products.
-          }
+            ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault(),
+            VariantId = sProductService.GetAsync((long)_context.Products.Where(
+              x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault()).Result.Variants.First().Id,
+            Quantity = cli.Quantity,
+            Taxable = true,
+            RequiresShipping = true
+          });
         }
 
         try
@@ -299,7 +501,7 @@ namespace XOSkinWebApp.Controllers
             }
           };
 
-          // TODO: Set taxes From Model.
+          // TODO: IMPORTANT GET TAXES FROM AvaTax.
           sOrder.Name = "#XO-10" + order.Id.ToString();
           sOrder.OrderStatusUrl = "https://xoskinqatest.azurewebsites.net/Orders/Detail/" + order.Id.ToString();
           sOrder.CreatedAt = DateTime.UtcNow;
@@ -317,11 +519,11 @@ namespace XOSkinWebApp.Controllers
           throw new Exception("An error was encountered while writing order to Shopify.", ex);
         }
 
-        Model.ShippingCarrier = Model.ShippingCarrier;
-        Model.TrackingNumber = "1000000000000000000001"; // TODO: IMPORTANT, GET FROM ShipEngine.
-        Model.ShippedOn = DateTime.UtcNow > DateTime.UtcNow.AddHours(10) ?
-          DateTime.UtcNow : DateTime.UtcNow.AddDays(1); // 5:00 PM PTDT.
-        Model.ExpectedToArrive = new DateTime(9999, 12, 31); // TODO: IMPORTANT, GET FROM ShipEngine.
+        Model.ShippingCarrier = String.Empty; // TODO: IMPORTANT GET FROM ShipEngine.
+        Model.TrackingNumber = String.Empty; // TODO: IMPORTANT GET FROM ShipEngine.
+        Model.ShippedOn = DateTime.UtcNow.TimeOfDay > new TimeSpan(10, 0, 0) ? // 5:00 PM PTDT.
+          DateTime.UtcNow : DateTime.UtcNow.AddDays(1); 
+        Model.ExpectedToArrive =DateTime.MaxValue; // TODO: IMPORTANT GET FROM ShipEngine.
         Model.BilledOn = DateTime.UtcNow;
 
         shippingCost = 0.0M; // TODO: IMPORTANT, GET FROM ShipEngine.
@@ -346,11 +548,11 @@ namespace XOSkinWebApp.Controllers
       }
       catch (Exception ex)
       {
-        throw new Exception("An error was encontered while writing the product order to the database.", ex);
+        throw new Exception("An error was encontered while initializing the product order to the database.", ex);
       }
 
       Model.OrderId = order.Id;
-      Model.ShopifyId = 123456789; // TODO: IMPORTANT, GET FROM SHOPIFY API.
+      Model.ShopifyId = (long)sOrder.Id;
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();
 
       try
@@ -477,7 +679,7 @@ namespace XOSkinWebApp.Controllers
             foreach (KitProduct kp in kitProduct)
             {
               product = _context.Products.Where(x => x.Id == kp.Product).FirstOrDefault();
-              product.Stock -= 1;
+              product.Stock -= 1 * item.Quantity;
               _context.Products.Update(product);
               _context.SaveChanges();
 
@@ -490,7 +692,7 @@ namespace XOSkinWebApp.Controllers
                 
                 await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
                 {
-                  AvailableAdjustment = -1,
+                  AvailableAdjustment = -1 * item.Quantity,
                   InventoryItemId = sInventoryItem.Id,
                   LocationId = sLocation.First().Id
                 });

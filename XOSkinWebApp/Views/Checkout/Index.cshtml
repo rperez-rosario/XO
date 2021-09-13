@@ -99,38 +99,41 @@ else
           </div>
         </div>
         <div class="col-sm-4">
-          <h4>Credit Card</h4>
-          <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-          <div class="form-group">
-            <label class="control-label">Credit Card Number</label>
-            <input asp-for="CreditCardNumber" class="form-control" type="password" />
-            <span asp-validation-for="CreditCardNumber" class="text-danger"></span>
-          </div>
-          <div class="form-group">
-            <label class="control-label">CVC</label>
-            <input asp-for="CreditCardCVC" class="form-control" type="password" />
-            <span asp-validation-for="CreditCardCVC" class="text-danger"></span>
-          </div>
-          <div class="form-group">
-            <label class="control-label">Expiration Date</label>
-            <input asp-for="CreditCardExpirationDate" class="form-control" type="Month" />
-            <span asp-validation-for="CreditCardExpirationDate" class="text-danger"></span>
+          <div hidden="@(!Model.CalculatedShipping)">
+            <h4>Credit Card</h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+              <label class="control-label">Credit Card Number</label>
+              <input asp-for="CreditCardNumber" class="form-control" type="password" />
+              <span asp-validation-for="CreditCardNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+              <label class="control-label">CVC</label>
+              <input asp-for="CreditCardCVC" class="form-control" type="password" />
+              <span asp-validation-for="CreditCardCVC" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+              <label class="control-label">Expiration Date</label>
+              <input asp-for="CreditCardExpirationDate" class="form-control" type="Month" />
+              <span asp-validation-for="CreditCardExpirationDate" class="text-danger"></span>
+            </div>
           </div>
           <br />
-          <div class="form-group">
+          @*<div class="form-group">
             <label id="carrier" class="control-label">Please Choose a Shipping Carrier</label>
-            <select class="form-control" asp-items="ViewBag.Carrier"></select>
-          </div>
-          <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(Model.SubTotal.ToString())</div>
-          <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(Model.Taxes.ToString())</div>
-          <div style="text-align: right; margin-right: 40px">Shipping: +$@Html.Raw(Model.ShippingCharges.ToString())</div>
-          <div style="text-align: right; margin-right: 40px">Code Discount: -$@Html.Raw(Model.CodeDiscount).ToString()</div>
-          <div style="text-align: right; margin-right: 40px">Coupon Discount: -$@Html.Raw(Model.CouponDiscount).ToString()</div>
-          <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(Model.Total).ToString()</div>
+            <select asp-for="SelectedCarrierId" class="form-control" asp-items="ViewBag.Carrier"></select>
+          </div>*@
+        <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
+        <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
+          <div style="text-align: right; margin-right: 40px">USPS Priority Mail: +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</div>
+          <div style="text-align: right; margin-right: 40px">Code Discount: -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</div>
+          <div style="text-align: right; margin-right: 40px">Coupon Discount: -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
+          <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
           <br />
           <div style="text-align: right; margin-right: 40px">
-            <input id="place-order-button" type="submit" value="PlaceOrder" class="btn-outline-dark btn" />
-          </div>
+            <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShipping)" />
+            <input id="calculate-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCost") value="Calculate Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShipping)"/>
+           </div>
         </div>
       </div>
     </div>
@@ -170,6 +173,8 @@ else
     <input type="hidden" asp-for="CouponDiscount" value="@Model.CouponDiscount.ToString()" />
     <input type="hidden" asp-for="ExpectedToArrive" value="@Model.ExpectedToArrive" />
     <input type="hidden" asp-for="ShippingCarrier" value="@Model.ShippingCarrier" />
+    <input type="hidden" asp-for="CalculatedShipping" value="@Model.CalculatedShipping" />
+    <input type="hidden" asp-for="TotalWeightInPounds" value="@Model.TotalWeightInPounds" />
   </form>
   <script type="text/javascript">
     $(document).ready(function () {
@@ -178,8 +183,6 @@ else
         searching: false,
         sort: false,
         bInfo: false
-
-
       });
 
       if ($('#same-address').prop('checked')) {
