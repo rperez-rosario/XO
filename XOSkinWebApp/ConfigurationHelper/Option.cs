@@ -28,5 +28,6 @@ namespace XOSkinWebApp.ConfigurationHelper
 		public String ShopifyShippingLineCode { get; set; }
 		public String ShopifyShippingLineSource { get; set; }
 		public String ShopifyOrderStatusUrl { get; set; }
+		public String StripeSecretKey { get; set; }
 	}
 }

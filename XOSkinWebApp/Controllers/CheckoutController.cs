@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using System.Text.Json;
 using System.IO;
 using System.Text;
+using Stripe;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -179,7 +180,7 @@ namespace XOSkinWebApp.Controllers
       return View(checkoutViewModel);
     }
 
-    public IActionResult CalculateShippingCost(CheckoutViewModel Model)
+    public IActionResult CalculateShippingCostAndTaxes(CheckoutViewModel Model)
     {
       String seShipmentDetailsJson = null;
       String seShipmentCostJson = null;
@@ -355,23 +356,26 @@ namespace XOSkinWebApp.Controllers
       ORM.Product kit = null;
       List<KitProduct> kitProduct = null;
       long stock = long.MaxValue;
-      ProductService sProductService = null;
-      ProductVariantService sProductVariantService = null;
-      InventoryLevelService sInventoryLevelService = null;
-      InventoryItemService sInventoryItemService = null;
-      LocationService sLocationService = null;
-      CustomerService sCustomerService = null;
-      OrderService sOrderService = null;
+      ShopifySharp.ProductService sProductService = null;
+      ProductVariantService shProductVariantService = null;
+      InventoryLevelService shInventoryLevelService = null;
+      InventoryItemService shInventoryItemService = null;
+      LocationService shLocationService = null;
+      ShopifySharp.CustomerService shCustomerService = null;
+      ShopifySharp.OrderService shOrderService = null;
       ShopifySharp.Product sProduct = null;
-      ProductVariant sProductVariant = null;
-      List<Location> sLocation = null;
-      InventoryItem sInventoryItem = null;
+      ProductVariant shProductVariant = null;
+      List<Location> shLocation = null;
+      InventoryItem shInventoryItem = null;
       long originalProductStock = 0L;
       long originalKitStock = 0L;
       List<long> updatedKit = null;
-      Order sOrder = null;
-      List<LineItem> sLineItemList = null;
+      ShopifySharp.Order shOrder = null;
+      List<ShopifySharp.LineItem> shLineItemList = null;
       String seShipmentRateJson = null;
+      PaymentIntentCreateOptions stPaymentIntentCreateOptions = null;
+      PaymentIntentService stPaymentIntentService = null;
+      PaymentIntent stPaymentIntent = null;
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -384,19 +388,19 @@ namespace XOSkinWebApp.Controllers
 
       try
       {
-        sProductService = new ProductService(_option.Value.ShopifyUrl,
+        sProductService = new ShopifySharp.ProductService(_option.Value.ShopifyUrl,
             _option.Value.ShopifyStoreFrontAccessToken);
-        sProductVariantService = new ProductVariantService(_option.Value.ShopifyUrl,
+        shProductVariantService = new ProductVariantService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
-        sInventoryLevelService = new InventoryLevelService(_option.Value.ShopifyUrl,
+        shInventoryLevelService = new InventoryLevelService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
-        sLocationService = new LocationService(_option.Value.ShopifyUrl,
+        shLocationService = new LocationService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
-        sInventoryItemService = new InventoryItemService(_option.Value.ShopifyUrl,
+        shInventoryItemService = new InventoryItemService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
-        sOrderService = new OrderService(_option.Value.ShopifyUrl,
+        shOrderService = new ShopifySharp.OrderService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
-        sCustomerService = new CustomerService(_option.Value.ShopifyUrl,
+        shCustomerService = new ShopifySharp.CustomerService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
       }
       catch (Exception ex)
@@ -423,7 +427,7 @@ namespace XOSkinWebApp.Controllers
       try
       {
 
-        sLineItemList = new List<LineItem>();
+        shLineItemList = new List<LineItem>();
 
         foreach (ShoppingCartLineItem cli in _context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -435,7 +439,7 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault() *
               cli.Quantity;
           
-          sLineItemList.Add(new LineItem()
+          shLineItemList.Add(new LineItem()
           {
             ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault(),
             VariantId = sProductService.GetAsync((long)_context.Products.Where(
@@ -448,7 +452,7 @@ namespace XOSkinWebApp.Controllers
 
         try
         {
-          sOrder = new Order()
+          shOrder = new Order()
           {
             BillingAddress = new ShopifySharp.Address()
             {
@@ -501,7 +505,7 @@ namespace XOSkinWebApp.Controllers
           }
 
           // TODO: IMPORTANT GET TAXES FROM AvaTax.
-          sOrder.ShippingLines = new List<ShippingLine>()
+          shOrder.ShippingLines = new List<ShippingLine>()
           {
             new ShippingLine()
             {
@@ -524,17 +528,17 @@ namespace XOSkinWebApp.Controllers
               Price = (decimal)Model.ShippingCharges
             }
           };
-          sOrder.Name = "#XO" + (order.Id + 10000).ToString();
-          sOrder.OrderStatusUrl = _option.Value.ShopifyOrderStatusUrl + order.Id.ToString();
-          sOrder.CreatedAt = DateTime.UtcNow;
-          sOrder.LineItems = sLineItemList;
-          sOrder.Test = false;
-          sOrder.TaxesIncluded = false;
-          sOrder.Test = false;  // Switch to "true" for testing against a production store.
-          sOrder.Customer = await sCustomerService.GetAsync((long)_context.AspNetUsers.Where(
+          shOrder.Name = "#XO" + (order.Id + 10000).ToString();
+          shOrder.OrderStatusUrl = _option.Value.ShopifyOrderStatusUrl + order.Id.ToString();
+          shOrder.CreatedAt = DateTime.UtcNow;
+          shOrder.LineItems = shLineItemList;
+          shOrder.Test = false;
+          shOrder.TaxesIncluded = false;
+          shOrder.Test = false;  // Switch to "true" for testing against a production store.
+          shOrder.Customer = await shCustomerService.GetAsync((long)_context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.ShopifyCustomerId).FirstOrDefault());
 
-          sOrder = await sOrderService.CreateAsync(sOrder);
+          shOrder = await shOrderService.CreateAsync(shOrder);
         }
         catch (Exception ex)
         {
@@ -550,6 +554,23 @@ namespace XOSkinWebApp.Controllers
         applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax.
         
         total = subTotal + shippingCost - codeDiscount - couponDiscount  + applicableTaxes;
+
+        // Stripe credit card transaction.
+        StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
+        stPaymentIntentCreateOptions = new PaymentIntentCreateOptions
+        {
+          Amount = (long?)(total * 100),
+          Currency = "usd",
+          Metadata = new Dictionary<string, string>
+          {
+            { "integration_check", "accept_a_payment" }
+          }
+        };
+
+        stPaymentIntentService = new PaymentIntentService();
+        stPaymentIntent = stPaymentIntentService.Create(stPaymentIntentCreateOptions);
+
+        // TODO: Continue Stripe credit card transaction here.
 
         order.DatePlaced = DateTime.UtcNow;
         order.Subtotal = subTotal;
@@ -570,7 +591,7 @@ namespace XOSkinWebApp.Controllers
       }
 
       Model.OrderId = order.Id;
-      Model.ShopifyId = (long)sOrder.Id;
+      Model.ShopifyId = (long)shOrder.Id;
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();
 
       try
@@ -620,15 +641,15 @@ namespace XOSkinWebApp.Controllers
             try
             {
               sProduct = await sProductService.GetAsync((long)product.ShopifyProductId);
-              sProductVariant = await sProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
-              sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
-              sLocation = (List<Location>)await sLocationService.ListAsync();
+              shProductVariant = await shProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+              shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
+              shLocation = (List<Location>)await shLocationService.ListAsync();
               
-              await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+              await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
               {
                 AvailableAdjustment = (int?)(-1 * item.Quantity),
-                InventoryItemId = sInventoryItem.Id,
-                LocationId = sLocation.First().Id
+                InventoryItemId = shInventoryItem.Id,
+                LocationId = shLocation.First().Id
               });
             }
             catch (Exception ex)
@@ -668,15 +689,15 @@ namespace XOSkinWebApp.Controllers
                   try
                   {
                     sProduct = await sProductService.GetAsync((long)kit.ShopifyProductId);
-                    sProductVariant = await sProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
-                    sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
-                    sLocation = (List<Location>)await sLocationService.ListAsync();
+                    shProductVariant = await shProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                    shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
+                    shLocation = (List<Location>)await shLocationService.ListAsync();
 
-                    await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                    await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
                     {
                       AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
-                      InventoryItemId = sInventoryItem.Id,
-                      LocationId = sLocation.First().Id
+                      InventoryItemId = shInventoryItem.Id,
+                      LocationId = shLocation.First().Id
                     });
 
                     updatedKit.Add(kit.Id);
@@ -704,15 +725,15 @@ namespace XOSkinWebApp.Controllers
               try
               {
                 sProduct = await sProductService.GetAsync((long)product.ShopifyProductId);
-                sProductVariant = await sProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
-                sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
-                sLocation = (List<Location>)await sLocationService.ListAsync();
+                shProductVariant = await shProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
+                shLocation = (List<Location>)await shLocationService.ListAsync();
                 
-                await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
                 {
                   AvailableAdjustment = -1 * item.Quantity,
-                  InventoryItemId = sInventoryItem.Id,
-                  LocationId = sLocation.First().Id
+                  InventoryItemId = shInventoryItem.Id,
+                  LocationId = shLocation.First().Id
                 });
               }
               catch (Exception ex)
@@ -752,15 +773,15 @@ namespace XOSkinWebApp.Controllers
                     try
                     {
                       sProduct = await sProductService.GetAsync((long)kit.ShopifyProductId);
-                      sProductVariant = await sProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
-                      sInventoryItem = await sInventoryItemService.GetAsync((long)sProductVariant.InventoryItemId);
-                      sLocation = (List<Location>)await sLocationService.ListAsync();
+                      shProductVariant = await shProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                      shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
+                      shLocation = (List<Location>)await shLocationService.ListAsync();
 
-                      await sInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                      await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
                       {
                         AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
-                        InventoryItemId = sInventoryItem.Id,
-                        LocationId = sLocation.First().Id
+                        InventoryItemId = shInventoryItem.Id,
+                        LocationId = shLocation.First().Id
                       });
                     }
                     catch (Exception ex)

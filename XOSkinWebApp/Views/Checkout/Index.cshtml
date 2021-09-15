@@ -130,7 +130,7 @@ else
           <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
           <br />
           <div style="text-align: right; margin-right: 40px">
-            <input id="calculate-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCost") value="Calculate Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShipping)" />
+            <input id="calculate-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") value="Calculate Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShipping)" />
             <input id="re-calculate-shipping-cost-button" type="submit" formaction=@Url.Action("Index") value="Re-Calculate" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShipping)" />
             <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShipping)" />
           </div>
