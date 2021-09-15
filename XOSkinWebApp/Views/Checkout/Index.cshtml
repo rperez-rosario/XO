@@ -26,35 +26,35 @@ else
           <h4>Billing Address</h4>
           <div class="form-group">
             <label class="control-label">Name on Credit Card</label>
-            <input asp-for="BillingName" class="form-control" />
+            <input asp-for="BillingName" class="form-control" id="billing-name" />
             <span asp-validation-for="BillingName" class="text-danger"></span>
           </div>
           <div class="form-group">
             <label class="control-label">Address Line 1</label>
-            <input asp-for="BillingAddress1" class="form-control" />
+            <input asp-for="BillingAddress1" class="form-control" id="billing-address1" />
             <span asp-validation-for="BillingAddress1" class="text-danger"></span>
           </div>
           <div class="form-group">
             <label class="control-label">Address Line 2</label>
-            <input asp-for="BillingAddress2" class="form-control" />
+            <input asp-for="BillingAddress2" class="form-control" id="billing-address2" />
             <span asp-validation-for="BillingAddress2" class="text-danger"></span>
           </div>
           <div class="form-group">
             <label class="control-label">City</label>
-            <input asp-for="BillingCity" class="form-control" />
+            <input asp-for="BillingCity" class="form-control" id="billing-city" />
             <span asp-validation-for="BillingCity" class="text-danger"></span>
           </div>
           <div class="form-group">
             <label class="control-label">State</label>
-            <select asp-for="BillingState" class="form-control" asp-items="ViewBag.State"></select>
+            <select asp-for="BillingState" class="form-control" asp-items="ViewBag.State" id="billing-state"></select>
           </div>
           <div class="form-group">
             <label class="control-label">Country</label>
-            <select asp-for="BillingCountry" class="form-control" asp-items="ViewBag.Country"></select>
+            <select asp-for="BillingCountry" class="form-control" asp-items="ViewBag.Country" id="billing-country"></select>
           </div>
           <div class="form-group">
             <label class="control-label">Postal Code</label>
-            <input asp-for="BillingPostalCode" class="form-control" />
+            <input asp-for="BillingPostalCode" class="form-control" id='billing-postal-code' />
             <span asp-validation-for="BillingPostalCode" class="text-danger"></span>
           </div>
         </div>
@@ -188,13 +188,15 @@ else
         bInfo: false
       });
 
+      new $.fn.dataTable.Responsive(table, {
+        details: true
+      });
+
       if ($('#same-address').prop('checked')) {
         shippingAddressSame();
       }
 
-      new $.fn.dataTable.Responsive(table, {
-        details: true
-      });
+      
 
       $('#same-address').change(function () {
         shippingAddressSame();
@@ -206,13 +208,41 @@ else
             validateShippingAddress(e);
             break;
           case "place-order-button":
-            validateShippingAddress(e);
-            validateCreditCardInformation(e);
+            if (validateShippingAddress(e) == true && validateCreditCardInformation(e) == true) {
+              $('#shipping-state').attr('disabled', false);
+              $('#shipping-state').attr('readonly', true);
+              $('#shipping-country').attr('disabled', false);
+              $('#shipping-country').attr('readonly', true);
+              $('#billing-state').attr('disabled', false);
+              $('#billing-state').attr('readonly', true);
+              $('#billing-country').attr('disabled', false);
+              $('#billing-country').attr('readonly', true);
+              $('#same-address').attr('disabled', false);
+              $('#same-address').attr('readonly', true);
+            }
           case "re-calculate-shipping-cost-button":
             break;
           default:
         }
       });
+
+      if ($('#calculated-shipping').val() == 'True') {
+        $('#billing-name').attr('readonly', true);
+        $('#billing-address1').attr('readonly', true);
+        $('#billing-address2').attr('readonly', true);
+        $('#billing-city').attr('readonly', true);
+        $('#billing-state').attr('disabled', true);
+        $('#billing-country').attr('disabled', true);
+        $('#billing-postal-code').attr('readonly', true);
+        $('#shipping-name').attr('readonly', true);
+        $('#shipping-address1').attr('readonly', true);
+        $('#shipping-address2').attr('readonly', true);
+        $('#shipping-city').attr('readonly', true);
+        $('#shipping-state').attr('disabled', true);
+        $('#shipping-country').attr('disabled', true);
+        $('#shipping-postal-code').attr('readonly', true);
+        $('#same-address').attr('disabled', true);
+      }
 
       // Custom required-if validation.
       function validateShippingAddress(e) {
@@ -220,31 +250,39 @@ else
           if ($("#shipping-name").val().trim() == '') {
             $('#val-shipping-name').html("Recipient's name required.");
             e.preventDefault();
+            return false;
           }
           if ($("#shipping-address1").val().trim() == '') {
             $('#val-shipping-address1').html("Shipping address line 1 required.");
             e.preventDefault();
+            return false;
           }
           if ($("#shipping-city").val().trim() == '') {
             $('#val-shipping-city').html("Shipping city name required.");
             e.preventDefault();
+            return false;
           }
           if ($("#shipping-postal-code").val().trim() == '') {
             $('#val-shipping-postal-code').html("Shipping country name required.");
             e.preventDefault();
+            return false;
           }
         }
+        return true;
       }
 
       function validateCreditCardInformation(e) {
         if ($("#credit-card-number").val().trim() == '') {
           $('#val-credit-card-number').html("Credit card number required.");
           e.preventDefault();
+          return false;
         }
         if ($("#credit-card-cvc").val().trim() == '') {
           $('#val-credit-card-cvc').html("Credit card CVC required.");
           e.preventDefault();
+          return false;
         }
+        return true;
       }
 
       $("#shipping-name").keyup(function () {
