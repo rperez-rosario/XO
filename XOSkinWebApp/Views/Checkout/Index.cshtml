@@ -196,18 +196,16 @@ else
         shippingAddressSame();
       }
 
-      
-
       $('#same-address').change(function () {
         shippingAddressSame();
       });
 
       document.addEventListener('submit', function (e) {
-        switch ($(e.submitter).prop("id")) {
-          case "calculate-shipping-cost-button":
+        switch ($(e.submitter).prop('id')) {
+          case 'calculate-shipping-cost-button':
             validateShippingAddress(e);
             break;
-          case "place-order-button":
+          case 'place-order-button':
             if (validateShippingAddress(e) == true && validateCreditCardInformation(e) == true) {
               $('#shipping-state').attr('disabled', false);
               $('#shipping-state').attr('readonly', true);
@@ -220,7 +218,7 @@ else
               $('#same-address').attr('disabled', false);
               $('#same-address').attr('readonly', true);
             }
-          case "re-calculate-shipping-cost-button":
+          case 're-calculate-shipping-cost-button':
             break;
           default:
         }
@@ -247,23 +245,23 @@ else
       // Custom required-if validation.
       function validateShippingAddress(e) {
         if (!$('#same-address').prop('checked')) {
-          if ($("#shipping-name").val().trim() == '') {
+          if ($('#shipping-name').val().trim() == '') {
             $('#val-shipping-name').html("Recipient's name required.");
             e.preventDefault();
             return false;
           }
-          if ($("#shipping-address1").val().trim() == '') {
-            $('#val-shipping-address1').html("Shipping address line 1 required.");
+          if ($('#shipping-address1').val().trim() == '') {
+            $('#val-shipping-address1').html('Shipping address line 1 required.');
             e.preventDefault();
             return false;
           }
-          if ($("#shipping-city").val().trim() == '') {
-            $('#val-shipping-city').html("Shipping city name required.");
+          if ($('#shipping-city').val().trim() == '') {
+            $('#val-shipping-city').html('Shipping city name required.');
             e.preventDefault();
             return false;
           }
-          if ($("#shipping-postal-code").val().trim() == '') {
-            $('#val-shipping-postal-code').html("Shipping country name required.");
+          if ($('#shipping-postal-code').val().trim() == '') {
+            $('#val-shipping-postal-code').html('Shipping country name required.');
             e.preventDefault();
             return false;
           }
@@ -272,72 +270,96 @@ else
       }
 
       function validateCreditCardInformation(e) {
-        if ($("#credit-card-number").val().trim() == '') {
-          $('#val-credit-card-number').html("Credit card number required.");
+        if ($('#credit-card-number').val().trim() == '') {
+          $('#val-credit-card-number').html('Credit card number required.');
           e.preventDefault();
           return false;
         }
-        if ($("#credit-card-cvc").val().trim() == '') {
-          $('#val-credit-card-cvc').html("Credit card CVC required.");
+        if ($('#credit-card-cvc').val().trim() == '') {
+          $('#val-credit-card-cvc').html('Credit card CVC required.');
           e.preventDefault();
           return false;
         }
         return true;
       }
 
-      $("#shipping-name").keyup(function () {
+      $('credit-card-number').keyup(function () {
+        creditCardNumberFilled();
+      });
+
+      $('#credit-card-cvc').keyup(function () {
+        creditCardCVCFilled();
+      });
+
+      $('#shipping-name').keyup(function () {
         if (!$('#same-address').prop('checked')) {
           shippingNameFilled();
         }
       });
 
-      $("#shipping-address1").keyup(function () {
+      $('#shipping-address1').keyup(function () {
         if (!$('#same-address').prop('checked')) {
           shippingAddress1Filled();
         }
       });
 
-      $("#shipping-city").keyup(function () {
+      $('shipping-city').keyup(function () {
         if (!$('#same-address').prop('checked')) {
           shippingCityFilled();
         }
       });
 
-      $("#shipping-postal-code").keyup(function () {
+      $('#shipping-postal-code').keyup(function () {
         if (!$('#same-address').prop('checked')) {
           shippingPostalCodeFilled();
         }
       });
 
+      function creditCardNumberFilled() {
+        if ($('#credit-card-number').val().trim() != '') {
+          $('#val-credit-card-number').html('');
+        } else {
+          $('#val-credit-card-number').html('Credit card number is required.');
+        }
+      }
+
+      function creditCardCVCFilled() {
+        if ($('#credit-card-cvc').val().trim() != '') {
+          $('#val-credit-card-cvc').html('');
+        } else {
+          $('#val-credit-card-cvc').html('Credit card CVC is required.');
+        }
+      }
+
       function shippingNameFilled() {
-        if ($("#shipping-name").val().trim() != '') {
-          $('#val-shipping-name').html("");
+        if ($('#shipping-name').val().trim() != '') {
+          $('#val-shipping-name').html('');
         } else {
           $('#val-shipping-name').html("Recipient's name required.");
         }
       }
 
       function shippingAddress1Filled() {
-        if ($("#shipping-address1").val().trim() != '') {
-          $('#val-shipping-address1').html("");
+        if ($('#shipping-address1').val().trim() != '') {
+          $('#val-shipping-address1').html('');
         } else {
-          $('#val-shipping-address1').html("Shipping address line 1 required.");
+          $('#val-shipping-address1').html('Shipping address line 1 required.');
         }
       }
 
       function shippingCityFilled() {
-        if ($("#shipping-city").val().trim() != '') {
-          $('#val-shipping-city').html("");
+        if ($('#shipping-city').val().trim() != '') {
+          $('#val-shipping-city').html('');
         } else {
-          $('#val-shipping-city').html("Shipping city name required.");
+          $('#val-shipping-city').html('Shipping city name required.');
         }
       }
 
       function shippingPostalCodeFilled() {
-        if ($("#shipping-postal-code").val().trim() != '') {
-          $('#val-shipping-postal-code').html("");
+        if ($('#shipping-postal-code').val().trim() != '') {
+          $('#val-shipping-postal-code').html('');
         } else {
-          $('#val-shipping-postal-code').html("Shipping country name required.");
+          $('#val-shipping-postal-code').html('Shipping country name required.');
         }
       }
 
@@ -357,12 +379,12 @@ else
           $('#shipping-state').attr('disabled', true);
           $('#shipping-country').attr('disabled', true);
           $('#shipping-postal-code').attr('readonly', true);
-          $('#val-shipping-name').html("");
-          $('#val-shipping-address1').html("");
-          $('#val-shipping-city').html("");
+          $('#val-shipping-name').html('');
+          $('#val-shipping-address1').html('');
+          $('#val-shipping-city').html('');
           $('#val-shipping-state').val(0);
           $('#val-shipping-country').val(0);
-          $('#val-shipping-postal-code').html("");
+          $('#val-shipping-postal-code').html('');
         } else {
           $('#shipping-name').attr('readonly', false);
           $('#shipping-address1').attr('readonly', false);
