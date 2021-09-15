@@ -427,7 +427,7 @@ namespace XOSkinWebApp.Controllers
       try
       {
 
-        shLineItemList = new List<LineItem>();
+        shLineItemList = new List<ShopifySharp.LineItem>();
 
         foreach (ShoppingCartLineItem cli in _context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -439,7 +439,7 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault() *
               cli.Quantity;
           
-          shLineItemList.Add(new LineItem()
+          shLineItemList.Add(new ShopifySharp.LineItem()
           {
             ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault(),
             VariantId = sProductService.GetAsync((long)_context.Products.Where(
@@ -452,7 +452,7 @@ namespace XOSkinWebApp.Controllers
 
         try
         {
-          shOrder = new Order()
+          shOrder = new ShopifySharp.Order()
           {
             BillingAddress = new ShopifySharp.Address()
             {
