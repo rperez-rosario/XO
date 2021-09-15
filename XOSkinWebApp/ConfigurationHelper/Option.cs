@@ -17,5 +17,16 @@ namespace XOSkinWebApp.ConfigurationHelper
 		public String ShipEngineApiKey { get; set; }
 		public String ShipEngineCarriersUrl { get; set; }
 		public String ShipEngineShippingCostUrl { get; set; }
+		public String ShipEngineGetShipmentCostFromIdPrefixUrl { get; set; }
+		public String ShipEngineGetShipmentCostFromIdPostfixUrl { get; set; }
+		public String ShipEngineDefaultCarrier { get; set; }
+		public String ShipEngineDefaultCarrierName { get; set; }
+		public String ShipEngineDefaultRateType { get; set; }
+		public String ShipEngineDefaultPackageType { get; set; }
+		public String ShipEngineDefaultServiceCode { get; set; }
+		public String ShopifyShippingLineTitle { get; set; }
+		public String ShopifyShippingLineCode { get; set; }
+		public String ShopifyShippingLineSource { get; set; }
+		public String ShopifyOrderStatusUrl { get; set; }
 	}
 }

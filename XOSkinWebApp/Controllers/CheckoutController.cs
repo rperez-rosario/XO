@@ -30,7 +30,7 @@ namespace XOSkinWebApp.Controllers
       _option = option;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
       CheckoutViewModel checkoutViewModel = new CheckoutViewModel();
       List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
@@ -119,8 +119,8 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.CodeDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.CouponDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.IsGift = false; // TODO: Map this.
-      checkoutViewModel.ShippingCarrier = "se-750817"; // Stamps.com.
-      checkoutViewModel.CarrierName = "USPS Priority Mail";
+      checkoutViewModel.ShippingCarrier = _option.Value.ShipEngineDefaultCarrier;
+      checkoutViewModel.CarrierName = _option.Value.ShipEngineDefaultCarrierName;
       checkoutViewModel.ShippedOn = DateTime.UtcNow.TimeOfDay > new TimeSpan(10, 0, 0) ? // 5:00 PM PTDT.
          DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(1); // If after 4:00 PM PDT, two-days (2), else one (1). 
       checkoutViewModel.ExpectedToArrive = checkoutViewModel.ShippedOn.AddDays(3);
@@ -179,7 +179,7 @@ namespace XOSkinWebApp.Controllers
       return View(checkoutViewModel);
     }
 
-    public async Task<IActionResult> CalculateShippingCost(CheckoutViewModel Model)
+    public IActionResult CalculateShippingCost(CheckoutViewModel Model)
     {
       String seShipmentDetailsJson = null;
       String seShipmentCostJson = null;
@@ -229,7 +229,7 @@ namespace XOSkinWebApp.Controllers
        x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))
        .Select(x => x.Text).FirstOrDefault());
 
-      Model.ShippingCarrier = "se-750817"; // Stamps.com.
+      Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrier;
       Model.ExpectedToArrive = Model.ExpectedToArrive;
       
       try
@@ -317,12 +317,13 @@ namespace XOSkinWebApp.Controllers
           JsonElement ratesElement = root.GetProperty("rate_response").GetProperty("rates");
           foreach (JsonElement rate in ratesElement.EnumerateArray())
           {
-            if (rate.GetProperty("carrier_id").ValueEquals("se-750817") &&
-              rate.GetProperty("rate_type").ValueEquals("shipment") &&
-              rate.GetProperty("package_type").ValueEquals("package") &&
-              rate.GetProperty("service_code").ValueEquals("usps_priority_mail"))
+            if (rate.GetProperty("carrier_id").ValueEquals(_option.Value.ShipEngineDefaultCarrier) &&
+              rate.GetProperty("rate_type").ValueEquals(_option.Value.ShipEngineDefaultRateType) &&
+              rate.GetProperty("package_type").ValueEquals(_option.Value.ShipEngineDefaultPackageType) &&
+              rate.GetProperty("service_code").ValueEquals(_option.Value.ShipEngineDefaultServiceCode))
             {
               Model.ShippingCharges = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
+              Model.ShipEngineShipmentId = root.GetProperty("shipment_id").ToString();
               break;
             }
           }
@@ -370,8 +371,7 @@ namespace XOSkinWebApp.Controllers
       List<long> updatedKit = null;
       Order sOrder = null;
       List<LineItem> sLineItemList = null;
-      String seShipmentDetailsJson = null;
-      String seShipmentCostJson = null;
+      String seShipmentRateJson = null;
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -476,93 +476,23 @@ namespace XOSkinWebApp.Controllers
             }
           };
 
-          var options = new JsonWriterOptions
-          {
-            Indented = true
-          };
-
-          using var stream = new MemoryStream();
-          using var writer = new Utf8JsonWriter(stream, options);
-
-          writer.WriteStartObject();
-          writer.WriteStartObject("rate_options");
-          writer.WriteStartArray("carrier_ids");
-          writer.WriteStringValue(Model.ShippingCarrier);
-          writer.WriteEndArray();
-          writer.WriteEndObject(); // rate_options.
-          writer.WriteStartObject("shipment");
-          writer.WritePropertyName("validate_address");
-          writer.WriteStringValue("validate_and_clean");
-          writer.WriteStartObject("ship_to");
-          writer.WritePropertyName("name");
-          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName);
-          writer.WritePropertyName("phone");
-          writer.WriteStringValue(_context.AspNetUsers.Where(
-              x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault());
-          writer.WritePropertyName("address_line1");
-          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1);
-          writer.WritePropertyName("address_line2");
-          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress2 : Model.ShippingAddress2);
-          writer.WritePropertyName("city_locality");
-          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingCity : Model.ShippingCity);
-          writer.WritePropertyName("state_province");
-          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState);
-          writer.WritePropertyName("postal_code");
-          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode);
-          writer.WritePropertyName("country_code");
-          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry);
-          writer.WriteEndObject(); // ship_to.
-          writer.WriteStartObject("ship_from");
-          writer.WritePropertyName("company_name");
-          writer.WriteStringValue("XO Skin, Corp.");
-          writer.WritePropertyName("name");
-          writer.WriteStringValue("XO Skin Shipping");
-          writer.WritePropertyName("phone");
-          writer.WriteStringValue("xxx-xxx-xxxx");
-          writer.WritePropertyName("address_line1");
-          writer.WriteStringValue("10815 Rancho Bernardo Road Suite 300");
-          writer.WritePropertyName("city_locality");
-          writer.WriteStringValue("San Diego");
-          writer.WritePropertyName("state_province");
-          writer.WriteStringValue("CA");
-          writer.WritePropertyName("postal_code");
-          writer.WriteStringValue("92127");
-          writer.WritePropertyName("country_code");
-          writer.WriteStringValue("US");
-          writer.WriteEndObject(); // ship_from.
-          writer.WriteStartArray("packages");
-          writer.WriteStartObject();
-          writer.WriteStartObject("weight");
-          writer.WritePropertyName("value");
-          writer.WriteNumberValue(Model.TotalWeightInPounds);
-          writer.WritePropertyName("unit");
-          writer.WriteStringValue("pound");
-          writer.WriteEndObject(); // weight.
-          writer.WriteEndObject(); // packages.
-          writer.WriteEndArray(); // packages.
-          writer.WriteEndObject();  // shipment.
-          writer.WriteEndObject(); // root.
-
-          writer.Flush();
-
-          seShipmentDetailsJson = Encoding.UTF8.GetString(stream.ToArray());
-
-          seShipmentCostJson = _option.Value.ShipEngineShippingCostUrl.PostJsonToUrlAsync(seShipmentDetailsJson,
+          seShipmentRateJson = (_option.Value.ShipEngineGetShipmentCostFromIdPrefixUrl + 
+            Model.ShipEngineShipmentId + _option.Value.ShipEngineGetShipmentCostFromIdPostfixUrl).GetJsonFromUrl(
             requestFilter: webReq =>
             {
               webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
-            }).Result;
+            }, responseFilter: null);
 
-          using (JsonDocument document = JsonDocument.Parse(seShipmentCostJson))
+          using (JsonDocument document = JsonDocument.Parse(seShipmentRateJson))
           {
             JsonElement root = document.RootElement;
-            JsonElement ratesElement = root.GetProperty("rate_response").GetProperty("rates");
+            JsonElement ratesElement = root.EnumerateArray().ElementAt(0).GetProperty("rates");
             foreach (JsonElement rate in ratesElement.EnumerateArray())
             {
-              if (rate.GetProperty("carrier_id").ValueEquals("se-750817") &&
-                rate.GetProperty("rate_type").ValueEquals("shipment") &&
-                rate.GetProperty("package_type").ValueEquals("package") &&
-                rate.GetProperty("service_code").ValueEquals("usps_priority_mail"))
+              if (rate.GetProperty("carrier_id").ValueEquals(_option.Value.ShipEngineDefaultCarrier) &&
+                rate.GetProperty("rate_type").ValueEquals(_option.Value.ShipEngineDefaultRateType) &&
+                rate.GetProperty("package_type").ValueEquals(_option.Value.ShipEngineDefaultPackageType) &&
+                rate.GetProperty("service_code").ValueEquals(_option.Value.ShipEngineDefaultServiceCode))
               {
                 Model.ShippingCharges = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
                 break;
@@ -571,29 +501,31 @@ namespace XOSkinWebApp.Controllers
           }
 
           // TODO: IMPORTANT GET TAXES FROM AvaTax.
-          // TODO: Configure shopify shipping li
-          //sOrder.TotalShippingPriceSet = new PriceSet() 
-          //{
-          //  PresentmentMoney = new ShopifySharp.Price()
-          //  {
-          //    Amount = (decimal)Model.ShippingCharges,
-          //    CurrencyCode = "USD"
-          //  },
-          //  ShopMoney = new ShopifySharp.Price()
-          //  {
-          //    Amount = (decimal)Model.ShippingCharges,
-          //    CurrencyCode = "USD"
-          //  }
-          //};
-          //sOrder.ShippingLines = new List<ShippingLine>()
-          //{
-          //  new ShippingLine()
-          //  {
-          //    Price = (decimal)Model.ShippingCharges
-          //  }
-          //};
-          sOrder.Name = "#XO-10" + order.Id.ToString();
-          sOrder.OrderStatusUrl = "https://xoskinqatest.azurewebsites.net/Orders/Detail/" + order.Id.ToString();
+          sOrder.ShippingLines = new List<ShippingLine>()
+          {
+            new ShippingLine()
+            {
+              PriceSet = new PriceSet()
+              {
+                PresentmentMoney = new ShopifySharp.Price()
+                {
+                  Amount = (decimal)Model.ShippingCharges,
+                  CurrencyCode = "usd"
+                },
+                ShopMoney = new ShopifySharp.Price()
+                {
+                  Amount = (decimal)Model.ShippingCharges,
+                  CurrencyCode = "usd"
+                }
+              },
+              Title = _option.Value.ShopifyShippingLineTitle,
+              Code = _option.Value.ShopifyShippingLineCode,
+              Source = _option.Value.ShopifyShippingLineSource,
+              Price = (decimal)Model.ShippingCharges
+            }
+          };
+          sOrder.Name = "#XO" + (order.Id + 10000).ToString();
+          sOrder.OrderStatusUrl = _option.Value.ShopifyOrderStatusUrl + order.Id.ToString();
           sOrder.CreatedAt = DateTime.UtcNow;
           sOrder.LineItems = sLineItemList;
           sOrder.Test = false;
@@ -609,7 +541,7 @@ namespace XOSkinWebApp.Controllers
           throw new Exception("An error was encountered while writing order to Shopify.", ex);
         }
 
-        Model.ShippingCarrier = "USPS Priority Mail"; // Can also get from ShipEngine if multi-options enabled.
+        Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrierName;
         Model.BilledOn = DateTime.UtcNow;
 
         shippingCost = (decimal)Model.ShippingCharges;
@@ -634,7 +566,7 @@ namespace XOSkinWebApp.Controllers
       }
       catch (Exception ex)
       {
-        throw new Exception("An error was encontered while initializing the product order to the database.", ex);
+        throw new Exception("An error was encontered while initializing the product order.", ex);
       }
 
       Model.OrderId = order.Id;

@@ -67,6 +67,7 @@ namespace XOSkinWebApp.Models
     public String SelectedCarrierId { get; set; }
     public String CarrierName { get; set; }
     public decimal TotalWeightInPounds { get; set; }
+    public String ShipEngineShipmentId { get; set; }
 
     public CheckoutViewModel()
     {
