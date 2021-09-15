@@ -17,6 +17,7 @@ namespace XOSkinWebApp.ORM
         public string CountryName { get; set; }
         public string PostalCode { get; set; }
         public string CarrierName { get; set; }
+        public string ShipEngineId { get; set; }
         public string TrackingNumber { get; set; }
         public DateTime? ShipDate { get; set; }
         public DateTime? Arrives { get; set; }

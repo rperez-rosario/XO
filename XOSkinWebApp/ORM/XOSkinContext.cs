@@ -69,6 +69,7 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<ShoppingCartDiscountCoupon> ShoppingCartDiscountCoupons { get; set; }
         public virtual DbSet<ShoppingCartHistory> ShoppingCartHistories { get; set; }
         public virtual DbSet<ShoppingCartLineItem> ShoppingCartLineItems { get; set; }
+        public virtual DbSet<StateU> StateUs { get; set; }
         public virtual DbSet<Subscription> Subscriptions { get; set; }
         public virtual DbSet<SubscriptionProduct> SubscriptionProducts { get; set; }
         public virtual DbSet<SubscriptionShipmentSchedule> SubscriptionShipmentSchedules { get; set; }
@@ -672,6 +673,10 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false);
 
                 entity.Property(e => e.ShipDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ShipEngineId)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.StateName)
                     .IsRequired()
@@ -1304,6 +1309,21 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.ShoppingCart)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ShoppingCartLineItem_ShoppingCart");
+            });
+
+            modelBuilder.Entity<StateU>(entity =>
+            {
+                entity.ToTable("StateUS");
+
+                entity.Property(e => e.StateAbbreviation)
+                    .IsRequired()
+                    .HasMaxLength(2)
+                    .IsUnicode(false)
+                    .IsFixedLength(true);
+
+                entity.Property(e => e.StateName)
+                    .IsRequired()
+                    .HasMaxLength(50);
             });
 
             modelBuilder.Entity<Subscription>(entity =>

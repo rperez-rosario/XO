@@ -77,115 +77,17 @@
       </div>
     </div>
     <div class="col-sm-4">
-      <h4>Billing and Shipping</h4><br />
-      <div class="form-group">
-        <div style="display: inline; float: left; vertical-align: middle">
-          <label class="control-label font-weight-bolder">Order Confirmation Number:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span class="font-weight-bolder">@Html.Raw("#XO" + (Model.OrderId + 10000))</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label">Sub-Total:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span>$@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label">(+) Taxes:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span>$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label">(+) Shipping:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span>$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label">(-) Code Discount:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span>$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label">(-) Coupon Discount:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span>$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label font-weight-bolder">(=) Total:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span class="font-weight-bolder">$@Html.Raw(String.Format("{0:0.00}", Model.Total))</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label">Billed:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span>@Html.Raw(Model.BilledOn.ToShortDateString())</span>
-        </div>
-      </div><br />
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label">Carrier:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span>@Html.Raw(Model.CarrierName)</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label font-weight-bolder">Tracking Number:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span class="font-weight-bolder">@Html.Raw(Model.TrackingNumber.Equals(String.Empty) ? "To Be Updated Soon" : Model.TrackingNumber)</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label">Shipping:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span>@Html.Raw(Model.ShippedOn.ToShortDateString())</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div style="display: inline;">
-          <label class="control-label font-weight-bolder">Arrival:</label>
-        </div>
-        <div style="display: inline;">&nbsp;</div>
-        <div style="display: inline;">
-          <span class="font-weight-bolder">@Html.Raw(Model.ExpectedToArrive.ToShortDateString())</span>
-        </div>
-      </div>
+      <div style="text-align: right; margin-right: 40px" class="font-weight-bolder">Order: @Html.Raw("#XO" + (Model.OrderId + 10000))</div>
+      <div style="text-align: right; margin-right: 40px">Carrier: @Html.Raw(Model.CarrierName)</div>
+      <div style="text-align: right; margin-right: 40px">Shipping: @Html.Raw(Model.ShippedOn.ToShortDateString())</div>
+      <div style="text-align: right; margin-right: 40px">Arrival: @Html.Raw(Model.ExpectedToArrive.ToShortDateString())</div>
+      <br />
+      <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
+      <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
+      <div style="text-align: right; margin-right: 40px">USPS Priority Mail: +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</div>
+      <div style="text-align: right; margin-right: 40px">Code Discount: -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</div>
+      <div style="text-align: right; margin-right: 40px">Coupon Discount: -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
+      <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
     </div>
   </div>
 </div>

@@ -46,13 +46,11 @@ else
           </div>
           <div class="form-group">
             <label class="control-label">State</label>
-            <input asp-for="BillingState" class="form-control" />
-            <span asp-validation-for="BillingState" class="text-danger"></span>
+            <select asp-for="BillingState" class="form-control" asp-items="ViewBag.State"></select>
           </div>
           <div class="form-group">
             <label class="control-label">Country</label>
-            <input asp-for="BillingCountry" class="form-control" />
-            <span asp-validation-for="BillingCountry" class="text-danger"></span>
+            <select asp-for="BillingCountry" class="form-control" asp-items="ViewBag.Country"></select>
           </div>
           <div class="form-group">
             <label class="control-label">Postal Code</label>
@@ -84,13 +82,11 @@ else
           </div>
           <div class="form-group">
             <label class="control-label">State</label>
-            <input asp-for="ShippingState" class="form-control" id="shipping-state" />
-            <span asp-validation-for="ShippingState" class="text-danger" id="val-shipping-state"></span>
+            <select asp-for="ShippingState" class="form-control" asp-items="ViewBag.State" id="shipping-state"></select>
           </div>
           <div class="form-group">
             <label class="control-label">Country</label>
-            <input asp-for="ShippingCountry" class="form-control" id="shipping-country" />
-            <span asp-validation-for="ShippingCountry" class="text-danger" id="val-shipping-country"></span>
+            <select asp-for="ShippingCountry" class="form-control" asp-items="ViewBag.Country" id="shipping-country"></select>
           </div>
           <div class="form-group">
             <label class="control-label">Postal Code</label>
@@ -104,13 +100,13 @@ else
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
               <label class="control-label">Credit Card Number</label>
-              <input asp-for="CreditCardNumber" class="form-control" type="password" />
-              <span asp-validation-for="CreditCardNumber" class="text-danger"></span>
+              <input asp-for="CreditCardNumber" class="form-control" type="password" id="credit-card-number" />
+              <span asp-validation-for="CreditCardNumber" class="text-danger" id="val-credit-card-number"></span>
             </div>
             <div class="form-group">
               <label class="control-label">CVC</label>
-              <input asp-for="CreditCardCVC" class="form-control" type="password" />
-              <span asp-validation-for="CreditCardCVC" class="text-danger"></span>
+              <input asp-for="CreditCardCVC" class="form-control" type="password" id="credit-card-cvc" />
+              <span asp-validation-for="CreditCardCVC" class="text-danger" id="val-credit-card-cvc"></span>
             </div>
             <div class="form-group">
               <label class="control-label">Expiration Date</label>
@@ -118,7 +114,6 @@ else
               <span asp-validation-for="CreditCardExpirationDate" class="text-danger"></span>
             </div>
           </div>
-          <br />
           @*<div class="form-group">
             <label id="carrier" class="control-label">Please Choose a Shipping Carrier</label>
             <select asp-for="SelectedCarrierId" class="form-control" asp-items="ViewBag.Carrier"></select>
@@ -135,9 +130,10 @@ else
           <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
           <br />
           <div style="text-align: right; margin-right: 40px">
+            <input id="calculate-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCost") value="Calculate Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShipping)" />
+            <input id="re-calculate-shipping-cost-button" type="submit" formaction=@Url.Action("Index") value="Re-Calculate" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShipping)" />
             <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShipping)" />
-            <input id="calculate-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCost") value="Calculate Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShipping)"/>
-           </div>
+          </div>
         </div>
       </div>
     </div>
@@ -178,7 +174,7 @@ else
     <input type="hidden" asp-for="ExpectedToArrive" value="@Model.ExpectedToArrive" />
     <input type="hidden" asp-for="ShippingCarrier" value="@Model.ShippingCarrier" />
     <input type="hidden" asp-for="CarrierName" value="@Model.CarrierName" />
-    <input type="hidden" asp-for="CalculatedShipping" value="@Model.CalculatedShipping" />
+    <input type="hidden" asp-for="CalculatedShipping" value="@Model.CalculatedShipping" id="calculated-shipping" />
     <input type="hidden" asp-for="TotalWeightInPounds" value="@Model.TotalWeightInPounds" />
     <input type="hidden" asp-for="ShippedOn" value="@Model.ShippedOn" />
   </form>
@@ -203,8 +199,18 @@ else
         shippingAddressSame();
       });
 
-      $('#PlaceOrder').submit(function (e) {
-        validateShippingAddress(e);
+      document.addEventListener('submit', function (e) {
+        switch ($(e.submitter).prop("id")) {
+          case "calculate-shipping-cost-button":
+            validateShippingAddress(e);
+            break;
+          case "place-order-button":
+            validateShippingAddress(e);
+            validateCreditCardInformation(e);
+          case "re-calculate-shipping-cost-button":
+            break;
+          default:
+        }
       });
 
       // Custom required-if validation.
@@ -222,18 +228,21 @@ else
             $('#val-shipping-city').html("Shipping city name required.");
             e.preventDefault();
           }
-          if ($("#shipping-state").val().trim() == '') {
-            $('#val-shipping-state').html("Shipping state name required.");
-            e.preventDefault();
-          }
-          if ($("#shipping-country").val().trim() == '') {
-            $('#val-shipping-country').html("Shipping country name required.");
-            e.preventDefault();
-          }
           if ($("#shipping-postal-code").val().trim() == '') {
             $('#val-shipping-postal-code').html("Shipping country name required.");
             e.preventDefault();
           }
+        }
+      }
+
+      function validateCreditCardInformation(e) {
+        if ($("#credit-card-number").val().trim() == '') {
+          $('#val-credit-card-number').html("Credit card number required.");
+          e.preventDefault();
+        }
+        if ($("#credit-card-cvc").val().trim() == '') {
+          $('#val-credit-card-cvc').html("Credit card CVC required.");
+          e.preventDefault();
         }
       }
 
@@ -252,18 +261,6 @@ else
       $("#shipping-city").keyup(function () {
         if (!$('#same-address').prop('checked')) {
           shippingCityFilled();
-        }
-      });
-
-      $("#shipping-state").keyup(function () {
-        if (!$('#same-address').prop('checked')) {
-          shippingStateFilled();
-        }
-      });
-
-      $("#shipping-country").keyup(function () {
-        if (!$('#same-address').prop('checked')) {
-          shippingCountryFilled();
         }
       });
 
@@ -297,22 +294,6 @@ else
         }
       }
 
-      function shippingStateFilled() {
-        if ($("#shipping-state").val().trim() != '') {
-          $('#val-shipping-state').html("");
-        } else {
-          $('#val-shipping-state').html("Shipping state name required.");
-        }
-      }
-
-      function shippingCountryFilled() {
-        if ($("#shipping-country").val().trim() != '') {
-          $('#val-shipping-country').html("");
-        } else {
-          $('#val-shipping-country').html("Shipping country name required.");
-        }
-      }
-
       function shippingPostalCodeFilled() {
         if ($("#shipping-postal-code").val().trim() != '') {
           $('#val-shipping-postal-code').html("");
@@ -334,22 +315,22 @@ else
           $('#shipping-address1').attr('readonly', true);
           $('#shipping-address2').attr('readonly', true);
           $('#shipping-city').attr('readonly', true);
-          $('#shipping-state').attr('readonly', true);
-          $('#shipping-country').attr('readonly', true);
+          $('#shipping-state').attr('disabled', true);
+          $('#shipping-country').attr('disabled', true);
           $('#shipping-postal-code').attr('readonly', true);
           $('#val-shipping-name').html("");
           $('#val-shipping-address1').html("");
           $('#val-shipping-city').html("");
-          $('#val-shipping-state').html("");
-          $('#val-shipping-country').html("");
+          $('#val-shipping-state').val(0);
+          $('#val-shipping-country').val(0);
           $('#val-shipping-postal-code').html("");
         } else {
           $('#shipping-name').attr('readonly', false);
           $('#shipping-address1').attr('readonly', false);
           $('#shipping-address2').attr('readonly', false);
           $('#shipping-city').attr('readonly', false);
-          $('#shipping-state').attr('readonly', false);
-          $('#shipping-country').attr('readonly', false);
+          $('#shipping-state').attr('disabled', false);
+          $('#shipping-country').attr('disabled', false);
           $('#shipping-postal-code').attr('readonly', false);
         }
       }

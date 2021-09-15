@@ -59,11 +59,8 @@ namespace XOSkinWebApp.Models
     public DateTime ShippedOn { get; set; }
     public DateTime ExpectedToArrive { get; set; }
 
-    [Required(ErrorMessage = "Please enter your credit card number.")]
     public String CreditCardNumber { get; set; }
-    [Required(ErrorMessage = "Please enter your credit card CVC.")]
     public String CreditCardCVC { get; set; }
-    [Required(ErrorMessage = "Please enter your credit card expiration date.")]
     public DateTime CreditCardExpirationDate { get; set; }
 
     public bool CalculatedShipping { get; set; }
