@@ -1383,7 +1383,7 @@
           "lib/netstandard2.1/StarkbankEcdsa.dll": {}
         }
       },
-      "Stripe.net/39.66.0": {
+      "Stripe.net/39.67.0": {
         "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "12.0.3",
@@ -5230,10 +5230,10 @@
         "starkbank-ecdsa.nuspec"
       ]
     },
-    "Stripe.net/39.66.0": {
-      "sha512": "x0UdOS05+y7UuTQ9qBy+J4TwQkx1JEpNrsbR68G3pYFdekD5WYfCPwVYVs75UsxV6vSLlGyqKzM5GJYl1ZoMTg==",
+    "Stripe.net/39.67.0": {
+      "sha512": "JMRDJ/iCWRDN723cFieDZjqyE61ImUyAvdqCm/VIZ+U9PXh2fUZzmZSvpTAmY/N4gLBnnvNIwlzhw390xKH9Jw==",
       "type": "package",
-      "path": "stripe.net/39.66.0",
+      "path": "stripe.net/39.67.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -5248,7 +5248,7 @@
         "lib/netstandard2.0/Stripe.net.dll",
         "lib/netstandard2.0/Stripe.net.pdb",
         "lib/netstandard2.0/Stripe.net.xml",
-        "stripe.net.39.66.0.nupkg.sha512",
+        "stripe.net.39.67.0.nupkg.sha512",
         "stripe.net.nuspec"
       ]
     },
@@ -9727,7 +9727,7 @@
       "SendGrid >= 9.24.1",
       "ServiceStack.Text >= 5.12.0",
       "ShopifySharp >= 5.12.0",
-      "Stripe.net >= 39.66.0",
+      "Stripe.net >= 39.67.0",
       "jQuery >= 3.6.0"
     ]
   },
@@ -9861,7 +9861,7 @@
           },
           "Stripe.net": {
             "target": "Package",
-            "version": "[39.66.0, )"
+            "version": "[39.67.0, )"
           },
           "jQuery": {
             "target": "Package",
@@ -9886,7 +9886,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.400\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.401\\RuntimeIdentifierGraph.json"
       }
     }
   }

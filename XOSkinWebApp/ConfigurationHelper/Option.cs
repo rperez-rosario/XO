@@ -29,5 +29,14 @@ namespace XOSkinWebApp.ConfigurationHelper
 		public String ShopifyShippingLineSource { get; set; }
 		public String ShopifyOrderStatusUrl { get; set; }
 		public String StripeSecretKey { get; set; }
+		public String StripePublishableKey { get; set; }
+		public String ShipFromCompanyName { get; set; }
+		public String ShipFromName { get; set; }
+		public String ShipFromPhone { get; set; }
+		public String ShipFromAddressLine1 { get; set; }
+		public String ShipFromCity { get; set; }
+		public String ShipFromState { get; set; }
+		public String ShipFromPostalCode { get; set; }
+		public String ShipFromCountryCode { get; set; }
 	}
 }

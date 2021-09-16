@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "J+XdUOChZTqFsmoD4JBhIWygqkEulVKhb2JBpE/nxLxFbWMuy1hvV3pN430dZJCP2k3ZcATrTEYqRYKOhY4iSA==",
+  "dgSpecHash": "q4lbUUuhSlNIiI7XmsR10XHlm00DeRRdfLv3f35LMxQvwSdTHJDtk5NlPQkvB49Nm7kU8N+gNWmv2UGJW/sevA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Rafael\\source\\repos\\XO\\XOSkinWebApp\\XOSkinWebApp.csproj",
   "expectedPackageFiles": [
@@ -94,7 +94,7 @@
     "C:\\Users\\Rafael\\.nuget\\packages\\servicestack.text\\5.12.0\\servicestack.text.5.12.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\shopifysharp\\5.12.0\\shopifysharp.5.12.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\starkbank-ecdsa\\1.3.1\\starkbank-ecdsa.1.3.1.nupkg.sha512",
-    "C:\\Users\\Rafael\\.nuget\\packages\\stripe.net\\39.66.0\\stripe.net.39.66.0.nupkg.sha512",
+    "C:\\Users\\Rafael\\.nuget\\packages\\stripe.net\\39.67.0\\stripe.net.39.67.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\system.appcontext\\4.3.0\\system.appcontext.4.3.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\system.buffers\\4.3.0\\system.buffers.4.3.0.nupkg.sha512",
     "C:\\Users\\Rafael\\.nuget\\packages\\system.collections\\4.3.0\\system.collections.4.3.0.nupkg.sha512",

@@ -42,6 +42,7 @@ namespace XOSkinWebApp.ORM
 
         public string Id { get; set; }
         public long? ShopifyCustomerId { get; set; }
+        public string StripeCustomerId { get; set; }
         public string UserName { get; set; }
         public string NormalizedUserName { get; set; }
         public string Email { get; set; }

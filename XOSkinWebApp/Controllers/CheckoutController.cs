@@ -84,32 +84,6 @@ namespace XOSkinWebApp.Controllers
 
       try
       {
-        //seCarrierJson = _option.Value.ShipEngineCarriersUrl.GetJsonFromUrl(requestFilter: webReq =>
-        // {
-        //   webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
-        // });
-
-        //seCarrierList = new List<Models.Carrier>();
-
-        //using (JsonDocument seCarrier = JsonDocument.Parse(seCarrierJson))
-        //{
-        //  JsonElement root = seCarrier.RootElement;
-        //  JsonElement carriersElement = root.GetProperty("carriers");
-        //  foreach (JsonElement carrier in carriersElement.EnumerateArray())
-        //  {
-        //    if (carrier.TryGetProperty("carrier_id", out JsonElement idElement))
-        //    {
-
-        //      seCarrierList.Add(new Models.Carrier()
-        //      {
-        //        Id = carrier.GetProperty("carrier_id").ToString(),
-        //        Name = carrier.GetProperty("friendly_name").ToString()
-        //      });
-        //    }
-        //  }
-        //}
-
-        //ViewData["Carrier"] = new SelectList(seCarrierList, "Id", "Name", seCarrierList.First());
       }
       catch (Exception ex)
       {
@@ -273,21 +247,21 @@ namespace XOSkinWebApp.Controllers
             writer.WriteEndObject(); // ship_to.
             writer.WriteStartObject("ship_from");
               writer.WritePropertyName("company_name");
-              writer.WriteStringValue("XO Skin, Corp.");
+              writer.WriteStringValue(_option.Value.ShipFromCompanyName);
               writer.WritePropertyName("name");
-              writer.WriteStringValue("XO Skin Shipping");
+              writer.WriteStringValue(_option.Value.ShipFromName);
               writer.WritePropertyName("phone");
-              writer.WriteStringValue("xxx-xxx-xxxx");
+              writer.WriteStringValue(_option.Value.ShipFromPhone);
               writer.WritePropertyName("address_line1");
-              writer.WriteStringValue("10815 Rancho Bernardo Road Suite 300");
+              writer.WriteStringValue(_option.Value.ShipFromAddressLine1);
               writer.WritePropertyName("city_locality");
-              writer.WriteStringValue("San Diego");
+              writer.WriteStringValue(_option.Value.ShipFromCity);
               writer.WritePropertyName("state_province");
-              writer.WriteStringValue("CA");
+              writer.WriteStringValue(_option.Value.ShipFromState);
               writer.WritePropertyName("postal_code");
-              writer.WriteStringValue("92127");
+              writer.WriteStringValue(_option.Value.ShipFromPostalCode);
               writer.WritePropertyName("country_code");
-              writer.WriteStringValue("US");
+              writer.WriteStringValue(_option.Value.ShipFromCountryCode);
             writer.WriteEndObject(); // ship_from.
             writer.WriteStartArray("packages");
               writer.WriteStartObject();
@@ -373,9 +347,22 @@ namespace XOSkinWebApp.Controllers
       ShopifySharp.Order shOrder = null;
       List<ShopifySharp.LineItem> shLineItemList = null;
       String seShipmentRateJson = null;
-      PaymentIntentCreateOptions stPaymentIntentCreateOptions = null;
-      PaymentIntentService stPaymentIntentService = null;
-      PaymentIntent stPaymentIntent = null;
+      Stripe.ChargeService stChargeService = null;
+      Stripe.CustomerService stCustomerService = null;
+      SourceService stSourceService = null;
+      TokenService stTokenService = null;
+      ChargeCreateOptions stChargeCreateOptions = null;
+      Dictionary<String, String> stCreditTransactionMetaValue = null;
+      Stripe.CustomerCreateOptions stCustomerCreateOptions = null;
+      Stripe.Customer stCustomer = null;
+      CardCreateNestedOptions stCardCreateNestedOptions = null;
+      Source stSource = null;
+      SourceCreateOptions stSourceCreateOptions = null;
+      TokenCreateOptions stTokenCreateOptions = null;
+      Token stToken = null;
+      TokenCardOptions stTokenCardOptions = null;
+      AspNetUser xoUser = null;
+      
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -504,6 +491,125 @@ namespace XOSkinWebApp.Controllers
             }
           }
 
+          Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrierName;
+          Model.BilledOn = DateTime.UtcNow;
+
+          shippingCost = (decimal)Model.ShippingCharges;
+          codeDiscount = 0.0M; // TODO: CALCULATE.
+          couponDiscount = 0.0M; // TODO : CALCULATE.
+          applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax.
+
+          total = subTotal + shippingCost - codeDiscount - couponDiscount + applicableTaxes;
+
+          try
+          {
+            // Credit card processing.
+            Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
+
+            if (_context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(
+              x => x.StripeCustomerId).FirstOrDefault() == null)
+            {
+              stCardCreateNestedOptions = new CardCreateNestedOptions()
+              {
+                AddressCity = Model.BillingCity,
+                AddressCountry = Model.BillingCountry,
+                AddressLine1 = Model.BillingAddress1,
+                AddressLine2 = Model.BillingAddress2,
+                AddressState = Model.BillingState,
+                AddressZip = Model.BillingPostalCode,
+                Cvc = Model.CreditCardCVC,
+                ExpMonth = Model.CreditCardExpirationDate.Month,
+                ExpYear = Model.CreditCardExpirationDate.Year,
+                Name = Model.BillingName,
+                Number = Model.CreditCardNumber
+              };
+              stCustomerCreateOptions = new Stripe.CustomerCreateOptions();
+              stCustomerCreateOptions.Email = User.Identity.Name;
+              stCustomerCreateOptions.Source = stCardCreateNestedOptions;
+              stCustomerCreateOptions.Description = "XO Skin Customer.";
+              stCustomerService = new Stripe.CustomerService();
+              stCustomer = stCustomerService.Create(stCustomerCreateOptions);
+              xoUser = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
+              xoUser.StripeCustomerId = stCustomer.Id;
+              _context.AspNetUsers.Update(xoUser);
+              _context.SaveChanges();
+            }
+            else
+            {
+              stCustomerService = new Stripe.CustomerService();
+              stCustomer = stCustomerService.Get(_context.AspNetUsers.Where(
+                x => x.Email.Equals(User.Identity.Name)).Select(x => x.StripeCustomerId).FirstOrDefault());
+
+              stTokenCardOptions = new TokenCardOptions()
+              {
+                AddressCity = Model.BillingCity,
+                AddressCountry = Model.BillingCountry,
+                AddressLine1 = Model.BillingAddress1,
+                AddressLine2 = Model.BillingAddress2,
+                AddressState = Model.BillingState,
+                AddressZip = Model.BillingPostalCode,
+                Cvc = Model.CreditCardCVC,
+                ExpMonth = Model.CreditCardExpirationDate.Month,
+                ExpYear = Model.CreditCardExpirationDate.Year,
+                Name = Model.BillingName,
+                Number = Model.CreditCardNumber
+              };
+              stTokenCreateOptions = new TokenCreateOptions()
+              {
+                Card = stTokenCardOptions
+              };
+              stTokenService = new TokenService();
+              stToken = stTokenService.Create(stTokenCreateOptions);
+              stSourceCreateOptions = new SourceCreateOptions()
+              {
+                Token = stToken.Id,
+                Type = SourceType.Card
+              };
+              stSourceService = new SourceService();
+              stSource = await stSourceService.CreateAsync(stSourceCreateOptions);
+              stSourceService.Attach(stCustomer.Id, new SourceAttachOptions()
+              {
+                Source = stSource.Id
+              });
+            }
+
+            stCreditTransactionMetaValue = new Dictionary<string, string>();
+            stCreditTransactionMetaValue.Add("ProductOrderId", order.Id.ToString());
+            stCreditTransactionMetaValue.Add("UserIdentityName", User.Identity.Name);
+
+            stChargeCreateOptions = new ChargeCreateOptions()
+            {
+              Amount = (long?)total * 100,
+              Currency = "usd",
+              Description = "Total charges for an XO Skin customer order #XO" + (order.Id + 10000).ToString() +
+                ". Customer: " + User.Identity.Name + ".",
+              Metadata = stCreditTransactionMetaValue,
+              ReceiptEmail = User.Identity.Name,
+              Customer = stCustomer.Id
+            };
+
+            stChargeService = new Stripe.ChargeService();
+            stChargeService.Create(stChargeCreateOptions);
+
+            stCustomer = stCustomerService.Get(_context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.StripeCustomerId).FirstOrDefault());
+
+            if (stCustomer.Sources != null)
+            {
+              stSourceService = new SourceService();
+              foreach (Source s in stCustomer.Sources)
+              {
+                stSourceService.Detach(stCustomer.Id, s.Id);
+              }
+            }
+          }
+          catch (Exception ex)
+          {
+            throw new Exception("An error was encountered while processing credit card information.", ex);
+          }
+          
+
           // TODO: IMPORTANT GET TAXES FROM AvaTax.
           shOrder.ShippingLines = new List<ShippingLine>()
           {
@@ -544,33 +650,6 @@ namespace XOSkinWebApp.Controllers
         {
           throw new Exception("An error was encountered while writing order to Shopify.", ex);
         }
-
-        Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrierName;
-        Model.BilledOn = DateTime.UtcNow;
-
-        shippingCost = (decimal)Model.ShippingCharges;
-        codeDiscount = 0.0M; // TODO: CALCULATE.
-        couponDiscount = 0.0M; // TODO : CALCULATE.
-        applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax.
-        
-        total = subTotal + shippingCost - codeDiscount - couponDiscount  + applicableTaxes;
-
-        // Stripe credit card transaction.
-        StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
-        stPaymentIntentCreateOptions = new PaymentIntentCreateOptions
-        {
-          Amount = (long?)(total * 100),
-          Currency = "usd",
-          Metadata = new Dictionary<string, string>
-          {
-            { "integration_check", "accept_a_payment" }
-          }
-        };
-
-        stPaymentIntentService = new PaymentIntentService();
-        stPaymentIntent = stPaymentIntentService.Create(stPaymentIntentCreateOptions);
-
-        // TODO: Continue Stripe credit card transaction here.
 
         order.DatePlaced = DateTime.UtcNow;
         order.Subtotal = subTotal;

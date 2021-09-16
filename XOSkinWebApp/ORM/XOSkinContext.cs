@@ -200,6 +200,10 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
 
+                entity.Property(e => e.StripeCustomerId)
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.UserName).HasMaxLength(256);
             });
 
