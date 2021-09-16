@@ -118,15 +118,15 @@ else
             <label id="carrier" class="control-label">Please Choose a Shipping Carrier</label>
             <select asp-for="SelectedCarrierId" class="form-control" asp-items="ViewBag.Carrier"></select>
           </div>*@
-          <div style="text-align: right; margin-right: 40px">Carrier: @Html.Raw(Model.CarrierName)</div>
-          <div style="text-align: right; margin-right: 40px">Shipping: @Html.Raw(Model.ShippedOn.ToShortDateString())</div>
-          <div style="text-align: right; margin-right: 40px">Arrival: @Html.Raw(Model.ExpectedToArrive.ToShortDateString())</div>
+          <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Carrier:  @Html.Raw(Model.CarrierName)</span></div>
+          <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Shipping:</span> @Html.Raw(Model.ShippedOn.ToShortDateString())</div>
+          <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Arrival:</span> @Html.Raw(Model.ExpectedToArrive.ToShortDateString())</div>
           <br />
-          <div style="text-align: right; margin-right: 40px">Sub-Total: $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
-          <div style="text-align: right; margin-right: 40px">Taxes: +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
-          <div style="text-align: right; margin-right: 40px">USPS Priority Mail: +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</div>
-          <div style="text-align: right; margin-right: 40px">Code Discount: -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</div>
-          <div style="text-align: right; margin-right: 40px">Coupon Discount: -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
+          <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Sub-Total:</span> $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
+          <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Taxes:</span> +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
+          <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">USPS Priority Mail:</span> +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</div>
+          <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Code Discount:</span> -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</div>
+          <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Coupon Discount:</span> -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
           <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
           <br />
           <div style="text-align: right; margin-right: 40px">
