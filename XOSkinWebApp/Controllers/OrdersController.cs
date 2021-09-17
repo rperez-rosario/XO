@@ -91,7 +91,7 @@ namespace XOSkinWebApp.Controllers
           CreditCardExpirationDate = new DateTime(1754, 1, 1),
           CreditCardNumber = null,
           ExpectedToArrive = shipping.Arrives == null ? new DateTime(1754, 1, 1) : shipping.Arrives.Value,
-          IsGift = order.GiftOrder,
+          IsGift = (bool)order.GiftOrder,
           OrderId = Id,
           CarrierName = shipping.CarrierName,
           ShippingCharges = order.ShippingCost,

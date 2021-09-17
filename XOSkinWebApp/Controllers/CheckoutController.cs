@@ -645,9 +645,12 @@ namespace XOSkinWebApp.Controllers
               }
             }
           }
-          catch (Exception ex)
+          catch
           {
-            throw new Exception("An error was encountered while processing credit card information.", ex);
+            Model.CardDeclined = true;
+            Model.CreditCardExpirationDate = DateTime.Now;
+            Model.CalculatedShippingAndTaxes = true;
+            return RedirectToAction("CalculateShippingCostAndTaxes", Model);
           }
           
 
