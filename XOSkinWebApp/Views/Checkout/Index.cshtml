@@ -109,7 +109,7 @@ else
               <span asp-validation-for="CreditCardCVC" class="text-danger" id="val-credit-card-cvc"></span>
             </div>
             <div class="form-group">
-              <label class="control-label">Expiration Date</label>
+              <label class="control-label">Expiration Month and Year</label>
               <input asp-for="CreditCardExpirationDate" class="form-control" type="Month" id="credit-card-expiration-date" />
               <span class="text-danger" id="val-credit-card-expiration"></span>
             </div>
@@ -192,9 +192,7 @@ else
 
       if ($('#card-declined').val() == 'True') {
         $('#val-credit-card-number').html('Credit card transaction declined.<br />Please try another credit card number.');
-        $('#val-credit-card-cvc').html('Please enter a CVC.');
-        $('#val-credit-card-expiration').html('Please enter an expiration date.');
-        $('#credit-card-expiration-date'.val(Date.now()));
+        $('#credit-card-expiration-date').val(Date.now());
       }
 
       if ($('#same-address').prop('checked')) {
@@ -253,7 +251,6 @@ else
         $('#same-address').attr('disabled', true);
       }
 
-      // Custom required-if validation.
       function validateShippingAddress(e) {
         if (!$('#same-address').prop('checked')) {
           if ($('#shipping-name').val().trim() == '') {

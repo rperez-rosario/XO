@@ -24,14 +24,14 @@ namespace XOSkinWebApp.ORM
         public string StripeChargeStatus { get; set; }
         public bool? Completed { get; set; }
         public string User { get; set; }
-        public DateTime DatePlaced { get; set; }
-        public decimal Subtotal { get; set; }
-        public decimal CouponDiscount { get; set; }
-        public decimal CodeDiscount { get; set; }
+        public DateTime? DatePlaced { get; set; }
+        public decimal? Subtotal { get; set; }
+        public decimal? CouponDiscount { get; set; }
+        public decimal? CodeDiscount { get; set; }
         public decimal? ShippingCost { get; set; }
-        public decimal ApplicableTaxes { get; set; }
-        public decimal Total { get; set; }
-        public bool GiftOrder { get; set; }
+        public decimal? ApplicableTaxes { get; set; }
+        public decimal? Total { get; set; }
+        public bool? GiftOrder { get; set; }
         public bool? Cancelled { get; set; }
         public DateTime? CancelledOn { get; set; }
         public string CancelReason { get; set; }

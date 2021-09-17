@@ -1033,7 +1033,7 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("ProductOrder");
 
-                entity.Property(e => e.ApplicableTaxes).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.ApplicableTaxes).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.CancelReason).IsUnicode(false);
 
@@ -1043,13 +1043,13 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.CancelledOn).HasColumnType("datetime");
 
-                entity.Property(e => e.CodeDiscount).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.CodeDiscount).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.CouponDiscount).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.CouponDiscount).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.DatePlaced).HasColumnType("datetime");
 
-                entity.Property(e => e.ShippingCost).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.ShippingCost).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.StripeChargeId)
                     .HasMaxLength(256)
@@ -1059,9 +1059,9 @@ namespace XOSkinWebApp.ORM
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.Total).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.User)
                     .IsRequired()

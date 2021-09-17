@@ -518,30 +518,40 @@ namespace XOSkinWebApp.Controllers
               x => x.Email.Equals(User.Identity.Name)).Select(
               x => x.StripeCustomerId).FirstOrDefault() == null)
             {
-              stCardCreateNestedOptions = new CardCreateNestedOptions()
+              try
               {
-                AddressCity = Model.BillingCity,
-                AddressCountry = Model.BillingCountry,
-                AddressLine1 = Model.BillingAddress1,
-                AddressLine2 = Model.BillingAddress2,
-                AddressState = Model.BillingState,
-                AddressZip = Model.BillingPostalCode,
-                Cvc = Model.CreditCardCVC,
-                ExpMonth = Model.CreditCardExpirationDate.Month,
-                ExpYear = Model.CreditCardExpirationDate.Year,
-                Name = Model.BillingName,
-                Number = Model.CreditCardNumber
-              };
-              stCustomerCreateOptions = new Stripe.CustomerCreateOptions();
-              stCustomerCreateOptions.Email = User.Identity.Name;
-              stCustomerCreateOptions.Source = stCardCreateNestedOptions;
-              stCustomerCreateOptions.Description = "XO Skin Customer.";
-              stCustomerService = new Stripe.CustomerService();
-              stCustomer = stCustomerService.Create(stCustomerCreateOptions);
-              xoUser = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
-              xoUser.StripeCustomerId = stCustomer.Id;
-              _context.AspNetUsers.Update(xoUser);
-              _context.SaveChanges();
+                stCardCreateNestedOptions = new CardCreateNestedOptions()
+                {
+                  AddressCity = Model.BillingCity,
+                  AddressCountry = Model.BillingCountry,
+                  AddressLine1 = Model.BillingAddress1,
+                  AddressLine2 = Model.BillingAddress2,
+                  AddressState = Model.BillingState,
+                  AddressZip = Model.BillingPostalCode,
+                  Cvc = Model.CreditCardCVC,
+                  ExpMonth = Model.CreditCardExpirationDate.Month,
+                  ExpYear = Model.CreditCardExpirationDate.Year,
+                  Name = Model.BillingName,
+                  Number = Model.CreditCardNumber
+                };
+                stCustomerCreateOptions = new Stripe.CustomerCreateOptions();
+                stCustomerCreateOptions.Email = User.Identity.Name;
+                stCustomerCreateOptions.Source = stCardCreateNestedOptions;
+                stCustomerCreateOptions.Description = "XO Skin Customer.";
+                stCustomerService = new Stripe.CustomerService();
+                stCustomer = stCustomerService.Create(stCustomerCreateOptions);
+                xoUser = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
+                xoUser.StripeCustomerId = stCustomer.Id;
+                _context.AspNetUsers.Update(xoUser);
+                _context.SaveChanges();
+              }
+              catch
+              {
+                Model.CardDeclined = true;
+                Model.CalculatedShippingAndTaxes = true;
+                Model.CreditCardExpirationDate = DateTime.Now;
+                return RedirectToAction("CalculateShippingCostAndTaxes", Model);
+              }
             }
             else
             {
@@ -676,6 +686,7 @@ namespace XOSkinWebApp.Controllers
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.ShopifyCustomerId).FirstOrDefault());
 
           shOrder = await shOrderService.CreateAsync(shOrder);
+          order.ShopifyId = shOrder.Id;
         }
         catch (Exception ex)
         {
