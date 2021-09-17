@@ -41,8 +41,6 @@ namespace XOSkinWebApp.Controllers
         .Select(x => x.Id).FirstOrDefault()).ToList();
       ORM.Address billingAddress = null;
       ORM.Address shippingAddress = null;
-      //List<Models.Carrier> seCarrierList = null;
-      //String seCarrierJson = null;
       decimal totalOrderShippingWeightInPounds = 0.0M;
 
       checkoutViewModel.SubTotal = 0.0M;
@@ -205,113 +203,115 @@ namespace XOSkinWebApp.Controllers
        .Select(x => x.Text).FirstOrDefault());
 
       Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrier;
-      Model.ExpectedToArrive = Model.ExpectedToArrive;
       
-      try
+      if (!Model.CalculatedShippingAndTaxes)
       {
-        var options = new JsonWriterOptions
+        try
         {
-          Indented = true
-        };
+          var options = new JsonWriterOptions
+          {
+            Indented = true
+          };
 
-        using var stream = new MemoryStream();
-        using var writer = new Utf8JsonWriter(stream, options);
-        
-        writer.WriteStartObject();
+          using var stream = new MemoryStream();
+          using var writer = new Utf8JsonWriter(stream, options);
+
+          writer.WriteStartObject();
           writer.WriteStartObject("rate_options");
-            writer.WriteStartArray("carrier_ids");
-              writer.WriteStringValue(Model.ShippingCarrier);
-            writer.WriteEndArray();
+          writer.WriteStartArray("carrier_ids");
+          writer.WriteStringValue(Model.ShippingCarrier);
+          writer.WriteEndArray();
           writer.WriteEndObject(); // rate_options.
           writer.WriteStartObject("shipment");
-            writer.WritePropertyName("validate_address");
-            writer.WriteStringValue("validate_and_clean");
-            writer.WriteStartObject("ship_to");
-              writer.WritePropertyName("name");
-              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName);
-              writer.WritePropertyName("phone");
-              writer.WriteStringValue(_context.AspNetUsers.Where(
-                  x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault());
-              writer.WritePropertyName("address_line1");
-              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1);
-              writer.WritePropertyName("address_line2");
-              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress2 : Model.ShippingAddress2);
-              writer.WritePropertyName("city_locality");
-              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingCity : Model.ShippingCity);
-              writer.WritePropertyName("state_province");
-              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState);
-              writer.WritePropertyName("postal_code");
-              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode);
-              writer.WritePropertyName("country_code");
-              writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingCountry: Model.ShippingCountry);
-            writer.WriteEndObject(); // ship_to.
-            writer.WriteStartObject("ship_from");
-              writer.WritePropertyName("company_name");
-              writer.WriteStringValue(_option.Value.ShipFromCompanyName);
-              writer.WritePropertyName("name");
-              writer.WriteStringValue(_option.Value.ShipFromName);
-              writer.WritePropertyName("phone");
-              writer.WriteStringValue(_option.Value.ShipFromPhone);
-              writer.WritePropertyName("address_line1");
-              writer.WriteStringValue(_option.Value.ShipFromAddressLine1);
-              writer.WritePropertyName("city_locality");
-              writer.WriteStringValue(_option.Value.ShipFromCity);
-              writer.WritePropertyName("state_province");
-              writer.WriteStringValue(_option.Value.ShipFromState);
-              writer.WritePropertyName("postal_code");
-              writer.WriteStringValue(_option.Value.ShipFromPostalCode);
-              writer.WritePropertyName("country_code");
-              writer.WriteStringValue(_option.Value.ShipFromCountryCode);
-            writer.WriteEndObject(); // ship_from.
-            writer.WriteStartArray("packages");
-              writer.WriteStartObject();
-                writer.WriteStartObject("weight");
-                  writer.WritePropertyName("value");
-                  writer.WriteNumberValue(Model.TotalWeightInPounds);
-                  writer.WritePropertyName("unit");
-                  writer.WriteStringValue("pound");
-                writer.WriteEndObject(); // weight.
-              writer.WriteEndObject(); // packages.
-            writer.WriteEndArray(); // packages.
+          writer.WritePropertyName("validate_address");
+          writer.WriteStringValue("validate_and_clean");
+          writer.WriteStartObject("ship_to");
+          writer.WritePropertyName("name");
+          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName);
+          writer.WritePropertyName("phone");
+          writer.WriteStringValue(_context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault());
+          writer.WritePropertyName("address_line1");
+          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1);
+          writer.WritePropertyName("address_line2");
+          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress2 : Model.ShippingAddress2);
+          writer.WritePropertyName("city_locality");
+          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingCity : Model.ShippingCity);
+          writer.WritePropertyName("state_province");
+          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState);
+          writer.WritePropertyName("postal_code");
+          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode);
+          writer.WritePropertyName("country_code");
+          writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry);
+          writer.WriteEndObject(); // ship_to.
+          writer.WriteStartObject("ship_from");
+          writer.WritePropertyName("company_name");
+          writer.WriteStringValue(_option.Value.ShipFromCompanyName);
+          writer.WritePropertyName("name");
+          writer.WriteStringValue(_option.Value.ShipFromName);
+          writer.WritePropertyName("phone");
+          writer.WriteStringValue(_option.Value.ShipFromPhone);
+          writer.WritePropertyName("address_line1");
+          writer.WriteStringValue(_option.Value.ShipFromAddressLine1);
+          writer.WritePropertyName("city_locality");
+          writer.WriteStringValue(_option.Value.ShipFromCity);
+          writer.WritePropertyName("state_province");
+          writer.WriteStringValue(_option.Value.ShipFromState);
+          writer.WritePropertyName("postal_code");
+          writer.WriteStringValue(_option.Value.ShipFromPostalCode);
+          writer.WritePropertyName("country_code");
+          writer.WriteStringValue(_option.Value.ShipFromCountryCode);
+          writer.WriteEndObject(); // ship_from.
+          writer.WriteStartArray("packages");
+          writer.WriteStartObject();
+          writer.WriteStartObject("weight");
+          writer.WritePropertyName("value");
+          writer.WriteNumberValue(Model.TotalWeightInPounds);
+          writer.WritePropertyName("unit");
+          writer.WriteStringValue("pound");
+          writer.WriteEndObject(); // weight.
+          writer.WriteEndObject(); // packages.
+          writer.WriteEndArray(); // packages.
           writer.WriteEndObject();  // shipment.
-        writer.WriteEndObject(); // root.
-        
-        writer.Flush();
+          writer.WriteEndObject(); // root.
 
-        seShipmentDetailsJson = Encoding.UTF8.GetString(stream.ToArray());
+          writer.Flush();
 
-        seShipmentCostJson = _option.Value.ShipEngineShippingCostUrl.PostJsonToUrlAsync(seShipmentDetailsJson, 
-          requestFilter: webReq =>
-        {
-          webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
-        }).Result;
+          seShipmentDetailsJson = Encoding.UTF8.GetString(stream.ToArray());
 
-        using (JsonDocument document = JsonDocument.Parse(seShipmentCostJson))
-        {
-          JsonElement root = document.RootElement;
-          JsonElement ratesElement = root.GetProperty("rate_response").GetProperty("rates");
-          foreach (JsonElement rate in ratesElement.EnumerateArray())
-          {
-            if (rate.GetProperty("carrier_id").ValueEquals(_option.Value.ShipEngineDefaultCarrier) &&
-              rate.GetProperty("rate_type").ValueEquals(_option.Value.ShipEngineDefaultRateType) &&
-              rate.GetProperty("package_type").ValueEquals(_option.Value.ShipEngineDefaultPackageType) &&
-              rate.GetProperty("service_code").ValueEquals(_option.Value.ShipEngineDefaultServiceCode))
+          seShipmentCostJson = _option.Value.ShipEngineShippingCostUrl.PostJsonToUrlAsync(seShipmentDetailsJson,
+            requestFilter: webReq =>
             {
-              Model.ShippingCharges = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
-              Model.ShipEngineShipmentId = root.GetProperty("shipment_id").ToString();
-              break;
+              webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+            }).Result;
+
+          using (JsonDocument document = JsonDocument.Parse(seShipmentCostJson))
+          {
+            JsonElement root = document.RootElement;
+            JsonElement ratesElement = root.GetProperty("rate_response").GetProperty("rates");
+            foreach (JsonElement rate in ratesElement.EnumerateArray())
+            {
+              if (rate.GetProperty("carrier_id").ValueEquals(_option.Value.ShipEngineDefaultCarrier) &&
+                rate.GetProperty("rate_type").ValueEquals(_option.Value.ShipEngineDefaultRateType) &&
+                rate.GetProperty("package_type").ValueEquals(_option.Value.ShipEngineDefaultPackageType) &&
+                rate.GetProperty("service_code").ValueEquals(_option.Value.ShipEngineDefaultServiceCode))
+              {
+                Model.ShippingCharges = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
+                Model.ShipEngineShipmentId = root.GetProperty("shipment_id").ToString();
+                break;
+              }
             }
           }
         }
-      }
-      catch (Exception ex)
-      {
-        throw new Exception("An error was encountered while calculating shipping cost. " + seShipmentDetailsJson, ex);
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while calculating shipping cost. " + seShipmentDetailsJson, ex);
+        }
       }
 
       Model.Total = Model.SubTotal + Model.Taxes + Model.ShippingCharges -
         Model.CodeDiscount - Model.CouponDiscount;
-      Model.CalculatedShipping = true;
+      Model.CalculatedShippingAndTaxes = true;
       
       return View("Index", Model);
     }
@@ -362,6 +362,7 @@ namespace XOSkinWebApp.Controllers
       Token stToken = null;
       TokenCardOptions stTokenCardOptions = null;
       AspNetUser xoUser = null;
+      Stripe.Charge stCharge = null;
       
 
       if (_context.ShoppingCartLineItems.Where(
@@ -395,25 +396,32 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while initializing Shopify services.", ex);
       }
 
-      Model.LineItem = new List<ShoppingCartLineItemViewModel>();
-      order = new ProductOrder()
+      if (Model.OrderId == 0)
       {
-        User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-        DatePlaced = DateTime.MaxValue,
-        Subtotal = 0.0M,
-        CouponDiscount = 0.0M,
-        CodeDiscount = 0.0M,
-        ApplicableTaxes = 0.0M,
-        Total = 0.0M,
-        GiftOrder = false
-      };
+        order = new ProductOrder()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          DatePlaced = DateTime.MaxValue,
+          Subtotal = 0.0M,
+          CouponDiscount = 0.0M,
+          CodeDiscount = 0.0M,
+          ApplicableTaxes = 0.0M,
+          Total = 0.0M,
+          GiftOrder = false
+        };
 
-      _context.ProductOrders.Add(order);
-      _context.SaveChanges();
+        _context.ProductOrders.Add(order);
+        _context.SaveChanges();
+
+        Model.OrderId = order.Id;
+      }
+      else
+      {
+        order = _context.ProductOrders.Where(x => x.Id == Model.OrderId).FirstOrDefault();
+      }
 
       try
       {
-
         shLineItemList = new List<ShopifySharp.LineItem>();
 
         foreach (ShoppingCartLineItem cli in _context.ShoppingCartLineItems.Where(
@@ -568,10 +576,20 @@ namespace XOSkinWebApp.Controllers
               };
               stSourceService = new SourceService();
               stSource = await stSourceService.CreateAsync(stSourceCreateOptions);
-              stSourceService.Attach(stCustomer.Id, new SourceAttachOptions()
+              try
               {
-                Source = stSource.Id
-              });
+                stSourceService.Attach(stCustomer.Id, new SourceAttachOptions()
+                {
+                  Source = stSource.Id
+                });
+              }
+              catch
+              {
+                Model.CardDeclined = true;
+                Model.CalculatedShippingAndTaxes = true;
+                Model.CreditCardExpirationDate = DateTime.Now;
+                return RedirectToAction("CalculateShippingCostAndTaxes", Model);
+              }
             }
 
             stCreditTransactionMetaValue = new Dictionary<string, string>();
@@ -590,8 +608,21 @@ namespace XOSkinWebApp.Controllers
             };
 
             stChargeService = new Stripe.ChargeService();
-            stChargeService.Create(stChargeCreateOptions);
+            stCharge = stChargeService.Create(stChargeCreateOptions);
 
+            if (stCharge.Status.Equals("succeeded"))
+            {
+              order.StripeChargeId = stCharge.Id;
+              order.StripeChargeStatus = stCharge.Status;
+            }
+            else
+            {
+              Model.CardDeclined = true;
+              Model.CreditCardExpirationDate = DateTime.Now;
+              Model.CalculatedShippingAndTaxes = true;
+              return RedirectToAction("CalculateShippingCostAndTaxes", Model);
+            }
+            
             stCustomer = stCustomerService.Get(_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.StripeCustomerId).FirstOrDefault());
 
@@ -659,6 +690,7 @@ namespace XOSkinWebApp.Controllers
         order.GiftOrder = Model.IsGift;
         order.ShippingCost = shippingCost;
         order.Total = total;
+        order.Completed = true;
 
         _context.ProductOrders.Update(order);
 
@@ -877,7 +909,9 @@ namespace XOSkinWebApp.Controllers
               }
             }
           }
-          
+
+          _context.SaveChanges();
+
           Model.LineItem.Add(new ShoppingCartLineItemViewModel()
           {
             Id = item.Id,
@@ -896,8 +930,6 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
               x => x.Amount).FirstOrDefault() * item.Quantity
           });
-
-          _context.SaveChanges();
 
           _context.ShoppingCartLineItems.Remove(item);
           _context.SaveChanges();

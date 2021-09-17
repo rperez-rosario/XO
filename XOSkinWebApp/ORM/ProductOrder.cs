@@ -20,6 +20,9 @@ namespace XOSkinWebApp.ORM
 
         public long Id { get; set; }
         public long? ShopifyId { get; set; }
+        public string StripeChargeId { get; set; }
+        public string StripeChargeStatus { get; set; }
+        public bool? Completed { get; set; }
         public string User { get; set; }
         public DateTime DatePlaced { get; set; }
         public decimal Subtotal { get; set; }

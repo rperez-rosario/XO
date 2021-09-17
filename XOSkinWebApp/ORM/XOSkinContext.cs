@@ -1051,6 +1051,14 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.ShippingCost).HasColumnType("decimal(18, 0)");
 
+                entity.Property(e => e.StripeChargeId)
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.StripeChargeStatus)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 0)");
 
                 entity.Property(e => e.Total).HasColumnType("decimal(18, 0)");

@@ -63,16 +63,18 @@ namespace XOSkinWebApp.Models
     public String CreditCardCVC { get; set; }
     public DateTime CreditCardExpirationDate { get; set; }
 
-    public bool CalculatedShipping { get; set; }
+    public bool CalculatedShippingAndTaxes { get; set; }
     public String SelectedCarrierId { get; set; }
     public String CarrierName { get; set; }
     public decimal TotalWeightInPounds { get; set; }
     public String ShipEngineShipmentId { get; set; }
+    public bool CardDeclined { get; set; }
 
     public CheckoutViewModel()
     {
       LineItem = new List<ShoppingCartLineItemViewModel>();
-      CalculatedShipping = false;
+      CalculatedShippingAndTaxes = false;
+      CardDeclined = false;
     }
   }
 }
