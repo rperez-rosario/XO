@@ -127,7 +127,7 @@ else
           <br />
           <div style="text-align: right; margin-right: 40px">
             <input id="calculate-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") value="Calculate Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShippingAndTaxes)" />
-            <input id="re-calculate-shipping-cost-button" type="submit" formaction=@Url.Action("Index") value="Correct Address" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
+            <input id="re-calculate-shipping-cost-button" type="submit" formaction=@Url.Action("Index") value="Change Address" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
             <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
           </div>
         </div>
@@ -192,7 +192,6 @@ else
 
       if ($('#card-declined').val() == 'True') {
         $('#val-credit-card-number').html('Credit card transaction declined.<br />Please try another credit card number.');
-        $('#credit-card-expiration-date').val(Date.now());
       }
 
       if ($('#same-address').prop('checked')) {

@@ -11,7 +11,6 @@ using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ServiceStack;
-using Newtonsoft.Json;
 using System.Text.Json;
 using System.IO;
 using System.Text;
@@ -311,6 +310,7 @@ namespace XOSkinWebApp.Controllers
 
       Model.Total = Model.SubTotal + Model.Taxes + Model.ShippingCharges -
         Model.CodeDiscount - Model.CouponDiscount;
+
       Model.CalculatedShippingAndTaxes = true;
       
       return View("Index", Model);
@@ -549,7 +549,6 @@ namespace XOSkinWebApp.Controllers
               {
                 Model.CardDeclined = true;
                 Model.CalculatedShippingAndTaxes = true;
-                Model.CreditCardExpirationDate = DateTime.Now;
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
               }
             }
@@ -597,7 +596,6 @@ namespace XOSkinWebApp.Controllers
               {
                 Model.CardDeclined = true;
                 Model.CalculatedShippingAndTaxes = true;
-                Model.CreditCardExpirationDate = DateTime.Now;
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
               }
             }
@@ -628,7 +626,6 @@ namespace XOSkinWebApp.Controllers
             else
             {
               Model.CardDeclined = true;
-              Model.CreditCardExpirationDate = DateTime.Now;
               Model.CalculatedShippingAndTaxes = true;
               return RedirectToAction("CalculateShippingCostAndTaxes", Model);
             }
@@ -648,7 +645,6 @@ namespace XOSkinWebApp.Controllers
           catch
           {
             Model.CardDeclined = true;
-            Model.CreditCardExpirationDate = DateTime.Now;
             Model.CalculatedShippingAndTaxes = true;
             return RedirectToAction("CalculateShippingCostAndTaxes", Model);
           }
