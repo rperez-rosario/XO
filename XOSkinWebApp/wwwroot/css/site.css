@@ -231,3 +231,9 @@ div.alert.alert-success.alert-dismissible {
 
 .flex-child:first-child {
 }
+
+/* Embedded Google Map */
+#map {
+  height: 241px;
+  width: 300px;
+}

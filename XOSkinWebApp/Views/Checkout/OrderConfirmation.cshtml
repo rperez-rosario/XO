@@ -77,7 +77,6 @@
       </div>
     </div>
     <div class="col-sm-4" style="font-weight: 500; line-height: 1.2; font-size: 1.5rem">
-      <br /><br /><br />
       <div style="text-align: right; margin-right: 40px">Order: @Html.Raw("#XO" + (Model.OrderId + 10000))</div>
       <div style="text-align: right; margin-right: 40px">Carrier: <span style="font-weight: 100">@Html.Raw(Model.CarrierName)</span></div>
       <div style="text-align: right; margin-right: 40px">Shipping: <span style="font-weight: 100">@Html.Raw(Model.ShippedOn.ToShortDateString())</span></div>
@@ -89,6 +88,8 @@
       <div style="text-align: right; margin-right: 40px">Code Discount: <span style="font-weight: 100">-$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</span></div>
       <div style="text-align: right; margin-right: 40px">Coupon Discount: <span style="font-weight: 100">-$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</span></div>
       <div style="text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
+      <br />
+      <div id="map"></div>
     </div>
   </div>
 </div>
@@ -136,4 +137,103 @@
       details: true
     });
   });
+</script>
+
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBleIbmeB7EG7zc8DElUEaGzXIYiHHFjQ4&callback=initMap&libraries=&v=weekly" async></script>
+<script type="text/javascript">
+  // Initialize and add the map
+  function initMap() {
+    // 40 Putnam Ave. Brooklyn NY, 11238
+    const home = { lat: 40.6826948, lng: -73.9623714 };
+    // The map, centered at Uluru
+    const map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 14,
+      disableDefaultUI: true,
+      center: home,
+      styles: [
+        { elementType: "geometry", stylers: [{ color: "#424242" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#424242" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#797979" }] },
+        {
+          featureType: "administrative.locality",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#ffffff" }],
+        },
+        {
+          featureType: "poi",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d5d5d5" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "geometry",
+          stylers: [{ color: "#404040" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#9b9b9b" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry",
+          stylers: [{ color: "#535353" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry.stroke",
+          stylers: [{ color: "#3c3c3c" }],
+        },
+        {
+          featureType: "road",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#b5b5b5" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry",
+          stylers: [{ color: "#797979" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry.stroke",
+          stylers: [{ color: "#393939" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#f3f3f3" }],
+        },
+        {
+          featureType: "transit",
+          elementType: "geometry",
+          stylers: [{ color: "#494949" }],
+        },
+        {
+          featureType: "transit.station",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d4d4d4" }],
+        },
+        {
+          featureType: "water",
+          elementType: "geometry",
+          stylers: [{ color: "#3f3f3f" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#6e6e6e" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.stroke",
+          stylers: [{ color: "#404040" }],
+        }]
+    });
+    // The marker, positioned at home.
+    const marker = new google.maps.Marker({
+      position: home,
+      map: map,
+    });
+  }
 </script>
