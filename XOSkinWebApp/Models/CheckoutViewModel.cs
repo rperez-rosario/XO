@@ -54,15 +54,16 @@ namespace XOSkinWebApp.Models
     public String ShippingState { get; set; }
     public String ShippingCountry { get; set; }
     public String ShippingPostalCode { get; set; }
+    public decimal ShippingLongitude { get; set; }
+    public decimal ShippingLatitude { get; set; }
+    public String GoogleMapsUrl { get; set; }
     public String ShippingCarrier { get; set; }
     public String TrackingNumber { get; set; }
     public DateTime ShippedOn { get; set; }
     public DateTime ExpectedToArrive { get; set; }
-
     public String CreditCardNumber { get; set; }
     public String CreditCardCVC { get; set; }
     public DateTime CreditCardExpirationDate { get; set; }
-
     public bool CalculatedShippingAndTaxes { get; set; }
     public String SelectedCarrierId { get; set; }
     public String CarrierName { get; set; }

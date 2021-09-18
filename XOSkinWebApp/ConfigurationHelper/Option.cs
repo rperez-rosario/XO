@@ -38,5 +38,9 @@ namespace XOSkinWebApp.ConfigurationHelper
 		public String ShipFromState { get; set; }
 		public String ShipFromPostalCode { get; set; }
 		public String ShipFromCountryCode { get; set; }
+		public String BingMapsKey { get; set; }
+		public String BingMapsGeolocationUrl { get; set; }
+		public String GoogleMapsKey { get; set; }
+		public String GoogleMapsUrl { get; set; }
 	}
 }

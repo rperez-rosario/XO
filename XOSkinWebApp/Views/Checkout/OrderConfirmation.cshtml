@@ -123,7 +123,10 @@
 </table>
 <form asp-action="PlaceOrder" id="PlaceOrder">
   <input type="hidden" asp-for="OrderId" value="@Model.OrderId" />
+  <input type="hidden" asp-for="ShippingLongitude" value="@Model.ShippingLongitude" id="shipping-longitude" />
+  <input type="hidden" asp-for="ShippingLatitude" value="@Model.ShippingLatitude" id="shipping-latitude" />
 </form>
+
 <script type="text/javascript">
   $(document).ready(function () {
     var table = $('#OrderItems').DataTable({
@@ -139,17 +142,14 @@
   });
 </script>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBleIbmeB7EG7zc8DElUEaGzXIYiHHFjQ4&callback=initMap&libraries=&v=weekly" async></script>
+<script type="text/javascript" src="@Model.GoogleMapsUrl" async></script>
 <script type="text/javascript">
-  // Initialize and add the map
   function initMap() {
-    // 40 Putnam Ave. Brooklyn NY, 11238
-    const home = { lat: 40.6826948, lng: -73.9623714 };
-    // The map, centered at Uluru
+    const shipmentGeolocation = { lat: @Model.ShippingLatitude, lng: @Model.ShippingLongitude };
     const map = new google.maps.Map(document.getElementById("map"), {
       zoom: 14,
       disableDefaultUI: true,
-      center: home,
+      center: shipmentGeolocation,
       styles: [
         { elementType: "geometry", stylers: [{ color: "#424242" }] },
         { elementType: "labels.text.stroke", stylers: [{ color: "#424242" }] },
@@ -230,9 +230,8 @@
           stylers: [{ color: "#404040" }],
         }]
     });
-    // The marker, positioned at home.
     const marker = new google.maps.Marker({
-      position: home,
+      position: shipmentGeolocation,
       map: map,
     });
   }

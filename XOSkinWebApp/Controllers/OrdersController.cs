@@ -6,6 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using XOSkinWebApp.ORM;
 using XOSkinWebApp.Models;
+using XOSkinWebApp.ConfigurationHelper;
+using Microsoft.Extensions.Options;
+using System.Web;
+using System.Text.Json;
+using ServiceStack;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -13,10 +18,12 @@ namespace XOSkinWebApp.Controllers
   public class OrdersController : Controller
   {
     private readonly XOSkinContext _context;
+    private readonly IOptions<Option> _option;
 
-    public OrdersController(XOSkinContext context)
+    public OrdersController(XOSkinContext context, IOptions<Option> option)
     {
       _context = context;
+      _option = option;
     }
 
     public IActionResult Index()
@@ -55,6 +62,8 @@ namespace XOSkinWebApp.Controllers
       OrderBillTo billing = null;
       OrderShipTo shipping = null;
       CheckoutViewModel checkout = null;
+      String geoLocationUrl = null;
+      String geoLocationJson = null;
 
       try
       {
@@ -126,6 +135,32 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while retrieving order details.", ex);
       }
 
+      geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
+        .Replace("{adminDistrict}", checkout.ShippingState)
+        .Replace("{postalCode}", checkout.ShippingPostalCode.Trim())
+        .Replace("{locality}", checkout.ShippingCity.Trim())
+        .Replace("{addressLine}", checkout.ShippingAddress1.Trim() + (checkout.ShippingAddress2 == null ? String.Empty : (" " + checkout.ShippingAddress2.Trim())))
+        .Replace("{includeNeighborhood}", "no")
+        .Replace("{includeValue}", String.Empty)
+        .Replace("{maxResults}", "1")
+        .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
+
+      geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
+      geoLocationJson = (geoLocationUrl).GetJsonFromUrl();
+
+      using (JsonDocument document = JsonDocument.Parse(geoLocationJson))
+      {
+        JsonElement root = document.RootElement;
+        JsonElement resourceSetElement = root.GetProperty("resourceSets");
+        JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
+        JsonElement resourcePoint = resource.GetProperty("point");
+        JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
+        checkout.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
+        checkout.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
+      }
+
+      checkout.GoogleMapsUrl = _option.Value.GoogleMapsUrl;
+
       ViewData.Add("OrderDetails.WelcomeText", _context.LocalizedTexts.Where(
         x => x.PlacementPointCode.Equals("OrderDetails.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
@@ -150,6 +185,8 @@ namespace XOSkinWebApp.Controllers
         return false;
       return true;
     }
+
+
 
     private int TotalQuantityOfItems(long OrderId)
     {

@@ -91,7 +91,7 @@ else
         <div class="form-group">
           <label class="control-label">Postal Code</label>
           <input asp-for="ShippingPostalCode" class="form-control" id="shipping-postal-code" maxlength="10" />
-          <span asp-validation-for="ShippingCountry" class="text-danger" id="val-shipping-postal-code"></span>
+          <span asp-validation-for="ShippingPostalCode" class="text-danger" id="val-shipping-postal-code"></span>
         </div>
       </div>
       <div class="col-sm-4">
@@ -278,7 +278,7 @@ else
           return false;
         }
         if ($('#shipping-postal-code').val().trim() == '') {
-          $('#val-shipping-postal-code').html('Shipping country name required.');
+          $('#val-shipping-postal-code').html('Shipping postal code required.');
           e.preventDefault();
           return false;
         }
