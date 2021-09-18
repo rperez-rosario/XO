@@ -31,7 +31,7 @@ namespace XOSkinWebApp.Controllers
       _option = option;
     }
 
-    public IActionResult Index()
+    public IActionResult Index(CheckoutViewModel Model = null)
     {
       CheckoutViewModel checkoutViewModel = new CheckoutViewModel();
       List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
@@ -79,14 +79,6 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.TotalWeightInPounds = totalOrderShippingWeightInPounds;
       ViewData["Country"] = new SelectList(new List<String> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
-
-      try
-      {
-      }
-      catch (Exception ex)
-      {
-        throw new Exception("An error was encountered while setting available shipping carrier information.", ex);
-      }
 
       checkoutViewModel.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax API.
       checkoutViewModel.CodeDiscount = 0.0M; // TODO: CALCULATE.
@@ -148,6 +140,9 @@ namespace XOSkinWebApp.Controllers
       ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
        x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))
        .Select(x => x.Text).FirstOrDefault());
+
+      if (Model != null && Model.ShippingAddressDeclined)
+        checkoutViewModel.ShippingAddressDeclined = true;
 
       return View(checkoutViewModel);
     }
@@ -303,9 +298,10 @@ namespace XOSkinWebApp.Controllers
             }
           }
         }
-        catch (Exception ex)
+        catch
         {
-          throw new Exception("An error was encountered while calculating shipping cost. " + seShipmentDetailsJson, ex);
+          Model.ShippingAddressDeclined = true;
+          return RedirectToAction("Index", Model);
         }
       }
 

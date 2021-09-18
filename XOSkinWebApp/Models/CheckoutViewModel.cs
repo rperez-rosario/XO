@@ -42,11 +42,8 @@ namespace XOSkinWebApp.Models
     public decimal? CodeDiscount { get; set; }
     public decimal? CouponDiscount { get; set; }
     public decimal? Total { get; set; }
-
     public bool IsGift { get; set; }
-
     public bool ShippingAddressSame { get; set; }
-
     public String ShippingName { get; set; }    
     public String ShippingAddress1 { get; set; }
     public String ShippingAddress2 { get; set; }
@@ -64,17 +61,20 @@ namespace XOSkinWebApp.Models
     public String CreditCardNumber { get; set; }
     public String CreditCardCVC { get; set; }
     public DateTime CreditCardExpirationDate { get; set; }
-    public bool CalculatedShippingAndTaxes { get; set; }
     public String SelectedCarrierId { get; set; }
     public String CarrierName { get; set; }
     public decimal TotalWeightInPounds { get; set; }
     public String ShipEngineShipmentId { get; set; }
+
+    public bool CalculatedShippingAndTaxes { get; set; }
     public bool CardDeclined { get; set; }
+    public bool ShippingAddressDeclined { get; set; }
 
     public CheckoutViewModel()
     {
       LineItem = new List<ShoppingCartLineItemViewModel>();
       CalculatedShippingAndTaxes = false;
+      ShippingAddressDeclined = false;
       CardDeclined = false;
     }
   }

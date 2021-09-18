@@ -24,25 +24,26 @@ else
       <div asp-validation-summary="ModelOnly" class="text-danger"></div>
       <div class="col-sm-4">
         <h4>Billing Address</h4>
+        <span class="text-danger" id="val-billing-address"></span>
         <div class="form-group">
           <label class="control-label">Name on Credit Card</label>
           <input asp-for="BillingName" class="form-control" id="billing-name" maxlength="100" />
-          <span asp-validation-for="BillingName" class="text-danger"></span>
+          <span asp-validation-for="BillingName" class="text-danger" id="val-billing-name"></span>
         </div>
         <div class="form-group">
           <label class="control-label">Address Line 1</label>
           <input asp-for="BillingAddress1" class="form-control" id="billing-address1" />
-          <span asp-validation-for="BillingAddress1" class="text-danger"></span>
+          <span asp-validation-for="BillingAddress1" class="text-danger" id="val-billing-address1"></span>
         </div>
         <div class="form-group">
           <label class="control-label">Address Line 2</label>
           <input asp-for="BillingAddress2" class="form-control" id="billing-address2" />
-          <span asp-validation-for="BillingAddress2" class="text-danger"></span>
+          <span asp-validation-for="BillingAddress2" class="text-danger" id="val-billing-address2"></span>
         </div>
         <div class="form-group">
           <label class="control-label">City</label>
           <input asp-for="BillingCity" class="form-control" id="billing-city" maxlength="100" />
-          <span asp-validation-for="BillingCity" class="text-danger"></span>
+          <span asp-validation-for="BillingCity" class="text-danger" id="val-billing-city"></span>
         </div>
         <div class="form-group">
           <label class="control-label">State</label>
@@ -55,11 +56,12 @@ else
         <div class="form-group">
           <label class="control-label">Postal Code</label>
           <input asp-for="BillingPostalCode" class="form-control" id='billing-postal-code' maxlength="10" />
-          <span asp-validation-for="BillingPostalCode" class="text-danger"></span>
+          <span asp-validation-for="BillingPostalCode" class="text-danger" id="val-billing-postal-code"></span>
         </div>
       </div>
       <div class="col-sm-4" style="padding-left: 10px; padding-right: 10px">
         <h4>Shipping Address, Same? <input asp-for="ShippingAddressSame" id="same-address" type="checkbox" /></h4>
+        <span class="text-danger" id="val-shipping-address"></span>
         <div class="form-group">
           <label class="control-label">Recipient's Name</label>
           <input asp-for="ShippingName" class="form-control" id="shipping-name" maxlength="100" />
@@ -176,6 +178,7 @@ else
   <input type="hidden" asp-for="ShippedOn" value="@Model.ShippedOn" />
   <input type="hidden" asp-for="ShipEngineShipmentId" value="@Model.ShipEngineShipmentId" />
   <input type="hidden" asp-for="CardDeclined" value="@Model.CardDeclined" id="card-declined" />
+  <input type="hidden" asp-for="ShippingAddressDeclined" value="@Model.ShippingAddressDeclined" id="shipping-address-declined" />
 </form>
 <script type="text/javascript">
   $(document).ready(function () {
@@ -189,6 +192,20 @@ else
     new $.fn.dataTable.Responsive(table, {
       details: true
     });
+
+    $('#val-billing-name').html('');
+    $('#val-billing-address1').html('');
+    $('#val-billing-city').html('');
+    $('#val-billing-postal-code').html('');
+
+    if ($('#shipping-address-declined').val() == 'True') {
+      if ($('#same-address').prop('checked')) {
+        $('#val-billing-address').html('The address provided does not exist in our database. Please correct it or enter a different address.');
+      }
+      else {
+        $('#val-shipping-address').html('The address provided does not exist in our database. Please correct it or enter a different address.');
+      }
+    }
 
     if ($('#card-declined').val() == 'True') {
       $('#val-credit-card-number').html('Credit card transaction declined.<br />Please try another credit card number.');
@@ -205,6 +222,7 @@ else
     document.addEventListener('submit', function (e) {
       switch ($(e.submitter).prop('id')) {
         case 'calculate-shipping-cost-button':
+          $('#shipping-address-declined').val(false);
           validateShippingAddress(e);
           break;
         case 'place-order-button':
@@ -220,6 +238,7 @@ else
             $('#same-address').attr('disabled', false);
             $('#same-address').attr('readonly', true);
             $('#card-declined').val(false);
+            $('#shipping-address-declined').val(false);
           }
         case 're-calculate-shipping-cost-button':
           $('#val-credit-card-number').html('');
@@ -227,6 +246,7 @@ else
           $('#val-credit-card-expiration').html('');
           $('#calculated-shipping').val(false);
           $('#card-declined').val(false);
+          $('#shipping-address-declined').val(false);
           break;
         default:
       }
