@@ -143,7 +143,7 @@ namespace XOSkinWebApp.Controllers
         .Replace("{postalCode}", checkout.ShippingPostalCode.Trim())
         .Replace("{locality}", checkout.ShippingCity.Trim())
         .Replace("{addressLine}", checkout.ShippingAddress1.Trim() + (checkout.ShippingAddress2 == null ? String.Empty : (" " + checkout.ShippingAddress2.Trim())))
-        .Replace("{includeNeighborhood}", "no")
+        .Replace("{includeNeighborhood}", "0")
         .Replace("{includeValue}", String.Empty)
         .Replace("{maxResults}", "1")
         .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
@@ -158,13 +158,13 @@ namespace XOSkinWebApp.Controllers
           JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
           JsonElement resourcePoint = resource.GetProperty("point");
           JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
-          checkout.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
           checkout.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
+          checkout.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
         }
       }
-      catch (Exception ex)
+      catch
       {
-        throw new Exception("An error was encountered while retrieving geolocation data.", ex);
+        // Address was not found. Fail silently and continue. Geolocation will not be displayed for this address.
       }
 
       checkout.GoogleMapsUrl = _option.Value.GoogleMapsUrl;

@@ -1179,7 +1179,7 @@ namespace XOSkinWebApp.Controllers
         .Replace("{addressLine}", Model.ShippingAddressSame ? Model.BillingAddress1.Trim() +
           (Model.BillingAddress2 == null ? String.Empty : (" " + Model.BillingAddress2.Trim())) :
           Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ? String.Empty : (" " + Model.ShippingAddress2.Trim())))
-        .Replace("{includeNeighborhood}", "no")
+        .Replace("{includeNeighborhood}", "0")
         .Replace("{includeValue}", String.Empty)
         .Replace("{maxResults}", "1")
         .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
@@ -1194,15 +1194,15 @@ namespace XOSkinWebApp.Controllers
           JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
           JsonElement resourcePoint = resource.GetProperty("point");
           JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
-          Model.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
           Model.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
+          Model.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
         }
       }
-      catch (Exception ex)
+      catch
       {
-        throw new Exception("An error was encountered while retrieving geolocation data.", ex);
+        // Address was not found. Fail silently and continue. Geolocation will not be displayed for this address.
       }
-      
+
       Model.GoogleMapsUrl = _option.Value.GoogleMapsUrl;
 
       ViewData.Add("OrderConfirmation.WelcomeText", _context.LocalizedTexts.Where(
