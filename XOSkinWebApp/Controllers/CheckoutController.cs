@@ -1162,32 +1162,6 @@ namespace XOSkinWebApp.Controllers
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
           });
 
-          geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
-           .Replace("{adminDistrict}", Model.ShippingState)
-           .Replace("{postalCode}", Model.ShippingPostalCode.Trim())
-           .Replace("{locality}", Model.ShippingCity.Trim())
-           .Replace("{addressLine}", Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ? String.Empty : (" " + Model.ShippingAddress2.Trim())))
-           .Replace("{includeNeighborhood}", "no")
-           .Replace("{includeValue}", String.Empty)
-           .Replace("{maxResults}", "1")
-           .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
-
-          geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
-          geoLocationJson = (geoLocationUrl).GetJsonFromUrl();
-
-          using (JsonDocument document = JsonDocument.Parse(geoLocationJson))
-          {
-            JsonElement root = document.RootElement;
-            JsonElement resourceSetElement = root.GetProperty("resourceSets");
-            JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
-            JsonElement resourcePoint = resource.GetProperty("point");
-            JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
-            Model.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
-            Model.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
-          }
-
-          Model.GoogleMapsUrl = _option.Value.GoogleMapsUrl;
-
           _context.SaveChanges();
         }
       }
@@ -1195,6 +1169,41 @@ namespace XOSkinWebApp.Controllers
       {
         throw new Exception("An error was encountered while saving the order's address(es.)", ex);
       }
+
+      try
+      {
+        geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
+        .Replace("{adminDistrict}", Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState)
+        .Replace("{postalCode}", Model.ShippingAddressSame ? Model.BillingPostalCode.Trim() : Model.ShippingPostalCode.Trim())
+        .Replace("{locality}", Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim())
+        .Replace("{addressLine}", Model.ShippingAddressSame ? Model.BillingAddress1.Trim() +
+          (Model.BillingAddress2 == null ? String.Empty : (" " + Model.BillingAddress2.Trim())) :
+          Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ? String.Empty : (" " + Model.ShippingAddress2.Trim())))
+        .Replace("{includeNeighborhood}", "no")
+        .Replace("{includeValue}", String.Empty)
+        .Replace("{maxResults}", "1")
+        .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
+
+        geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
+        geoLocationJson = (geoLocationUrl).GetJsonFromUrl();
+
+        using (JsonDocument document = JsonDocument.Parse(geoLocationJson))
+        {
+          JsonElement root = document.RootElement;
+          JsonElement resourceSetElement = root.GetProperty("resourceSets");
+          JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
+          JsonElement resourcePoint = resource.GetProperty("point");
+          JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
+          Model.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
+          Model.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
+        }
+      }
+      catch (Exception ex)
+      {
+        throw new Exception("An error was encountered while retrieving geolocation data.", ex);
+      }
+      
+      Model.GoogleMapsUrl = _option.Value.GoogleMapsUrl;
 
       ViewData.Add("OrderConfirmation.WelcomeText", _context.LocalizedTexts.Where(
        x => x.PlacementPointCode.Equals("OrderConfirmation.WelcomeText"))

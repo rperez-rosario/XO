@@ -135,7 +135,10 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while retrieving order details.", ex);
       }
 
-      geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
+      
+      try
+      {
+        geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
         .Replace("{adminDistrict}", checkout.ShippingState)
         .Replace("{postalCode}", checkout.ShippingPostalCode.Trim())
         .Replace("{locality}", checkout.ShippingCity.Trim())
@@ -145,18 +148,23 @@ namespace XOSkinWebApp.Controllers
         .Replace("{maxResults}", "1")
         .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
 
-      geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
-      geoLocationJson = (geoLocationUrl).GetJsonFromUrl();
+        geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
+        geoLocationJson = (geoLocationUrl).GetJsonFromUrl();
 
-      using (JsonDocument document = JsonDocument.Parse(geoLocationJson))
+        using (JsonDocument document = JsonDocument.Parse(geoLocationJson))
+        {
+          JsonElement root = document.RootElement;
+          JsonElement resourceSetElement = root.GetProperty("resourceSets");
+          JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
+          JsonElement resourcePoint = resource.GetProperty("point");
+          JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
+          checkout.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
+          checkout.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
+        }
+      }
+      catch (Exception ex)
       {
-        JsonElement root = document.RootElement;
-        JsonElement resourceSetElement = root.GetProperty("resourceSets");
-        JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
-        JsonElement resourcePoint = resource.GetProperty("point");
-        JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
-        checkout.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
-        checkout.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
+        throw new Exception("An error was encountered while retrieving geolocation data.", ex);
       }
 
       checkout.GoogleMapsUrl = _option.Value.GoogleMapsUrl;
