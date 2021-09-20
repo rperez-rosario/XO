@@ -80,7 +80,7 @@ namespace XOSkinWebApp.Controllers
       ViewData["Country"] = new SelectList(new List<String> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
 
-      checkoutViewModel.Taxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax API.
+      checkoutViewModel.Taxes = 0.0M;
       checkoutViewModel.CodeDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.CouponDiscount = 0.0M; // TODO: CALCULATE.
       checkoutViewModel.IsGift = false; // TODO: Map this.
@@ -506,7 +506,7 @@ namespace XOSkinWebApp.Controllers
           shippingCost = (decimal)Model.ShippingCharges;
           codeDiscount = 0.0M; // TODO: CALCULATE.
           couponDiscount = 0.0M; // TODO : CALCULATE.
-          applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM AvaTax.
+          applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM TaxJar.
 
           total = subTotal + shippingCost - codeDiscount - couponDiscount + applicableTaxes;
 
@@ -666,7 +666,7 @@ namespace XOSkinWebApp.Controllers
           }
           
 
-          // TODO: IMPORTANT GET TAXES FROM AvaTax.
+          // TODO: IMPORTANT GET TAXES FROM TaxJar.
           shOrder.ShippingLines = new List<ShippingLine>()
           {
             new ShippingLine()

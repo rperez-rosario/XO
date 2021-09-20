@@ -196,6 +196,10 @@
               "target": "Package",
               "version": "[39.67.0, )"
             },
+            "TaxJar": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
             "jQuery": {
               "target": "Package",
               "version": "[3.6.0, )"

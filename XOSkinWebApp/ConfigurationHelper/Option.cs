@@ -42,5 +42,6 @@ namespace XOSkinWebApp.ConfigurationHelper
 		public String BingMapsGeolocationUrl { get; set; }
 		public String GoogleMapsKey { get; set; }
 		public String GoogleMapsUrl { get; set; }
+		public String TaxJarApiKey { get; set; }
 	}
 }

@@ -1160,6 +1160,15 @@
           "lib/netstandard2.0/Newtonsoft.Json.dll": {}
         }
       },
+      "RestSharp/106.10.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/RestSharp.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/RestSharp.dll": {}
+        }
+      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
         "type": "package",
         "runtimeTargets": {
@@ -2966,6 +2975,19 @@
         },
         "runtime": {
           "lib/netstandard1.3/System.Xml.XmlSerializer.dll": {}
+        }
+      },
+      "TaxJar/3.3.1": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3",
+          "RestSharp": "[106.10.1, 107.0.0)"
+        },
+        "compile": {
+          "lib/netstandard2.0/TaxJar.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/TaxJar.dll": {}
         }
       },
       "AdaptiveProductRecommendationEngine/1.0.0": {
@@ -4935,6 +4957,21 @@
         "newtonsoft.json.12.0.3.nupkg.sha512",
         "newtonsoft.json.nuspec",
         "packageIcon.png"
+      ]
+    },
+    "RestSharp/106.10.1": {
+      "sha512": "MhR4w8LbArVaRA5T/oAR3ZnF852QXtDXRBO84GsvyYzsm7FsjXHJ+JaM8x/nR/B/OCB1WbolGH7hqMT1GZpNJw==",
+      "type": "package",
+      "path": "restsharp/106.10.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net452/RestSharp.dll",
+        "lib/net452/RestSharp.xml",
+        "lib/netstandard2.0/RestSharp.dll",
+        "lib/netstandard2.0/RestSharp.xml",
+        "restsharp.106.10.1.nupkg.sha512",
+        "restsharp.nuspec"
       ]
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
@@ -9699,6 +9736,19 @@
         "system.xml.xmlserializer.nuspec"
       ]
     },
+    "TaxJar/3.3.1": {
+      "sha512": "MVkKcOZ3h49NvKnYPCmyfFgbzKAzcwJtq2ICc5NBT7tQDfDeMnxA6hPIjml5DCN5a2jYnh8WpdhyJq/iRPy7mw==",
+      "type": "package",
+      "path": "taxjar/3.3.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net452/TaxJar.dll",
+        "lib/netstandard2.0/TaxJar.dll",
+        "taxjar.3.3.1.nupkg.sha512",
+        "taxjar.nuspec"
+      ]
+    },
     "AdaptiveProductRecommendationEngine/1.0.0": {
       "type": "project",
       "path": "../AdaptiveProductRecommendationEngine/AdaptiveProductRecommendationEngine.csproj",
@@ -9728,6 +9778,7 @@
       "ServiceStack.Text >= 5.12.0",
       "ShopifySharp >= 5.12.0",
       "Stripe.net >= 39.67.0",
+      "TaxJar >= 3.3.1",
       "jQuery >= 3.6.0"
     ]
   },
@@ -9862,6 +9913,10 @@
           "Stripe.net": {
             "target": "Package",
             "version": "[39.67.0, )"
+          },
+          "TaxJar": {
+            "target": "Package",
+            "version": "[3.3.1, )"
           },
           "jQuery": {
             "target": "Package",
