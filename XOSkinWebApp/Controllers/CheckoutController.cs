@@ -539,6 +539,12 @@ namespace XOSkinWebApp.Controllers
                 stCustomerCreateOptions.Description = "XO Skin Customer.";
                 stCustomerService = new Stripe.CustomerService();
                 stCustomer = stCustomerService.Create(stCustomerCreateOptions);
+
+                stCustomerCreateOptions = null;
+                Model.CreditCardNumber = null;
+                Model.CreditCardCVC = null;
+                Model.CreditCardExpirationDate = DateTime.MinValue;
+                
                 xoUser = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
                 xoUser.StripeCustomerId = stCustomer.Id;
                 _context.AspNetUsers.Update(xoUser);
@@ -577,11 +583,20 @@ namespace XOSkinWebApp.Controllers
               };
               stTokenService = new TokenService();
               stToken = stTokenService.Create(stTokenCreateOptions);
+              
+              stTokenCreateOptions = null;
+              Model.CreditCardNumber = null;
+              Model.CreditCardCVC = null;
+              Model.CreditCardExpirationDate = DateTime.MinValue;
+              
               stSourceCreateOptions = new SourceCreateOptions()
               {
                 Token = stToken.Id,
                 Type = SourceType.Card
               };
+
+              stToken = null;
+              
               stSourceService = new SourceService();
               stSource = await stSourceService.CreateAsync(stSourceCreateOptions);
               try
