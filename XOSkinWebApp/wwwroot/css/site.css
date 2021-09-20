@@ -7,7 +7,7 @@ a.navbar-brand {
   word-break: break-all;
 }
 
-/* Provide sufficient contrast against white background */
+/* Provide sufficient contrast against white background. */
 a {
   color: #0366d6;
 }
@@ -24,8 +24,7 @@ a {
   border-color: #1861ac;
 }
 
-/* Sticky footer styles
--------------------------------------------------- */
+/* Sticky footer styles. */
 html {
   font-size: 14px;
 }
@@ -51,15 +50,13 @@ button.accept-policy {
   line-height: inherit;
 }
 
-/* Sticky footer styles
--------------------------------------------------- */
+/* Sticky footer styles. */
 html {
   position: relative;
   min-height: 100%;
 }
 
 body {
-  /* Margin bottom by footer height */
   margin-bottom: 60px;
 }
 .footer {
@@ -67,13 +64,12 @@ body {
   bottom: 0;
   width: 100%;
   white-space: nowrap;
-  line-height: 22px; /* Vertically center the text there */
+  line-height: 22px;
   margin-bottom: 5px;
 }
 
 
 /* XO Skin Modifications */
-
 .nav-link {
   font-size: 14px;
 }
@@ -141,7 +137,6 @@ div.alert.alert-success.alert-dismissible {
 }
 
 /* Account Management */
-
 #profile.nav-link.active {
   color: #fff;
   background: #212529;
@@ -198,7 +193,6 @@ div.alert.alert-success.alert-dismissible {
 */
 
 /* Image Zoom */
-
 * {
   box-sizing: border-box;
 }
@@ -210,14 +204,12 @@ div.alert.alert-success.alert-dismissible {
 .img-zoom-lens {
   position: absolute;
   border: 1px solid #000;
-  /*set the size of the lens:*/
   width: 40px;
   height: 40px;
 }
 
 .img-zoom-result {
   border: 1px solid #d4d4d4;
-  /*set the size of the result div:*/
   width: 180px;
 }
 

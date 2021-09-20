@@ -5,17 +5,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using ShopifySharp;
-using XOSkinWebApp.ConfigurationHelper;
-using XOSkinWebApp.Models;
-using XOSkinWebApp.ORM;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using ServiceStack;
 using System.Text.Json;
 using System.IO;
 using System.Text;
-using Stripe;
 using System.Web;
+using ShopifySharp;
+using Stripe;
+using Taxjar;
+using ServiceStack;
+using XOSkinWebApp.ConfigurationHelper;
+using XOSkinWebApp.Models;
+using XOSkinWebApp.ORM;
+
 
 namespace XOSkinWebApp.Controllers
 {
@@ -158,12 +160,19 @@ namespace XOSkinWebApp.Controllers
         x => x.ShoppingCart == _context.ShoppingCarts.Where(x => x.User.Equals(_context.AspNetUsers.Where(
         x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
         .Select(x => x.Id).FirstOrDefault()).ToList();
+      object[] tjLineItem = null;
       decimal totalOrderShippingWeightInPounds = 0.0M;
+      TaxjarApi tjService = null;
+      TaxResponseAttributes tjTaxRate = null;
+      int i = 0;
+      
       ViewData["Country"] = new SelectList(new List<String> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
-
+      
       Model.SubTotal = 0.0M;
       totalOrderShippingWeightInPounds = 0.0M;
+
+      tjLineItem = new object[lineItem.Count];
 
       foreach (ShoppingCartLineItem li in lineItem)
       {
@@ -191,6 +200,17 @@ namespace XOSkinWebApp.Controllers
           x => x.Amount).FirstOrDefault() * li.Quantity;
         totalOrderShippingWeightInPounds += (decimal)(_context.Products.Where(
           x => x.Id == li.Product).Select(x => x.ShippingWeightLb).FirstOrDefault() * li.Quantity);
+
+        tjLineItem[i] = new
+        {
+          id = _context.ShoppingCartLineItems.Where(x => x.Product == li.Product).Select(x => x.Id).FirstOrDefault().ToString(),
+          quantity = li.Quantity,
+          product_tax_code = _option.Value.TaxJarSkinCareProductTaxCode,
+          unit_price = _context.Prices.Where(
+            x => x.Id == _context.Products.Where(
+            x => x.Id == li.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault(),
+          discount = 0
+        };
       }
 
       Model.LineItem = lineItemViewModel;
@@ -299,6 +319,38 @@ namespace XOSkinWebApp.Controllers
               }
             }
           }
+
+          tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
+          tjTaxRate = tjService.TaxForOrder(new {
+            amount = (decimal)Model.SubTotal,
+            from_city = _option.Value.ShipFromCity,
+            from_country = _option.Value.ShipFromCountryCode,
+            from_state = _option.Value.ShipFromState,
+            from_street = _option.Value.ShipFromAddressLine1,
+            from_zip = _option.Value.ShipFromPostalCode,
+            line_items = tjLineItem,
+            shipping = (decimal)Model.ShippingCharges,
+            to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
+            to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+            to_state = Model.ShippingAddressSame ? Model.BillingState : Model.BillingState,
+            to_street = Model.ShippingAddressSame ?
+              Model.BillingAddress1.Trim() + Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim() :
+              Model.ShippingAddress1.Trim() + Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim(),
+            to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+            nexus_addresses = new []
+            {
+              new
+              {
+                id = _option.Value.ShipFromName,
+                country = _option.Value.ShipFromCountryCode,
+                zip = _option.Value.ShipFromPostalCode,
+                state = _option.Value.ShipFromState,
+                city = _option.Value.ShipFromCity,
+                street = _option.Value.ShipFromAddressLine1
+              }
+            } 
+          });
+          Model.Taxes = tjTaxRate.Rate;
         }
         catch
         {
@@ -364,7 +416,14 @@ namespace XOSkinWebApp.Controllers
       Stripe.Charge stCharge = null;
       String geoLocationUrl = null;
       String geoLocationJson = null;
-      
+      TaxjarApi tjService = null;
+      TaxResponseAttributes tjTaxRate = null;
+      OrderResponseAttributes tjOrder = null;
+      object[] tjLineItem = null;
+      List<ShoppingCartLineItem> lineItem = null;
+      int i = 0;
+
+
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -421,14 +480,19 @@ namespace XOSkinWebApp.Controllers
         order = _context.ProductOrders.Where(x => x.Id == Model.OrderId).FirstOrDefault();
       }
 
+      lineItem = _context.ShoppingCartLineItems.Where(
+          x => x.ShoppingCart == _context.ShoppingCarts.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Select(
+            x => x.Id).FirstOrDefault()).ToList();
+
+      tjLineItem = new object[lineItem.Count];
+
       try
       {
         shLineItemList = new List<ShopifySharp.LineItem>();
 
-        foreach (ShoppingCartLineItem cli in _context.ShoppingCartLineItems.Where(
-          x => x.ShoppingCart == _context.ShoppingCarts.Where(
-          x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Select(x => x.Id).FirstOrDefault()).ToList())
+        foreach (ShoppingCartLineItem cli in lineItem)
         {
           subTotal += _context.Prices.Where(
             x => x.Id == _context.Products.Where(
@@ -444,6 +508,16 @@ namespace XOSkinWebApp.Controllers
             Taxable = true,
             RequiresShipping = true
           });
+
+          tjLineItem[i] = new
+          {
+            quantity = cli.Quantity,
+            product_identifier = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.Id).FirstOrDefault().ToString(),
+            description = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.Name).FirstOrDefault(),
+            unit_price = _context.Prices.Where(
+              x => x.Id == _context.Products.Where(
+              x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault()
+          };
         }
 
         try
@@ -500,19 +574,79 @@ namespace XOSkinWebApp.Controllers
             }
           }
 
+          try
+          {
+            tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
+
+            tjTaxRate = tjService.TaxForOrder(new
+            {
+              amount = (decimal)Model.SubTotal,
+              from_city = _option.Value.ShipFromCity,
+              from_country = _option.Value.ShipFromCountryCode,
+              from_state = _option.Value.ShipFromState,
+              from_street = _option.Value.ShipFromAddressLine1,
+              from_zip = _option.Value.ShipFromPostalCode,
+              line_items = tjLineItem,
+              shipping = (decimal)Model.ShippingCharges,
+              to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
+              to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+              to_state = Model.ShippingAddressSame ? Model.BillingState : Model.BillingState,
+              to_street = Model.ShippingAddressSame ?
+                Model.BillingAddress1.Trim() + Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim() :
+                Model.ShippingAddress1.Trim() + Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim(),
+              to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+              nexus_addresses = new[]
+              {
+                new
+                {
+                  id = _option.Value.ShipFromName,
+                  country = _option.Value.ShipFromCountryCode,
+                  zip = _option.Value.ShipFromPostalCode,
+                  state = _option.Value.ShipFromState,
+                  city = _option.Value.ShipFromCity,
+                  street = _option.Value.ShipFromAddressLine1
+                }
+              }
+            });
+
+            tjOrder = tjService.CreateOrder(new 
+            {
+              transaction_id = Model.OrderId.ToString(),
+              transaction_date = DateTime.UtcNow.ToString(),
+              to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+              to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+              to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+              to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
+              to_street = Model.ShippingAddressSame ?
+                Model.BillingAddress1.Trim() + Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2 :
+                Model.ShippingAddress1.Trim() + Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2,
+              amount = (decimal)Model.SubTotal,
+              lineItems = tjLineItem,
+              sales_tax = tjTaxRate.AmountToCollect,
+              shipping = (decimal)Model.ShippingCharges
+
+            });
+          }
+          catch (Exception ex)
+          {
+            throw new Exception("An error was encountered while calculating taxes for this order.", ex);
+          }
+
+          applicableTaxes = tjOrder.SalesTax;
+
           Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrierName;
           Model.BilledOn = DateTime.UtcNow;
 
           shippingCost = (decimal)Model.ShippingCharges;
           codeDiscount = 0.0M; // TODO: CALCULATE.
           couponDiscount = 0.0M; // TODO : CALCULATE.
-          applicableTaxes = 0.0M; // TODO: IMPORTANT, GET FROM TaxJar.
+          
+          Model.Taxes = applicableTaxes;
 
           total = subTotal + shippingCost - codeDiscount - couponDiscount + applicableTaxes;
 
           try
           {
-            // Credit card processing.
             Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
 
             if (_context.AspNetUsers.Where(
@@ -664,9 +798,7 @@ namespace XOSkinWebApp.Controllers
             Model.CalculatedShippingAndTaxes = true;
             return RedirectToAction("CalculateShippingCostAndTaxes", Model);
           }
-          
 
-          // TODO: IMPORTANT GET TAXES FROM TaxJar.
           shOrder.ShippingLines = new List<ShippingLine>()
           {
             new ShippingLine()
@@ -688,6 +820,42 @@ namespace XOSkinWebApp.Controllers
               Code = _option.Value.ShopifyShippingLineCode,
               Source = _option.Value.ShopifyShippingLineSource,
               Price = (decimal)Model.ShippingCharges
+            }
+          };
+          shOrder.EstimatedTaxes = false;
+          shOrder.TotalTax = applicableTaxes;
+          shOrder.TotalTaxSet = new PriceSet()
+          {
+            PresentmentMoney = new ShopifySharp.Price()
+            {
+              Amount = applicableTaxes,
+              CurrencyCode = "usd"
+            },
+            ShopMoney = new ShopifySharp.Price()
+            {
+              Amount = applicableTaxes,
+              CurrencyCode = "usd"
+            }
+          };
+          shOrder.TaxLines = new List<TaxLine>()
+          {
+            new TaxLine()
+            {
+              Price = applicableTaxes,
+              PriceSet = new PriceSet()
+              {
+                PresentmentMoney = new ShopifySharp.Price()
+                {
+                  Amount = applicableTaxes,
+                  CurrencyCode = "usd"
+                },
+                ShopMoney = new ShopifySharp.Price()
+                {
+                  Amount = applicableTaxes,
+                  CurrencyCode = "usd"
+                }
+              },
+              Title = "Tax calculation performed by Taxjar."
             }
           };
           shOrder.Name = "#XO" + (order.Id + 10000).ToString();
@@ -1189,9 +1357,8 @@ namespace XOSkinWebApp.Controllers
         .Replace("{adminDistrict}", Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState)
         .Replace("{postalCode}", Model.ShippingAddressSame ? Model.BillingPostalCode.Trim() : Model.ShippingPostalCode.Trim())
         .Replace("{locality}", Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim())
-        .Replace("{addressLine}", Model.ShippingAddressSame ? Model.BillingAddress1.Trim() +
-          (Model.BillingAddress2 == null ? String.Empty : (" " + Model.BillingAddress2.Trim())) :
-          Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ? String.Empty : (" " + Model.ShippingAddress2.Trim())))
+        .Replace("{addressLine}", Model.ShippingAddressSame ? Model.BillingAddress1.Trim() + Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim() :
+          Model.ShippingAddress1.Trim() + Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())
         .Replace("{includeNeighborhood}", "0")
         .Replace("{includeValue}", String.Empty)
         .Replace("{maxResults}", "1")

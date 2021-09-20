@@ -128,13 +128,10 @@ else
         <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
         <br />
         <div style="text-align: right; margin-right: 14px">
-          <div>
-            <input id="calculate-taxes-and-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") value="Calculate Taxes & Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShippingAndTaxes)" />
-            <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Address" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
-            <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)">
-            &nbsp;
-            <span class="spinner spinner-border spinner-border-sm" id="spinner" role="status" hidden"></span>
-          </div>         
+          <input id="calculate-shipping-cost-and-taxes-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") value="Calculate Shipping Cost & Taxes" class="btn-outline-dark btn" hidden="@(Model.CalculatedShippingAndTaxes)" />
+          <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Address" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
+          <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)">
+          &nbsp;<span class="spinner spinner-border spinner-border-sm" id="spinner" role="status" hidden"></span>
         </div>
       </div>
     </div>
@@ -239,10 +236,10 @@ else
 
     document.addEventListener('submit', function (e) {
       switch ($(e.submitter).prop('id')) {
-        case 'calculate-taxes-and-shipping-cost-button':
+        case 'calculate-shipping-cost-and-taxes-button':
           if (validateShippingAddress(e) == true) {
             $('body').addClass('calculating-shipping');
-            $('calculate-taxes-and-shipping-cost-button').attr('disabled', true);
+            $('calculate-shipping-cost-and-taxes-button').attr('disabled', true);
             $('#shipping-address-declined').val(false);
           } else {
             e.preventDefault();
@@ -288,6 +285,39 @@ else
     $('#same-address').change(function () {
       shippingAddressSame();
     });
+
+    function shippingAddressSame() {
+      if ($('#same-address').prop('checked')) {
+        $('#shipping-name').val('');
+        $('#shipping-address1').val('');
+        $('#shipping-address2').val('');
+        $('#shipping-city').val('');
+        $('#shipping-state').val('');
+        $('#shipping-country').val('');
+        $('#shipping-postal-code').val('');
+        $('#shipping-name').attr('readonly', true);
+        $('#shipping-address1').attr('readonly', true);
+        $('#shipping-address2').attr('readonly', true);
+        $('#shipping-city').attr('readonly', true);
+        $('#shipping-state').attr('disabled', true);
+        $('#shipping-country').attr('disabled', true);
+        $('#shipping-postal-code').attr('readonly', true);
+        $('#val-shipping-name').html('');
+        $('#val-shipping-address1').html('');
+        $('#val-shipping-city').html('');
+        $('#val-shipping-state').val(0);
+        $('#val-shipping-country').val(0);
+        $('#val-shipping-postal-code').html('');
+      } else {
+        $('#shipping-name').attr('readonly', false);
+        $('#shipping-address1').attr('readonly', false);
+        $('#shipping-address2').attr('readonly', false);
+        $('#shipping-city').attr('readonly', false);
+        $('#shipping-state').attr('disabled', false);
+        $('#shipping-country').attr('disabled', false);
+        $('#shipping-postal-code').attr('readonly', false);
+      }
+    }
 
     function validateShippingAddress(e) {
       if (!$('#same-address').prop('checked')) {
@@ -412,39 +442,6 @@ else
         shippingPostalCodeFilled();
       }
     });
-
-    function shippingAddressSame() {
-      if ($('#same-address').prop('checked')) {
-        $('#shipping-name').val('');
-        $('#shipping-address1').val('');
-        $('#shipping-address2').val('');
-        $('#shipping-city').val('');
-        $('#shipping-state').val('');
-        $('#shipping-country').val('');
-        $('#shipping-postal-code').val('');
-        $('#shipping-name').attr('readonly', true);
-        $('#shipping-address1').attr('readonly', true);
-        $('#shipping-address2').attr('readonly', true);
-        $('#shipping-city').attr('readonly', true);
-        $('#shipping-state').attr('disabled', true);
-        $('#shipping-country').attr('disabled', true);
-        $('#shipping-postal-code').attr('readonly', true);
-        $('#val-shipping-name').html('');
-        $('#val-shipping-address1').html('');
-        $('#val-shipping-city').html('');
-        $('#val-shipping-state').val(0);
-        $('#val-shipping-country').val(0);
-        $('#val-shipping-postal-code').html('');
-      } else {
-        $('#shipping-name').attr('readonly', false);
-        $('#shipping-address1').attr('readonly', false);
-        $('#shipping-address2').attr('readonly', false);
-        $('#shipping-city').attr('readonly', false);
-        $('#shipping-state').attr('disabled', false);
-        $('#shipping-country').attr('disabled', false);
-        $('#shipping-postal-code').attr('readonly', false);
-      }
-    }
 
     $('#billing-postal-code').inputmask("99999[-9999]", { greedy: false });
     $('#shipping-postal-code').inputmask("99999[-9999]", { greedy: false });
