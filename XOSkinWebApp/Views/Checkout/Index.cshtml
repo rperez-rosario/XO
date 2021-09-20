@@ -18,7 +18,7 @@
 else
 {
 <br />
-<form asp-action="PlaceOrder" id="PlaceOrder">
+<form asp-action="PlaceOrder" id="PlaceOrder" aria-hidden="true">
   <div class="container-fluid">
     <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
       <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -127,10 +127,14 @@ else
         <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Coupon Discount:</span> -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
         <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
         <br />
-        <div style="text-align: right; margin-right: 40px">
-          <input id="calculate-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") value="Calculate Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShippingAndTaxes)" />
-          <input id="re-calculate-shipping-cost-button" type="submit" formaction=@Url.Action("Index") value="Change Address" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
-          <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
+        <div style="text-align: right; margin-right: 14px">
+          <div>
+            <input id="calculate-taxes-and-shipping-cost-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") value="Calculate Taxes & Shipping Cost" class="btn-outline-dark btn" hidden="@(Model.CalculatedShippingAndTaxes)" />
+            <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Address" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
+            <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)">
+            &nbsp;
+            <span class="spinner spinner-border spinner-border-sm" id="spinner" role="status" hidden"></span>
+          </div>         
         </div>
       </div>
     </div>
@@ -148,19 +152,19 @@ else
     </thead>
     <tbody>
       @foreach (ShoppingCartLineItemViewModel lineItem in Model.LineItem)
-        {
-          <tr>
-            <td><img src="@lineItem.ImageSource" style="height: 100px; display: inline; float: left" /></td>
-            <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
-            <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
-            <td style="width: 170px">
-              <div style="display: inline; float: left">
-                @lineItem.Quantity
-              </div>
-            </td>
-            <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
-          </tr>
-        }
+      {
+        <tr>
+          <td><img src="@lineItem.ImageSource" style="height: 100px; display: inline; float: left" /></td>
+          <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
+          <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
+          <td style="width: 170px">
+            <div style="display: inline; float: left">
+              @lineItem.Quantity
+            </div>
+          </td>
+          <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
+        </tr>
+      }
     </tbody>
   </table>
   <input type="hidden" asp-for="OrderId" value="@Model.OrderId" />
@@ -193,11 +197,6 @@ else
       details: true
     });
 
-    $('#val-billing-name').html('');
-    $('#val-billing-address1').html('');
-    $('#val-billing-city').html('');
-    $('#val-billing-postal-code').html('');
-
     if ($('#shipping-address-declined').val() == 'True') {
       if ($('#same-address').prop('checked')) {
         $('#val-billing-address').html('The address provided does not exist in our database. Please correct it or enter a different address.');
@@ -210,47 +209,6 @@ else
     if ($('#card-declined').val() == 'True') {
       $('#val-credit-card-number').html('Credit card transaction declined.<br />Please try another credit card number.');
     }
-
-    if ($('#same-address').prop('checked')) {
-      shippingAddressSame();
-    }
-
-    $('#same-address').change(function () {
-      shippingAddressSame();
-    });
-
-    document.addEventListener('submit', function (e) {
-      switch ($(e.submitter).prop('id')) {
-        case 'calculate-shipping-cost-button':
-          $('#shipping-address-declined').val(false);
-          validateShippingAddress(e);
-          break;
-        case 'place-order-button':
-          if (validateShippingAddress(e) == true && validateCreditCardInformation(e) == true) {
-            $('#shipping-state').attr('disabled', false);
-            $('#shipping-state').attr('readonly', true);
-            $('#shipping-country').attr('disabled', false);
-            $('#shipping-country').attr('readonly', true);
-            $('#billing-state').attr('disabled', false);
-            $('#billing-state').attr('readonly', true);
-            $('#billing-country').attr('disabled', false);
-            $('#billing-country').attr('readonly', true);
-            $('#same-address').attr('disabled', false);
-            $('#same-address').attr('readonly', true);
-            $('#card-declined').val(false);
-            $('#shipping-address-declined').val(false);
-          }
-        case 're-calculate-shipping-cost-button':
-          $('#val-credit-card-number').html('');
-          $('#val-credit-card-cvc').html('');
-          $('#val-credit-card-expiration').html('');
-          $('#calculated-shipping').val(false);
-          $('#card-declined').val(false);
-          $('#shipping-address-declined').val(false);
-          break;
-        default:
-      }
-    });
 
     if ($('#calculated-shipping').val() == 'True') {
       $('#billing-name').attr('readonly', true);
@@ -270,36 +228,91 @@ else
       $('#same-address').attr('disabled', true);
     }
 
+    $('#val-billing-name').html('');
+    $('#val-billing-address1').html('');
+    $('#val-billing-city').html('');
+    $('#val-billing-postal-code').html('');
+
+    if ($('#same-address').prop('checked')) {
+      shippingAddressSame();
+    }
+
+    document.addEventListener('submit', function (e) {
+      switch ($(e.submitter).prop('id')) {
+        case 'calculate-taxes-and-shipping-cost-button':
+          if (validateShippingAddress(e) == true) {
+            $('body').addClass('calculating-shipping');
+            $('calculate-taxes-and-shipping-cost-button').attr('disabled', true);
+            $('#shipping-address-declined').val(false);
+          } else {
+            e.preventDefault();
+          }
+          break;
+        case 'change-address-button':
+          $('body').addClass('changing-address');
+          $('#change-address-button').attr('disabled', true);
+          $('#val-credit-card-number').html('');
+          $('#val-credit-card-cvc').html('');
+          $('#val-credit-card-expiration').html('');
+          $('#calculated-shipping').val(false);
+          $('#card-declined').val(false);
+          $('#shipping-address-declined').val(false);
+          break;
+        case 'place-order-button':
+          if (validateShippingAddress(e) == true && validateCreditCardInformation(e) == true) {
+            $('body').addClass('placing-order');
+            $('#place-order-button').attr('disabled', true);
+            $('#change-address-button').attr('disabled', true);
+            $('#shipping-state').attr('disabled', false);
+            $('#shipping-state').attr('readonly', true);
+            $('#shipping-country').attr('disabled', false);
+            $('#shipping-country').attr('readonly', true);
+            $('#billing-state').attr('disabled', false);
+            $('#billing-state').attr('readonly', true);
+            $('#billing-country').attr('disabled', false);
+            $('#billing-country').attr('readonly', true);
+            $('#same-address').attr('disabled', false);
+            $('#same-address').attr('readonly', true);
+            $('#card-declined').val(false);
+            $('#shipping-address-declined').val(false);
+            $('#credit-card-number').attr('readonly', true);
+            $('#credit-card-cvc').attr('readonly', true);
+            $('#credit-card-expiration-date').attr('readonly', true);
+          } else {
+            e.preventDefault();
+          }
+        default:
+      }
+    });
+
+    $('#same-address').change(function () {
+      shippingAddressSame();
+    });
+
     function validateShippingAddress(e) {
       if (!$('#same-address').prop('checked')) {
         if ($('#shipping-name').val().trim() == '') {
           $('#val-shipping-name').html("Recipient's name required.");
-          e.preventDefault();
           return false;
         }
         if ($('#shipping-address1').val().trim() == '') {
           $('#val-shipping-address1').html('Shipping address line 1 required.');
-          e.preventDefault();
           return false;
         }
         if ($('#shipping-city').val().trim() == '') {
           $('#val-shipping-city').html('Shipping city name required.');
-          e.preventDefault();
           return false;
         }
         if ($('#shipping-state').val() == 0) {
           $('#val-shipping-state').html('Shipping state required.');
-          e.preventDefault();
           return false;
         }
         if ($('#shipping-country').val() == 0) {
           $('#val-shipping-country').html('Shipping oountry required.');
-          e.preventDefault();
           return false;
         }
         if ($('#shipping-postal-code').val().trim() == '') {
           $('#val-shipping-postal-code').html('Shipping postal code required.');
-          e.preventDefault();
           return false;
         }
       }
@@ -307,17 +320,65 @@ else
     }
 
     function validateCreditCardInformation(e) {
-      if ($('#credit-card-number').val().trim() == '') {
-        $('#val-credit-card-number').html('Credit card number required.');
-        e.preventDefault();
+      if (creditCardNumberFilled() == false) {
         return false;
       }
-      if ($('#credit-card-cvc').val().trim() == '') {
-        $('#val-credit-card-cvc').html('Credit card CVC required.');
-        e.preventDefault();
+      if (creditCardCVCFilled() == false) {
         return false;
       }
       return true;
+    }
+
+    function creditCardNumberFilled() {
+      if ($('#credit-card-number').val().trim() != '') {
+        $('#val-credit-card-number').html('');
+        return true;
+      } else {
+        $('#val-credit-card-number').html('Credit card number is required.');
+        return false;
+      }
+    }
+
+    function creditCardCVCFilled() {
+      if ($('#credit-card-cvc').val().trim() != '') {
+        $('#val-credit-card-cvc').html('');
+        return true;
+      } else {
+        $('#val-credit-card-cvc').html('Credit card CVC is required.');
+        return false;
+      }
+    }
+
+    function shippingNameFilled() {
+      if ($('#shipping-name').val().trim() != '') {
+        $('#val-shipping-name').html('');
+      } else {
+        $('#val-shipping-name').html("Recipient's name required.");
+      }
+    }
+
+    function shippingAddress1Filled() {
+      if ($('#shipping-address1').val().trim() != '') {
+        $('#val-shipping-address1').html('');
+      } else {
+        $('#val-shipping-address1').html('Shipping address line 1 required.');
+      }
+    }
+
+    function shippingCityFilled() {
+      if ($('#shipping-city').val().trim() != '') {
+        $('#val-shipping-city').html('');
+      } else {
+        $('#val-shipping-city').html('Shipping city name required.');
+      }
+    }
+
+    function shippingPostalCodeFilled() {
+      if ($('#shipping-postal-code').val().trim() != '') {
+        $('#val-shipping-postal-code').html('');
+      } else {
+        $('#val-shipping-postal-code').html('Shipping postal code required.');
+      }
     }
 
     $('#credit-card-number').keyup(function () {
@@ -351,54 +412,6 @@ else
         shippingPostalCodeFilled();
       }
     });
-
-    function creditCardNumberFilled() {
-      if ($('#credit-card-number').val().trim() != '') {
-        $('#val-credit-card-number').html('');
-      } else {
-        $('#val-credit-card-number').html('Credit card number is required.');
-      }
-    }
-
-    function creditCardCVCFilled() {
-      if ($('#credit-card-cvc').val().trim() != '') {
-        $('#val-credit-card-cvc').html('');
-      } else {
-        $('#val-credit-card-cvc').html('Credit card CVC is required.');
-      }
-    }
-
-    function shippingNameFilled() {
-      if ($('#shipping-name').val().trim() != '') {
-        $('#val-shipping-name').html('');
-      } else {
-        $('#val-shipping-name').html("Recipient's name required.");
-      }
-    }
-
-    function shippingAddress1Filled() {
-      if ($('#shipping-address1').val().trim() != '') {
-        $('#val-shipping-address1').html('');
-      } else {
-        $('#val-shipping-address1').html('Shipping address line 1 required.');
-      }
-    }
-
-    function shippingCityFilled() {
-      if ($('#shipping-city').val().trim() != '') {
-        $('#val-shipping-city').html('');
-      } else {
-        $('#val-shipping-city').html('Shipping city name required.');
-      }
-    }
-
-    function shippingPostalCodeFilled() {
-      if ($('#shipping-postal-code').val().trim() != '') {
-        $('#val-shipping-postal-code').html('');
-      } else {
-        $('#val-shipping-postal-code').html('Shipping country name required.');
-      }
-    }
 
     function shippingAddressSame() {
       if ($('#same-address').prop('checked')) {

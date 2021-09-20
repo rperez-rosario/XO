@@ -144,6 +144,8 @@ namespace XOSkinWebApp.Controllers
       if (Model != null && Model.ShippingAddressDeclined)
         checkoutViewModel.ShippingAddressDeclined = true;
 
+      checkoutViewModel.ShippingAddressSame = Model == null ? checkoutViewModel.ShippingAddressSame : Model.ShippingAddressSame;
+
       return View(checkoutViewModel);
     }
 
@@ -215,7 +217,7 @@ namespace XOSkinWebApp.Controllers
           writer.WriteStartObject("rate_options");
           writer.WriteStartArray("carrier_ids");
           writer.WriteStringValue(Model.ShippingCarrier);
-          writer.WriteEndArray();
+          writer.WriteEndArray(); // carrier_ids.
           writer.WriteEndObject(); // rate_options.
           writer.WriteStartObject("shipment");
           writer.WritePropertyName("validate_address");
@@ -225,7 +227,7 @@ namespace XOSkinWebApp.Controllers
           writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName);
           writer.WritePropertyName("phone");
           writer.WriteStringValue(_context.AspNetUsers.Where(
-              x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault());
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault());
           writer.WritePropertyName("address_line1");
           writer.WriteStringValue(Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1);
           writer.WritePropertyName("address_line2");
@@ -267,7 +269,7 @@ namespace XOSkinWebApp.Controllers
           writer.WriteEndObject(); // weight.
           writer.WriteEndObject(); // packages.
           writer.WriteEndArray(); // packages.
-          writer.WriteEndObject();  // shipment.
+          writer.WriteEndObject(); // shipment.
           writer.WriteEndObject(); // root.
 
           writer.Flush();

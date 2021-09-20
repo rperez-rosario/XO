@@ -237,3 +237,20 @@ div.alert.alert-success.alert-dismissible {
   height: 241px;
   width: 300px;
 }
+
+/* Bootstrap Spinner */
+#spinner {
+  visibility: hidden;
+}
+
+body.placing-order .spinner {
+  visibility: visible !important;
+}
+
+body.calculating-shipping .spinner {
+  visibility: visible !important;
+}
+
+body.changing-address .spinner {
+  visibility: visible !important;
+}
