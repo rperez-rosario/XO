@@ -254,6 +254,8 @@ else
           $('#calculated-shipping').val(false);
           $('#card-declined').val(false);
           $('#shipping-address-declined').val(false);
+          $('#same-address').attr('disabled', false);
+          $('#same-address').attr('readonly', true);
           break;
         case 'place-order-button':
           if (validateShippingAddress(e) == true && validateCreditCardInformation(e) == true) {

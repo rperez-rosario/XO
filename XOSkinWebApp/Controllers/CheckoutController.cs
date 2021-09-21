@@ -94,57 +94,81 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.Total = checkoutViewModel.SubTotal + checkoutViewModel.Taxes + checkoutViewModel.ShippingCharges -
         checkoutViewModel.CodeDiscount - checkoutViewModel.CouponDiscount;
 
-      if (_context.Addresses.Where(
-        x => x.User.Equals(_context.AspNetUsers.Where(
-        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Count() == 2)
-      {
-        billingAddress = _context.Addresses.Where(
-          x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-          x => x.AddressType == 1).FirstOrDefault();
-
-        checkoutViewModel.BillingName = billingAddress.Name;
-        checkoutViewModel.BillingAddress1 = billingAddress.Line1;
-        checkoutViewModel.BillingAddress2 = billingAddress.Line2;
-        checkoutViewModel.BillingCity = billingAddress.CityName;
-        checkoutViewModel.BillingState = billingAddress.StateName;
-        checkoutViewModel.BillingCountry = billingAddress.CountryName;
-        checkoutViewModel.BillingPostalCode = billingAddress.PostalCode;
-
-        shippingAddress = _context.Addresses.Where(
-          x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-          x => x.AddressType == 2).FirstOrDefault();
-
-        if (!ShippingAddressSame(billingAddress, shippingAddress))
-        {
-          checkoutViewModel.ShippingName = shippingAddress.Name;
-          checkoutViewModel.ShippingAddress1 = shippingAddress.Line1;
-          checkoutViewModel.ShippingAddress2 = shippingAddress.Line2;
-          checkoutViewModel.ShippingCity = shippingAddress.CityName;
-          checkoutViewModel.ShippingState = shippingAddress.StateName;
-          checkoutViewModel.ShippingCountry = shippingAddress.CountryName;
-          checkoutViewModel.ShippingPostalCode = shippingAddress.PostalCode;
-        }
-        else
-        {
-          checkoutViewModel.ShippingAddressSame = true;
-          checkoutViewModel.ShippingName = billingAddress.Name;
-          checkoutViewModel.ShippingAddress1 = billingAddress.Line1;
-          checkoutViewModel.ShippingAddress2 = billingAddress.Line2;
-          checkoutViewModel.ShippingCity = billingAddress.CityName;
-          checkoutViewModel.ShippingState = billingAddress.StateName;
-          checkoutViewModel.ShippingCountry = billingAddress.CountryName;
-          checkoutViewModel.ShippingPostalCode = billingAddress.PostalCode;
-        }
-      }
-
       ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
        x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))
        .Select(x => x.Text).FirstOrDefault());
 
-      if (Model != null && Model.ShippingAddressDeclined)
-        checkoutViewModel.ShippingAddressDeclined = true;
+      if (Model == null || (Model.BillingName == null || Model.BillingName.Trim().Length == 0))
+      {
+        if (_context.Addresses.Where(
+        x => x.User.Equals(_context.AspNetUsers.Where(
+        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Count() == 2)
+        {
+          billingAddress = _context.Addresses.Where(
+            x => x.User.Equals(_context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+            x => x.AddressType == 1).FirstOrDefault();
+
+          checkoutViewModel.BillingName = billingAddress.Name;
+          checkoutViewModel.BillingAddress1 = billingAddress.Line1;
+          checkoutViewModel.BillingAddress2 = billingAddress.Line2;
+          checkoutViewModel.BillingCity = billingAddress.CityName;
+          checkoutViewModel.BillingState = billingAddress.StateName;
+          checkoutViewModel.BillingCountry = billingAddress.CountryName;
+          checkoutViewModel.BillingPostalCode = billingAddress.PostalCode;
+
+          shippingAddress = _context.Addresses.Where(
+            x => x.User.Equals(_context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+            x => x.AddressType == 2).FirstOrDefault();
+
+          if (!ShippingAddressSame(billingAddress, shippingAddress))
+          {
+            checkoutViewModel.ShippingName = shippingAddress.Name;
+            checkoutViewModel.ShippingAddress1 = shippingAddress.Line1;
+            checkoutViewModel.ShippingAddress2 = shippingAddress.Line2;
+            checkoutViewModel.ShippingCity = shippingAddress.CityName;
+            checkoutViewModel.ShippingState = shippingAddress.StateName;
+            checkoutViewModel.ShippingCountry = shippingAddress.CountryName;
+            checkoutViewModel.ShippingPostalCode = shippingAddress.PostalCode;
+          }
+          else
+          {
+            checkoutViewModel.ShippingAddressSame = true;
+            checkoutViewModel.ShippingName = billingAddress.Name;
+            checkoutViewModel.ShippingAddress1 = billingAddress.Line1;
+            checkoutViewModel.ShippingAddress2 = billingAddress.Line2;
+            checkoutViewModel.ShippingCity = billingAddress.CityName;
+            checkoutViewModel.ShippingState = billingAddress.StateName;
+            checkoutViewModel.ShippingCountry = billingAddress.CountryName;
+            checkoutViewModel.ShippingPostalCode = billingAddress.PostalCode;
+          }
+        }
+      }
+      else
+      {
+        if (Model.ShippingAddressDeclined)
+        {
+          checkoutViewModel.ShippingAddressDeclined = true;
+        }
+        checkoutViewModel.BillingName = Model.BillingName;
+        checkoutViewModel.BillingAddress1 = Model.BillingAddress1;
+        checkoutViewModel.BillingAddress2 = Model.BillingAddress2;
+        checkoutViewModel.BillingCity = Model.BillingCity;
+        checkoutViewModel.BillingState = Model.BillingState;
+        checkoutViewModel.BillingCountry = Model.BillingCountry;
+        checkoutViewModel.BillingPostalCode = Model.BillingPostalCode;
+
+        checkoutViewModel.ShippingAddressSame = Model.ShippingAddressSame;
+
+        checkoutViewModel.ShippingName = Model.ShippingName;
+        checkoutViewModel.ShippingAddress1 = Model.ShippingAddress1;
+        checkoutViewModel.ShippingAddress2 = Model.ShippingAddress2;
+        checkoutViewModel.ShippingCity = Model.ShippingCity;
+        checkoutViewModel.ShippingState = Model.ShippingState;
+        checkoutViewModel.ShippingCountry = Model.ShippingCountry;
+        checkoutViewModel.ShippingPostalCode = Model.ShippingPostalCode;
+      }
 
       checkoutViewModel.ShippingAddressSame = Model == null ? checkoutViewModel.ShippingAddressSame : Model.ShippingAddressSame;
 
