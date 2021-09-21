@@ -350,7 +350,7 @@ namespace XOSkinWebApp.Controllers
               }
             } 
           });
-          Model.Taxes = tjTaxRate.Rate;
+          Model.Taxes = tjTaxRate.AmountToCollect;
         }
         catch
         {
