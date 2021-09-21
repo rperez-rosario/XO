@@ -17,7 +17,7 @@ using ServiceStack;
 using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
-
+using System.Globalization;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -376,7 +376,7 @@ namespace XOSkinWebApp.Controllers
           });
           Model.Taxes = tjTaxRate.AmountToCollect;
         }
-        catch
+        catch (Exception ex)
         {
           Model.ShippingAddressDeclined = true;
           return RedirectToAction("Index", Model);
@@ -595,82 +595,14 @@ namespace XOSkinWebApp.Controllers
                 rate.GetProperty("package_type").ValueEquals(_option.Value.ShipEngineDefaultPackageType) &&
                 rate.GetProperty("service_code").ValueEquals(_option.Value.ShipEngineDefaultServiceCode))
               {
-                Model.ShippingCharges = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
+                shippingCost = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
                 break;
               }
             }
           }
 
-          try
-          {
-            tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
-
-            tjTaxRate = tjService.TaxForOrder(new
-            {
-              amount = (decimal)Model.SubTotal,
-              from_city = _option.Value.ShipFromCity,
-              from_country = _option.Value.ShipFromCountryCode,
-              from_state = _option.Value.ShipFromState,
-              from_street = _option.Value.ShipFromAddressLine1,
-              from_zip = _option.Value.ShipFromPostalCode,
-              line_items = tjLineItem,
-              shipping = (decimal)Model.ShippingCharges,
-              to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
-              to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
-              to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
-              to_street = Model.ShippingAddressSame ?
-                (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
-                (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
-              to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
-              nexus_addresses = new[]
-              {
-                new
-                {
-                  id = _option.Value.ShipFromName,
-                  country = _option.Value.ShipFromCountryCode,
-                  zip = _option.Value.ShipFromPostalCode,
-                  state = _option.Value.ShipFromState,
-                  city = _option.Value.ShipFromCity,
-                  street = _option.Value.ShipFromAddressLine1
-                }
-              }
-            });
-
-            tjOrder = tjService.CreateOrder(new 
-            {
-              transaction_id = Model.OrderId.ToString(),
-              transaction_date = DateTime.UtcNow.ToString(),
-              to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
-              to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
-              to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
-              to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
-              to_street = Model.ShippingAddressSame ?
-                (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
-                (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
-              amount = (decimal)Model.SubTotal,
-              lineItems = tjLineItem,
-              sales_tax = tjTaxRate.AmountToCollect,
-              shipping = (decimal)Model.ShippingCharges
-
-            });
-          }
-          catch (Exception ex)
-          {
-            throw new Exception("An error was encountered while calculating taxes for this order.", ex);
-          }
-
-          applicableTaxes = tjOrder.SalesTax;
-
           Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrierName;
-          Model.BilledOn = DateTime.UtcNow;
-
-          shippingCost = (decimal)Model.ShippingCharges;
-          codeDiscount = 0.0M; // TODO: CALCULATE.
-          couponDiscount = 0.0M; // TODO : CALCULATE.
-          
-          Model.Taxes = applicableTaxes;
-
-          total = subTotal + shippingCost - codeDiscount - couponDiscount + applicableTaxes;
+          Model.ShippingCharges = shippingCost;
 
           try
           {
@@ -696,10 +628,12 @@ namespace XOSkinWebApp.Controllers
                   Name = Model.BillingName,
                   Number = Model.CreditCardNumber
                 };
+
                 stCustomerCreateOptions = new Stripe.CustomerCreateOptions();
                 stCustomerCreateOptions.Email = User.Identity.Name;
                 stCustomerCreateOptions.Source = stCardCreateNestedOptions;
                 stCustomerCreateOptions.Description = "XO Skin Customer.";
+                
                 stCustomerService = new Stripe.CustomerService();
                 stCustomer = stCustomerService.Create(stCustomerCreateOptions);
 
@@ -744,6 +678,7 @@ namespace XOSkinWebApp.Controllers
               {
                 Card = stTokenCardOptions
               };
+
               stTokenService = new TokenService();
               stToken = stTokenService.Create(stTokenCreateOptions);
               
@@ -762,6 +697,7 @@ namespace XOSkinWebApp.Controllers
               
               stSourceService = new SourceService();
               stSource = await stSourceService.CreateAsync(stSourceCreateOptions);
+
               try
               {
                 stSourceService.Attach(stCustomer.Id, new SourceAttachOptions()
@@ -776,6 +712,71 @@ namespace XOSkinWebApp.Controllers
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
               }
             }
+
+            try
+            {
+              tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
+
+              tjTaxRate = tjService.TaxForOrder(new
+              {
+                amount = (decimal)Model.SubTotal,
+                from_city = _option.Value.ShipFromCity,
+                from_country = _option.Value.ShipFromCountryCode,
+                from_state = _option.Value.ShipFromState,
+                from_street = _option.Value.ShipFromAddressLine1,
+                from_zip = _option.Value.ShipFromPostalCode,
+                line_items = tjLineItem,
+                shipping = shippingCost,
+                to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
+                to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+                to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+                to_street = Model.ShippingAddressSame ?
+                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
+                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
+                to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+                nexus_addresses = new[]
+                {
+                new
+                {
+                  id = _option.Value.ShipFromName,
+                  country = _option.Value.ShipFromCountryCode,
+                  zip = _option.Value.ShipFromPostalCode,
+                  state = _option.Value.ShipFromState,
+                  city = _option.Value.ShipFromCity,
+                  street = _option.Value.ShipFromAddressLine1
+                }
+              }
+              });
+
+              tjOrder = tjService.CreateOrder(new
+              {
+                transaction_id = Model.OrderId.ToString(),
+                transaction_date = DateTime.UtcNow.ToString(),
+                to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+                to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+                to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+                to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
+                to_street = Model.ShippingAddressSame ?
+                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
+                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
+                amount = subTotal,
+                lineItems = tjLineItem,
+                sales_tax = tjTaxRate.AmountToCollect,
+                shipping = shippingCost
+              });
+            }
+            catch (Exception ex)
+            {
+              throw new Exception("An error was encountered while calculating taxes for this order.", ex);
+            }
+
+            applicableTaxes = tjOrder.SalesTax;
+            Model.Taxes = applicableTaxes;
+
+            codeDiscount = 0.0M; // TODO: CALCULATE.
+            couponDiscount = 0.0M; // TODO : CALCULATE.
+
+            total = subTotal + shippingCost - codeDiscount - couponDiscount + applicableTaxes;
 
             stCreditTransactionMetaValue = new Dictionary<string, string>();
             stCreditTransactionMetaValue.Add("ProductOrderId", order.Id.ToString());
@@ -795,10 +796,13 @@ namespace XOSkinWebApp.Controllers
             stChargeService = new Stripe.ChargeService();
             stCharge = stChargeService.Create(stChargeCreateOptions);
 
+            
+
             if (stCharge.Status.Equals("succeeded"))
             {
               order.StripeChargeId = stCharge.Id;
               order.StripeChargeStatus = stCharge.Status;
+              Model.BilledOn = stCharge.Created;
             }
             else
             {

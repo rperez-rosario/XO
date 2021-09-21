@@ -240,6 +240,26 @@ else
           if (validateShippingAddress(e) == true) {
             $('body').addClass('calculating-shipping');
             $('calculate-shipping-cost-and-taxes-button').attr('disabled', true);
+            $('#billing-name').attr('readonly', true);
+            $('#billing-address1').attr('readonly', true);
+            $('#billing-address2').attr('readonly', true);
+            $('#billing-city').attr('readonly', true);
+            $('#billing-state').attr('disabled', false);
+            $('#billing-state').attr('readonly', true);
+            $('#billing-country').attr('disabled', false);
+            $('#billing-country').attr('readonly', true);
+            $('#billing-postal-code').attr('readonly', true);
+            $('#shipping-name').attr('readonly', true);
+            $('#shipping-address1').attr('readonly', true);
+            $('#shipping-address2').attr('readonly', true);
+            $('#shipping-city').attr('readonly', true);
+            $('#shipping-state').attr('disabled', false);
+            $('#shipping-state').attr('readonly', true);
+            $('#shipping-country').attr('disabled', false);
+            $('#shipping-country').attr('readonly', true);
+            $('#shipping-postal-code').attr('readonly', true);
+            $('#same-address').attr('disabled', false);
+            $('#same-address').attr('readonly', true);
             $('#shipping-address-declined').val(false);
           } else {
             e.preventDefault();
@@ -251,11 +271,19 @@ else
           $('#val-credit-card-number').html('');
           $('#val-credit-card-cvc').html('');
           $('#val-credit-card-expiration').html('');
-          $('#calculated-shipping').val(false);
           $('#card-declined').val(false);
           $('#shipping-address-declined').val(false);
           $('#same-address').attr('disabled', false);
           $('#same-address').attr('readonly', true);
+          $('#shipping-state').attr('disabled', false);
+          $('#shipping-state').attr('readonly', true);
+          $('#shipping-country').attr('disabled', false);
+          $('#shipping-country').attr('readonly', true);
+          $('#billing-state').attr('disabled', false);
+          $('#billing-state').attr('readonly', true);
+          $('#billing-country').attr('disabled', false);
+          $('#billing-country').attr('readonly', true);
+          $('#calculated-shipping').val(false);
           break;
         case 'place-order-button':
           if (validateShippingAddress(e) == true && validateCreditCardInformation(e) == true) {
