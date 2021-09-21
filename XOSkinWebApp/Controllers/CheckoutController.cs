@@ -376,7 +376,7 @@ namespace XOSkinWebApp.Controllers
           });
           Model.Taxes = tjTaxRate.AmountToCollect;
         }
-        catch (Exception ex)
+        catch
         {
           Model.ShippingAddressDeclined = true;
           return RedirectToAction("Index", Model);
