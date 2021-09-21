@@ -332,10 +332,10 @@ namespace XOSkinWebApp.Controllers
             shipping = (decimal)Model.ShippingCharges,
             to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
             to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
-            to_state = Model.ShippingAddressSame ? Model.BillingState : Model.BillingState,
+            to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
             to_street = Model.ShippingAddressSame ?
-              Model.BillingAddress1.Trim() + Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim() :
-              Model.ShippingAddress1.Trim() + Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim(),
+              (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
+              (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
             to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
             nexus_addresses = new []
             {
@@ -422,8 +422,6 @@ namespace XOSkinWebApp.Controllers
       object[] tjLineItem = null;
       List<ShoppingCartLineItem> lineItem = null;
       int i = 0;
-
-
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -590,10 +588,10 @@ namespace XOSkinWebApp.Controllers
               shipping = (decimal)Model.ShippingCharges,
               to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
               to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
-              to_state = Model.ShippingAddressSame ? Model.BillingState : Model.BillingState,
+              to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
               to_street = Model.ShippingAddressSame ?
-                Model.BillingAddress1.Trim() + Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim() :
-                Model.ShippingAddress1.Trim() + Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim(),
+                (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
+                (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
               to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
               nexus_addresses = new[]
               {
@@ -618,8 +616,8 @@ namespace XOSkinWebApp.Controllers
               to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
               to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
               to_street = Model.ShippingAddressSame ?
-                Model.BillingAddress1.Trim() + Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2 :
-                Model.ShippingAddress1.Trim() + Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2,
+                (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
+                (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
               amount = (decimal)Model.SubTotal,
               lineItems = tjLineItem,
               sales_tax = tjTaxRate.AmountToCollect,
@@ -1357,8 +1355,9 @@ namespace XOSkinWebApp.Controllers
         .Replace("{adminDistrict}", Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState)
         .Replace("{postalCode}", Model.ShippingAddressSame ? Model.BillingPostalCode.Trim() : Model.ShippingPostalCode.Trim())
         .Replace("{locality}", Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim())
-        .Replace("{addressLine}", Model.ShippingAddressSame ? Model.BillingAddress1.Trim() + Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim() :
-          Model.ShippingAddress1.Trim() + Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())
+        .Replace("{addressLine}", Model.ShippingAddressSame ?
+          Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim()) :
+          Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim()))
         .Replace("{includeNeighborhood}", "0")
         .Replace("{includeValue}", String.Empty)
         .Replace("{maxResults}", "1")
