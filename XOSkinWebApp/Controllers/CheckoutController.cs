@@ -412,6 +412,8 @@ namespace XOSkinWebApp.Controllers
       LocationService shLocationService = null;
       ShopifySharp.CustomerService shCustomerService = null;
       ShopifySharp.OrderService shOrderService = null;
+      ShopifySharp.TransactionService shTransactionService = null;
+      ShopifySharp.Transaction shTransaction = null;
       ShopifySharp.Product sProduct = null;
       ProductVariant shProductVariant = null;
       List<Location> shLocation = null;
@@ -446,6 +448,7 @@ namespace XOSkinWebApp.Controllers
       object[] tjLineItem = null;
       List<ShoppingCartLineItem> lineItem = null;
       int i = 0;
+      List<Transaction> shOrderTransactions = null;
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -471,6 +474,8 @@ namespace XOSkinWebApp.Controllers
         shOrderService = new ShopifySharp.OrderService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
         shCustomerService = new ShopifySharp.CustomerService(_option.Value.ShopifyUrl,
+          _option.Value.ShopifyStoreFrontAccessToken);
+        shTransactionService = new TransactionService(_option.Value.ShopifyUrl, 
           _option.Value.ShopifyStoreFrontAccessToken);
       }
       catch (Exception ex)
@@ -829,19 +834,19 @@ namespace XOSkinWebApp.Controllers
               {
                 PresentmentMoney = new ShopifySharp.Price()
                 {
-                  Amount = (decimal)Model.ShippingCharges,
-                  CurrencyCode = "usd"
+                  Amount = shippingCost,
+                  CurrencyCode = stCharge.Currency
                 },
                 ShopMoney = new ShopifySharp.Price()
                 {
-                  Amount = (decimal)Model.ShippingCharges,
-                  CurrencyCode = "usd"
+                  Amount = shippingCost,
+                  CurrencyCode = stCharge.Currency
                 }
               },
               Title = _option.Value.ShopifyShippingLineTitle,
               Code = _option.Value.ShopifyShippingLineCode,
               Source = _option.Value.ShopifyShippingLineSource,
-              Price = (decimal)Model.ShippingCharges
+              Price = shippingCost
             }
           };
           shOrder.EstimatedTaxes = false;
@@ -851,12 +856,12 @@ namespace XOSkinWebApp.Controllers
             PresentmentMoney = new ShopifySharp.Price()
             {
               Amount = applicableTaxes,
-              CurrencyCode = "usd"
+              CurrencyCode = stCharge.Currency
             },
             ShopMoney = new ShopifySharp.Price()
             {
               Amount = applicableTaxes,
-              CurrencyCode = "usd"
+              CurrencyCode = stCharge.Currency
             }
           };
           shOrder.TaxLines = new List<TaxLine>()
@@ -869,18 +874,80 @@ namespace XOSkinWebApp.Controllers
                 PresentmentMoney = new ShopifySharp.Price()
                 {
                   Amount = applicableTaxes,
-                  CurrencyCode = "usd"
+                  CurrencyCode = stCharge.Currency
                 },
                 ShopMoney = new ShopifySharp.Price()
                 {
                   Amount = applicableTaxes,
-                  CurrencyCode = "usd"
+                  CurrencyCode = stCharge.Currency
                 }
               },
               Rate = tjTaxRate.Rate,
-              Title = "Tax calculation performed by Taxjar."
+              Title = "Sales tax calculation performed by Taxjar."
             }
           };
+          shOrder.PaymentGatewayNames = new List<String>()
+          {
+            "Stripe"
+          };
+          shOrder.ProcessingMethod = "Stripe payment gateway.";
+          shOrder.SubtotalPrice = subTotal;
+          shOrder.SubtotalPriceSet = new PriceSet()
+          {
+            PresentmentMoney = new ShopifySharp.Price()
+            {
+              Amount = subTotal,
+              CurrencyCode = stCharge.Currency
+            },
+            ShopMoney = new ShopifySharp.Price()
+            {
+              Amount = subTotal,
+              CurrencyCode = stCharge.Currency
+            }
+          };
+          shOrder.TotalLineItemsPrice = subTotal;
+          shOrder.TotalLineItemsPriceSet = new PriceSet()
+          {
+            PresentmentMoney = new ShopifySharp.Price()
+            {
+              Amount = subTotal,
+              CurrencyCode = stCharge.Currency
+            },
+            ShopMoney = new ShopifySharp.Price()
+            {
+              Amount = subTotal,
+              CurrencyCode = stCharge.Currency
+            }
+          };
+          shOrder.TotalPrice = total;
+          shOrder.TotalPriceSet = new PriceSet()
+          {
+            PresentmentMoney = new ShopifySharp.Price()
+            {
+              Amount = total,
+              CurrencyCode = stCharge.Currency
+            },
+            ShopMoney = new ShopifySharp.Price()
+            {
+              Amount = total,
+              CurrencyCode = stCharge.Currency
+            }
+          };
+          shOrder.TotalShippingPriceSet = new PriceSet()
+          {
+            PresentmentMoney = new ShopifySharp.Price
+            {
+              Amount = shippingCost,
+              CurrencyCode = stCharge.Currency
+            },
+            ShopMoney = new ShopifySharp.Price()
+            {
+              Amount = shippingCost,
+              CurrencyCode = stCharge.Currency
+            }
+          };
+          shOrder.PresentmentCurrency = stCharge.Currency.ToUpper();
+          shOrder.Currency = stCharge.Currency.ToUpper();
           shOrder.Name = "#XO" + (order.Id + 10000).ToString();
           shOrder.OrderStatusUrl = _option.Value.ShopifyOrderStatusUrl + order.Id.ToString();
           shOrder.CreatedAt = DateTime.UtcNow;
@@ -890,9 +957,50 @@ namespace XOSkinWebApp.Controllers
           shOrder.Test = false;  // Switch to "true" for testing against a production store.
           shOrder.Customer = await shCustomerService.GetAsync((long)_context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.ShopifyCustomerId).FirstOrDefault());
+          shOrder.FinancialStatus = "pending";
+          shOrder.Transactions = new List<Transaction>()
+          {
+            new Transaction()
+            {
+              Amount = total,
+              Kind = "authorization",
+              Status = "success",
+              CreatedAt = stCharge.Created,
+              Currency = stCharge.Currency.ToUpper(),
+              DeviceId = shOrder.DeviceId.ToString(),
+              Gateway = shOrder.PaymentGatewayNames.FirstOrDefault(),
+              LocationId = shOrder.LocationId,
+              MaximumRefundable = subTotal + applicableTaxes,
+              Message = "Transaction authorized by Stripe on behalf of XO Skin.",
+              Source = shOrder.SourceName
+            }
+          };
 
           shOrder = await shOrderService.CreateAsync(shOrder);
+
           order.ShopifyId = shOrder.Id;
+
+          shOrderTransactions = shTransactionService.ListAsync((long)shOrder.Id).Result.ToList();
+
+          shTransaction = new Transaction()
+          {
+            Kind = "capture",
+            Gateway = "manual",
+            Amount = total,
+            ParentId = shOrderTransactions.FirstOrDefault().Id,
+            Status = "success",
+            Currency = stCharge.Currency.ToUpper(),
+            Authorization = shOrderTransactions.FirstOrDefault().Authorization,
+            CreatedAt = stCharge.Created,
+            DeviceId = shOrderTransactions.FirstOrDefault().DeviceId,
+            LocationId = shOrder.LocationId,
+            MaximumRefundable = subTotal + applicableTaxes,
+            Message = "Transaction captured by Stripe on behalf of XO Skin.",
+            OrderId = shOrder.Id,
+            Source = shOrderTransactions.FirstOrDefault().Source,
+          };
+
+          shTransaction = await shTransactionService.CreateAsync((long)shOrder.Id, shTransaction);
         }
         catch (Exception ex)
         {
