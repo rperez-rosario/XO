@@ -877,6 +877,7 @@ namespace XOSkinWebApp.Controllers
                   CurrencyCode = "usd"
                 }
               },
+              Rate = tjTaxRate.Rate,
               Title = "Tax calculation performed by Taxjar."
             }
           };
