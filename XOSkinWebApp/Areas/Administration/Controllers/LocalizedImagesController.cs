@@ -23,7 +23,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         }
 
         // GET: Administration/LocalizedImages
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             List<LocalizedImageViewModel> localizedImage = new List<LocalizedImageViewModel>();
             
@@ -86,11 +86,13 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImageViewModel localizedImage)
+        public async Task<IActionResult> Create(
+          [Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImageViewModel localizedImage)
         {
             if (ModelState.IsValid)
             {
-                localizedImage.PlacementPointCode = _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + 
+                localizedImage.PlacementPointCode = _context.Pages.Where(
+                  x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + 
                   "." + localizedImage.PlacementPointCode;
 
                 _context.Add(new LocalizedImage()
@@ -127,7 +129,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             localizedImage.PlacementPointCode = localizedImage.PlacementPointCode.Replace(
               _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault() + "."
               , "");
-            ViewData["Language"] = new SelectList(_context.Languages.Where(x => x.Active == true), "Id", "LanguageName", localizedImage.Language);
+            ViewData["Language"] = new SelectList(_context.Languages.Where(
+              x => x.Active == true), "Id", "LanguageName", localizedImage.Language);
             ViewData["Page"] = new SelectList(_context.Pages, "Id", "Name", localizedImage.Page);
             
             return View(new LocalizedImageViewModel()
@@ -147,8 +150,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImageViewModel localizedImage,
-          bool LimitedEntry)
+        public async Task<IActionResult> Edit(
+          long id, [Bind("Id,Path,Language,PlacementPointCode,Page")] LocalizedImageViewModel localizedImage, bool LimitedEntry)
         {
             if (id != localizedImage.Id)
             {
@@ -161,14 +164,18 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 {
                   if (LimitedEntry)
                   {
-                    localizedImage.Language = _context.LocalizedImages.Where(x => x.Id == id).Select(x => x.Language).FirstOrDefault();
-                    localizedImage.Page = _context.LocalizedImages.Where(x => x.Id == id).Select(x => x.Page).FirstOrDefault();
+                    localizedImage.Language = _context.LocalizedImages.Where(
+                      x => x.Id == id).Select(x => x.Language).FirstOrDefault();
+                    localizedImage.Page = _context.LocalizedImages.Where(
+                      x => x.Id == id).Select(x => x.Page).FirstOrDefault();
 
                     localizedImage.PlacementPointCode =
-                      _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
-                      "." + _context.LocalizedTexts.Where(
-                      x => x.Id == id).Select(x => x.PlacementPointCode).FirstOrDefault().Replace(
-                     _context.Pages.Where(x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + ".", "");
+                      _context.Pages.Where(
+                        x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
+                        "." + _context.LocalizedTexts.Where(
+                        x => x.Id == id).Select(x => x.PlacementPointCode).FirstOrDefault().Replace(
+                     _context.Pages.Where(
+                       x => x.Id == localizedImage.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + ".", "");
                    }
                     _context.Update(new LocalizedImage()
                     {
@@ -248,7 +255,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           {
             String prefixedPlacementCode =
               _context.Pages.Where(x => x.Id == Page).Select(x => x.Name).FirstOrDefault() + "." + PlacementPointCode.Trim();
-            if (_context.LocalizedImages.Where(x => x.Language == Language).Any(x => x.PlacementPointCode.Equals(prefixedPlacementCode)))
+            if (_context.LocalizedImages.Where(
+              x => x.Language == Language).Any(x => x.PlacementPointCode.Equals(prefixedPlacementCode)))
             {
               return Json(false);
             }

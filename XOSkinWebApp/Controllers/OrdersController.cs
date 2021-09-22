@@ -142,7 +142,9 @@ namespace XOSkinWebApp.Controllers
         .Replace("{adminDistrict}", checkout.ShippingState)
         .Replace("{postalCode}", checkout.ShippingPostalCode.Trim())
         .Replace("{locality}", checkout.ShippingCity.Trim())
-        .Replace("{addressLine}", checkout.ShippingAddress1.Trim() + (checkout.ShippingAddress2 == null ? String.Empty : (" " + checkout.ShippingAddress2.Trim())))
+        .Replace("{addressLine}", (checkout.ShippingAddress1.Trim() + (checkout.ShippingAddress2 == null || 
+          (checkout.ShippingAddress2 != null && checkout.ShippingAddress2.Trim() == String.Empty) ? String.Empty : 
+          " " + checkout.ShippingAddress2.Trim())))
         .Replace("{includeNeighborhood}", "0")
         .Replace("{includeValue}", String.Empty)
         .Replace("{maxResults}", "1")
@@ -193,8 +195,6 @@ namespace XOSkinWebApp.Controllers
         return false;
       return true;
     }
-
-
 
     private int TotalQuantityOfItems(long OrderId)
     {

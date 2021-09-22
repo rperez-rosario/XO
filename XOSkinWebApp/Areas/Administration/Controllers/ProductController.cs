@@ -87,7 +87,6 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       try
       {
         ViewData["ProductType"] = new MultiSelectList(_context.ProductTypes, "Id", "Name");
-        //ViewData["ProductCategory"] = new SelectList(_context.ProductCategories, "Id", "Name");
         ViewData["Price"] = new SelectList(_context.Prices.Where(
           x => x.ValidFrom <= DateTime.UtcNow).Where(
           x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
@@ -113,7 +112,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
+    public async Task<IActionResult> Create(
+      [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient," +
+      "VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall," +
+      "ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] 
+      ProductViewModel productViewModel,
       IFormFile ImageLarge, long[] KitProduct, long[] Ingredient)
     {
       ORM.Product product = null;
@@ -401,7 +404,6 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         ingredientList = ingredientList.OrderBy(x => x.Name).ToList();
         
         ViewData["ProductType"] = new MultiSelectList(_context.ProductTypes, "Id", "Name");
-        //ViewData["ProductCategory"] = new SelectList(_context.ProductCategories, "Id", "Name");
         ViewData["Price"] = new SelectList(_context.Prices.Where(
           x => x.ValidFrom <= DateTime.UtcNow).Where(
           x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
@@ -466,8 +468,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(long id, [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel,
-      IFormFile ImageLarge)
+    public async Task<IActionResult> Edit(
+      long id, [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient," +
+      "VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall," +
+      "ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] 
+      ProductViewModel productViewModel, IFormFile ImageLarge)
     {
       ORM.Product product = null;
       String filePathPrefix = "wwwroot/img/product/xo-img-pid-";

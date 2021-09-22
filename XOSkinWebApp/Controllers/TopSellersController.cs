@@ -83,7 +83,8 @@ namespace XOSkinWebApp.Controllers
             cartLineItem.ShoppingCart = shoppingCart.Id;
             cartLineItem.Product = product.Id;
             cartLineItem.Quantity = 1;
-            cartLineItem.Total = _context.Prices.Where(x => x.Id == product.CurrentPrice).Select(x => x.Amount).FirstOrDefault();
+            cartLineItem.Total = _context.Prices.Where(
+              x => x.Id == product.CurrentPrice).Select(x => x.Amount).FirstOrDefault();
             _context.ShoppingCartLineItems.Add(cartLineItem);
           }
         }

@@ -23,7 +23,8 @@ namespace XOSkinWebApp.Controllers
         // GET: QuestionnaireController
         public async Task<IActionResult> Index()
         {
-          ViewData.Add("Questionnaire.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Questionnaire.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+          ViewData.Add("Questionnaire.WelcomeText", _context.LocalizedTexts.Where(
+            x => x.PlacementPointCode.Equals("Questionnaire.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
           var xOSkinContext = _context.Questions.Where(x => x.QuestionnaireNavigation.Active);
           return View(await xOSkinContext.ToListAsync());

@@ -23,17 +23,21 @@ namespace XOSkinWebApp.Controllers
 
     public IActionResult Index()
     {
-      ViewData.Add("Splash.SplashText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Splash.SplashText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("Splash.SplashText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("Splash.SplashText")).Select(x => x.Text).FirstOrDefault());
 
-      ViewData.Add("Home.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Home.WelcomeText")).Select(x => x.Text).FirstOrDefault());
-      ViewData.Add("Home.PromotionalRibbon", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Home.PromotionalRibbon")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("Home.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("Home.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("Home.PromotionalRibbon", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("Home.PromotionalRibbon")).Select(x => x.Text).FirstOrDefault());
       
       return View();
     }
 
     public IActionResult Privacy()
     {
-      ViewData.Add("Privacy.PrivacyPolicy", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Privacy.PrivacyPolicy")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("Privacy.PrivacyPolicy", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("Privacy.PrivacyPolicy")).Select(x => x.Text).FirstOrDefault());
 
       return View();
     }

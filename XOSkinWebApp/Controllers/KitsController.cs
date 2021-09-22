@@ -34,7 +34,8 @@ namespace XOSkinWebApp.Controllers
           _context.Prices.Where(x => x.Id == p.CurrentPrice).Select(x => x.Amount).FirstOrDefault()));
       }
 
-      ViewData.Add("Kits.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("Kits.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("Kits.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("Kits.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
       return View(productModel);
     }
@@ -75,7 +76,8 @@ namespace XOSkinWebApp.Controllers
             cartLineItem.ShoppingCart = shoppingCart.Id;
             cartLineItem.Product = product.Id;
             cartLineItem.Quantity = 1;
-            cartLineItem.Total = _context.Prices.Where(x => x.Id == product.CurrentPrice).Select(x => x.Amount).FirstOrDefault();
+            cartLineItem.Total = _context.Prices.Where(
+              x => x.Id == product.CurrentPrice).Select(x => x.Amount).FirstOrDefault();
             _context.ShoppingCartLineItems.Add(cartLineItem);
           }
         }

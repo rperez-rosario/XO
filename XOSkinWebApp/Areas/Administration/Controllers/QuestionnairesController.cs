@@ -172,8 +172,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 try
                 {
                   questionnaire.QuestionnaireName = questionnaire.QuestionnaireName.Trim();
-                  questionnaire.CreatedBy = _context.Questionnaires.Where(x => x.Id == id).Select(x => x.CreatedBy).FirstOrDefault();
-                  questionnaire.DateCreated = _context.Questionnaires.Where(x => x.Id == id).Select(x => x.DateCreated).FirstOrDefault();
+                  questionnaire.CreatedBy = _context.Questionnaires.Where(
+                    x => x.Id == id).Select(x => x.CreatedBy).FirstOrDefault();
+                  questionnaire.DateCreated = _context.Questionnaires.Where(
+                    x => x.Id == id).Select(x => x.DateCreated).FirstOrDefault();
+
                   _context.Update(new Questionnaire() {
                     Id = questionnaire.Id,
                     QuestionnaireName = questionnaire.QuestionnaireName,
@@ -184,7 +187,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                     CreatedByNavigation = questionnaire.CreatedByNavigation,
                     Questions = questionnaire.Questions
                   });
+
                   await _context.SaveChangesAsync();
+          
                   if (questionnaire.Active)
                   {
                     foreach (Questionnaire q in _context.Questionnaires)
@@ -194,7 +199,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                     }
                     await _context.SaveChangesAsync();
                   }
-        }
+                }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!QuestionnaireExists(questionnaire.Id))

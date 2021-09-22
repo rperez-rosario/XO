@@ -41,7 +41,8 @@ namespace XOSkinWebApp.Controllers
           _context.Prices.Where(x => x.Id == p.CurrentPrice).Select(x => x.Amount).FirstOrDefault()));
       }
 
-      ViewData.Add("YourLipsAndSmile.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("YourLipsAndSmile.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("YourLipsAndSmile.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("YourLipsAndSmile.WelcomeText")).Select(x => x.Text).FirstOrDefault());
       
       return View(productModel);
     }

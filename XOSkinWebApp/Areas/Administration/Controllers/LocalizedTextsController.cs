@@ -84,11 +84,13 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedTextViewModel localizedText)
+        public async Task<IActionResult> Create(
+          [Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedTextViewModel localizedText)
         {
             if (ModelState.IsValid)
             {
-                localizedText.PlacementPointCode = _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
+                localizedText.PlacementPointCode = _context.Pages.Where(
+                  x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
                   "." + localizedText.PlacementPointCode;
                 _context.Add(new LocalizedText() {
                   Id = localizedText.Id,
@@ -123,7 +125,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             localizedText.PlacementPointCode = localizedText.PlacementPointCode.Replace(
               _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault() + "."
               , "");
-            ViewData["Language"] = new SelectList(_context.Languages.Where(x => x.Active == true), "Id", "LanguageName", localizedText.Language);
+            ViewData["Language"] = new SelectList(_context.Languages.Where(
+              x => x.Active == true), "Id", "LanguageName", localizedText.Language);
             ViewData["Page"] = new SelectList(_context.Pages, "Id", "Name", localizedText.Page);
             return View(new LocalizedTextViewModel() { 
               Id = localizedText.Id,
@@ -141,7 +144,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedTextViewModel localizedText,
+        public async Task<IActionResult> Edit(
+          long id, [Bind("Id,Text,Language,PlacementPointCode,Page")] LocalizedTextViewModel localizedText,
           bool LimitedEntry)
         {   
             if (id != localizedText.Id)
@@ -155,14 +159,17 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
               {
                 if (LimitedEntry)
                 {
-                  localizedText.Language = _context.LocalizedTexts.Where(x => x.Id == id).Select(x => x.Language).FirstOrDefault();
-                  localizedText.Page = _context.LocalizedTexts.Where(x => x.Id == id).Select(x => x.Page).FirstOrDefault();
+                  localizedText.Language = _context.LocalizedTexts.Where(
+                    x => x.Id == id).Select(x => x.Language).FirstOrDefault();
+                  localizedText.Page = _context.LocalizedTexts.Where(
+                    x => x.Id == id).Select(x => x.Page).FirstOrDefault();
 
                   localizedText.PlacementPointCode =
                     _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") +
                     "." + _context.LocalizedTexts.Where(
                     x => x.Id == id).Select(x => x.PlacementPointCode).FirstOrDefault().Replace(
-                   _context.Pages.Where(x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + ".", "");
+                    _context.Pages.Where(
+                    x => x.Id == localizedText.Page).Select(x => x.Name).FirstOrDefault().Replace(" ", "") + ".", "");
                 }
                 _context.Update(new LocalizedText() { 
                   Id = localizedText.Id,
@@ -240,7 +247,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           {
             String prefixedPlacementCode =
               _context.Pages.Where(x => x.Id == Page).Select(x => x.Name).FirstOrDefault() + "." + PlacementPointCode;
-            if (_context.LocalizedTexts.Where(x => x.Language == Language).Any(x => x.PlacementPointCode.Equals(prefixedPlacementCode)))
+            if (_context.LocalizedTexts.Where(
+              x => x.Language == Language).Any(x => x.PlacementPointCode.Equals(prefixedPlacementCode)))
             {
               return Json(false);
             }

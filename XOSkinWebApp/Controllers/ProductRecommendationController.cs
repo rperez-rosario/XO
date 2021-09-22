@@ -26,7 +26,8 @@ namespace XOSkinWebApp.Controllers
 
     public IActionResult Index()
     {
-      ViewData.Add("ProductRecommendation.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("ProductRecommendation.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("ProductRecommendation.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("ProductRecommendation.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
       List<ProductViewModel> product = TestProductRecommendations();
 

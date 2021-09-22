@@ -20,7 +20,8 @@ namespace XOSkinWebApp.Controllers
 
     public IActionResult Index()
     {
-      ViewData.Add("SubscriptionsAndReferrals.WelcomeText", _context.LocalizedTexts.Where(x => x.PlacementPointCode.Equals("SubscriptionsAndReferrals.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+      ViewData.Add("SubscriptionsAndReferrals.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("SubscriptionsAndReferrals.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
       return View();
     }

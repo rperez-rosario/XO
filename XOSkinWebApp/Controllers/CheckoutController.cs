@@ -17,7 +17,6 @@ using ServiceStack;
 using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
-using System.Globalization;
 
 namespace XOSkinWebApp.Controllers
 {
