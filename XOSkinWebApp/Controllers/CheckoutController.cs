@@ -397,6 +397,19 @@ namespace XOSkinWebApp.Controllers
 
     public async Task<IActionResult> PlaceOrder(CheckoutViewModel Model)
     {
+      ShopifySharp.ProductService sProductService = null;
+      ProductVariantService shProductVariantService = null;
+      InventoryLevelService shInventoryLevelService = null;
+      InventoryItemService shInventoryItemService = null;
+      LocationService shLocationService = null;
+      ShopifySharp.CustomerService shCustomerService = null;
+      ShopifySharp.OrderService shOrderService = null;
+      ShopifySharp.TransactionService shTransactionService = null;
+      Stripe.ChargeService stChargeService = null;
+      Stripe.CustomerService stCustomerService = null;
+      SourceService stSourceService = null;
+      TokenService stTokenService = null;
+      TaxjarApi tjService = null;
       ProductOrder order = null;
       ORM.Product product = null;
       decimal balanceBeforeTransaction = 0.00M;
@@ -409,14 +422,6 @@ namespace XOSkinWebApp.Controllers
       ORM.Product kit = null;
       List<KitProduct> kitProduct = null;
       long stock = long.MaxValue;
-      ShopifySharp.ProductService sProductService = null;
-      ProductVariantService shProductVariantService = null;
-      InventoryLevelService shInventoryLevelService = null;
-      InventoryItemService shInventoryItemService = null;
-      LocationService shLocationService = null;
-      ShopifySharp.CustomerService shCustomerService = null;
-      ShopifySharp.OrderService shOrderService = null;
-      ShopifySharp.TransactionService shTransactionService = null;
       ShopifySharp.Transaction shTransaction = null;
       ShopifySharp.Product sProduct = null;
       ProductVariant shProductVariant = null;
@@ -428,10 +433,6 @@ namespace XOSkinWebApp.Controllers
       ShopifySharp.Order shOrder = null;
       List<ShopifySharp.LineItem> shLineItemList = null;
       String seShipmentRateJson = null;
-      Stripe.ChargeService stChargeService = null;
-      Stripe.CustomerService stCustomerService = null;
-      SourceService stSourceService = null;
-      TokenService stTokenService = null;
       ChargeCreateOptions stChargeCreateOptions = null;
       Dictionary<String, String> stCreditTransactionMetaValue = null;
       Stripe.CustomerCreateOptions stCustomerCreateOptions = null;
@@ -446,13 +447,14 @@ namespace XOSkinWebApp.Controllers
       Stripe.Charge stCharge = null;
       String geoLocationUrl = null;
       String geoLocationJson = null;
-      TaxjarApi tjService = null;
+      
       TaxResponseAttributes tjTaxRate = null;
       OrderResponseAttributes tjOrder = null;
       object[] tjLineItem = null;
       List<ShoppingCartLineItem> lineItem = null;
       int i = 0;
       List<Transaction> shOrderTransactions = null;
+      String clientIpAddress = null;
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -462,6 +464,9 @@ namespace XOSkinWebApp.Controllers
       {
         return RedirectToAction("Index", "Home");
       }
+
+      clientIpAddress = HttpContext.Connection.RemoteIpAddress == null ?
+        String.Empty : HttpContext.Connection.RemoteIpAddress.ToString();
 
       try
       {
@@ -498,7 +503,8 @@ namespace XOSkinWebApp.Controllers
           CodeDiscount = 0.0M,
           ApplicableTaxes = 0.0M,
           Total = 0.0M,
-          GiftOrder = false
+          GiftOrder = false,
+          ClientIpAddress = clientIpAddress
         };
 
         _context.ProductOrders.Add(order);
@@ -987,8 +993,38 @@ namespace XOSkinWebApp.Controllers
               LocationId = shOrder.LocationId,
               MaximumRefundable = subTotal + applicableTaxes,
               Message = "Transaction authorized by Stripe on behalf of XO Skin.",
-              Source = shOrder.SourceName
+              Source = shOrder.SourceName,
+              Authorization = stCharge.AuthorizationCode
             }
+          };
+
+          shOrder.BrowserIp = clientIpAddress;
+
+          shOrder.BillingAddress = new ShopifySharp.Address()
+          {
+            Address1 = stCharge.BillingDetails.Address.Line1 == null ? String.Empty : stCharge.BillingDetails.Address.Line1,
+            Address2 = stCharge.BillingDetails.Address.Line2 == null ? String.Empty : stCharge.BillingDetails.Address.Line2,
+            City = stCharge.BillingDetails.Address.City == null ? String.Empty : stCharge.BillingDetails.Address.City,
+            Country = stCharge.BillingDetails.Address.Country == null ? String.Empty : stCharge.BillingDetails.Address.Country,
+            Name = stCharge.BillingDetails.Name == null ? String.Empty : stCharge.BillingDetails.Name,
+            Phone = stCharge.BillingDetails.Phone == null ? String.Empty : stCharge.BillingDetails.Phone,
+            Province = stCharge.BillingDetails.Address.State == null ? String.Empty : stCharge.BillingDetails.Address.State,
+            Zip = stCharge.BillingDetails.Address.PostalCode == null ? String.Empty : stCharge.BillingDetails.Address.PostalCode
+          };
+
+          shOrder.ShippingAddress = new ShopifySharp.Address()
+          {
+            Address1 = Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1,
+            Address2 = Model.ShippingAddressSame ? Model.BillingAddress2 : Model.ShippingAddress2,
+            City = Model.ShippingAddressSame ? Model.BillingCity : Model.ShippingCity,
+            Country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+            Name = Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName,
+            Phone = _context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault() == null ? 
+              String.Empty : _context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
+            Province = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+            Zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode
           };
 
           shOrder = await shOrderService.CreateAsync(shOrder);
@@ -1005,7 +1041,7 @@ namespace XOSkinWebApp.Controllers
             ParentId = shOrderTransactions.FirstOrDefault().Id,
             Status = "success",
             Currency = stCharge.Currency.ToUpper(),
-            Authorization = shOrderTransactions.FirstOrDefault().Authorization,
+            Authorization = stCharge.AuthorizationCode,
             CreatedAt = stCharge.Created,
             DeviceId = shOrderTransactions.FirstOrDefault().DeviceId,
             LocationId = shOrder.LocationId,

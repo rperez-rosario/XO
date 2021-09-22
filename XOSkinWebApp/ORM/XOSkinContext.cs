@@ -1043,6 +1043,10 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.CancelledOn).HasColumnType("datetime");
 
+                entity.Property(e => e.ClientIpAddress)
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.CodeDiscount).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.CouponDiscount).HasColumnType("decimal(18, 2)");

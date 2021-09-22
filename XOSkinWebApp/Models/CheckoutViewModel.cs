@@ -70,6 +70,8 @@ namespace XOSkinWebApp.Models
     public bool CardDeclined { get; set; }
     public bool ShippingAddressDeclined { get; set; }
 
+    public String clientIpAddress { get; set; }
+
     public CheckoutViewModel()
     {
       LineItem = new List<ShoppingCartLineItemViewModel>();

@@ -32,6 +32,7 @@ namespace XOSkinWebApp.ORM
         public decimal? ApplicableTaxes { get; set; }
         public decimal? Total { get; set; }
         public bool? GiftOrder { get; set; }
+        public string ClientIpAddress { get; set; }
         public bool? Cancelled { get; set; }
         public DateTime? CancelledOn { get; set; }
         public string CancelReason { get; set; }
