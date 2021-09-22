@@ -234,6 +234,7 @@ namespace XOSkinWebApp.Controllers
             x => x.Id == li.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault(),
           discount = 0
         };
+        i++;
       }
 
       Model.LineItem = lineItemViewModel;
@@ -548,6 +549,7 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == _context.Products.Where(
               x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault()
           };
+          i++;
         }
 
         try
