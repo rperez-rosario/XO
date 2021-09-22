@@ -102,12 +102,14 @@ else
           <div asp-validation-summary="ModelOnly" class="text-danger"></div>
           <div class="form-group">
             <label class="control-label">Credit Card Number</label>
-            <input asp-for="CreditCardNumber" class="form-control" type="password" id="credit-card-number" maxlength="19" onkeypress="return restrictAlphabets(event)" />
+            <input asp-for="CreditCardNumber" class="form-control" type="password" id="credit-card-number" maxlength="19" 
+              onkeypress="return restrictAlphabets(event)" />
             <span asp-validation-for="CreditCardNumber" class="text-danger" id="val-credit-card-number"></span>
           </div>
           <div class="form-group">
             <label class="control-label">CVC</label>
-            <input asp-for="CreditCardCVC" class="form-control" type="password" id="credit-card-cvc" maxlength="4" onkeypress="return restrictAlphabets(event)" />
+            <input asp-for="CreditCardCVC" class="form-control" type="password" id="credit-card-cvc" maxlength="4" 
+              onkeypress="return restrictAlphabets(event)" />
             <span asp-validation-for="CreditCardCVC" class="text-danger" id="val-credit-card-cvc"></span>
           </div>
           <div class="form-group">
@@ -116,21 +118,33 @@ else
             <span class="text-danger" id="val-credit-card-expiration"></span>
           </div>
         </div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Carrier:  @Html.Raw(Model.CarrierName)</span></div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Shipping:</span> @Html.Raw(Model.ShippedOn.ToShortDateString())</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Arrival:</span> @Html.Raw(Model.ExpectedToArrive.ToShortDateString())</div>
+        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">
+          Carrier:  @Html.Raw(Model.CarrierName)</span></div>
+        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Shipping:</span>
+          @Html.Raw(Model.ShippedOn.ToShortDateString())</div>
+        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Arrival:</span>
+          @Html.Raw(Model.ExpectedToArrive.ToShortDateString())</div>
         <br />
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Sub-Total:</span> $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Taxes:</span> +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">USPS Priority Mail:</span> +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Code Discount:</span> -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Coupon Discount:</span> -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
-        <div style="font-weight: bold; text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
+        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Sub-Total:</span>
+          $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
+        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Taxes:</span>
+          +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
+        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">USPS Priority Mail:</span>
+          +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</div>
+        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Code Discount:</span>
+          -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</div>
+        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Coupon Discount:</span>
+          -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
+        <div style="font-weight: bold; text-align: right; margin-right: 40px">
+          Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
         <br />
         <div style="text-align: right; margin-right: 14px">
-          <input id="calculate-shipping-cost-and-taxes-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") value="Calculate Shipping Cost & Taxes" class="btn-outline-dark btn" hidden="@(Model.CalculatedShippingAndTaxes)" />
-          <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Address" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
-          <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)">
+          <input id="calculate-shipping-cost-and-taxes-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") 
+            value="Calculate Shipping Cost & Taxes" class="btn-outline-dark btn" hidden="@(Model.CalculatedShippingAndTaxes)" />
+          <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Address" 
+            class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
+          <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" 
+            class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)">
           &nbsp;<span class="spinner spinner-border spinner-border-sm" id="spinner" role="status" hidden"></span>
         </div>
       </div>
@@ -196,10 +210,12 @@ else
 
     if ($('#shipping-address-declined').val() == 'True') {
       if ($('#same-address').prop('checked')) {
-        $('#val-billing-address').html('The address provided does not exist in our database. Please correct it or enter a different address.');
+        $('#val-billing-address').html('The address provided does not exist in our database. ' +
+          'Please correct it or enter a different address.');
       }
       else {
-        $('#val-shipping-address').html('The address provided does not exist in our database. Please correct it or enter a different address.');
+        $('#val-shipping-address').html('The address provided does not exist in our database. ' +
+          'Please correct it or enter a different address.');
       }
     }
 
@@ -389,6 +405,38 @@ else
       return true;
     }
 
+    $('#credit-card-number').keyup(function () {
+      creditCardNumberFilled();
+    });
+
+    $('#credit-card-cvc').keyup(function () {
+      creditCardCVCFilled();
+    });
+
+    $('#shipping-name').keyup(function () {
+      if (!$('#same-address').prop('checked')) {
+        shippingNameFilled();
+      }
+    });
+
+    $('#shipping-address1').keyup(function () {
+      if (!$('#same-address').prop('checked')) {
+        shippingAddress1Filled();
+      }
+    });
+
+    $('shipping-city').keyup(function () {
+      if (!$('#same-address').prop('checked')) {
+        shippingCityFilled();
+      }
+    });
+
+    $('#shipping-postal-code').keyup(function () {
+      if (!$('#same-address').prop('checked')) {
+        shippingPostalCodeFilled();
+      }
+    });
+
     function creditCardNumberFilled() {
       if ($('#credit-card-number').val().trim() != '') {
         $('#val-credit-card-number').html('');
@@ -440,38 +488,6 @@ else
         $('#val-shipping-postal-code').html('Shipping postal code required.');
       }
     }
-
-    $('#credit-card-number').keyup(function () {
-      creditCardNumberFilled();
-    });
-
-    $('#credit-card-cvc').keyup(function () {
-      creditCardCVCFilled();
-    });
-
-    $('#shipping-name').keyup(function () {
-      if (!$('#same-address').prop('checked')) {
-        shippingNameFilled();
-      }
-    });
-
-    $('#shipping-address1').keyup(function () {
-      if (!$('#same-address').prop('checked')) {
-        shippingAddress1Filled();
-      }
-    });
-
-    $('shipping-city').keyup(function () {
-      if (!$('#same-address').prop('checked')) {
-        shippingCityFilled();
-      }
-    });
-
-    $('#shipping-postal-code').keyup(function () {
-      if (!$('#same-address').prop('checked')) {
-        shippingPostalCodeFilled();
-      }
-    });
 
     $('#billing-postal-code').inputmask("99999[-9999]", { greedy: false });
     $('#shipping-postal-code').inputmask("99999[-9999]", { greedy: false });

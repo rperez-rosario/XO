@@ -358,8 +358,12 @@ namespace XOSkinWebApp.Controllers
             to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
             to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
             to_street = Model.ShippingAddressSame ?
-              (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
-              (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
+              (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || 
+              (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : 
+              " " + Model.BillingAddress2.Trim())) :
+              (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || 
+              (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : 
+              " " + Model.ShippingAddress2.Trim())),
             to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
             nexus_addresses = new []
             {
@@ -731,8 +735,12 @@ namespace XOSkinWebApp.Controllers
                 to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
                 to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
                 to_street = Model.ShippingAddressSame ?
-                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
-                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
+                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || 
+                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : 
+                  " " + Model.BillingAddress2.Trim())) :
+                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || 
+                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : 
+                  " " + Model.ShippingAddress2.Trim())),
                 to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
                 nexus_addresses = new[]
                 {
@@ -757,8 +765,12 @@ namespace XOSkinWebApp.Controllers
                 to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
                 to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
                 to_street = Model.ShippingAddressSame ?
-                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim())) :
-                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim())),
+                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || 
+                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : 
+                  " " + Model.BillingAddress2.Trim())) :
+                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || 
+                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : 
+                  " " + Model.ShippingAddress2.Trim())),
                 amount = subTotal,
                 lineItems = tjLineItem,
                 sales_tax = tjTaxRate.AmountToCollect,
@@ -795,8 +807,6 @@ namespace XOSkinWebApp.Controllers
 
             stChargeService = new Stripe.ChargeService();
             stCharge = stChargeService.Create(stChargeCreateOptions);
-
-            
 
             if (stCharge.Status.Equals("succeeded"))
             {
@@ -1493,8 +1503,12 @@ namespace XOSkinWebApp.Controllers
         .Replace("{postalCode}", Model.ShippingAddressSame ? Model.BillingPostalCode.Trim() : Model.ShippingPostalCode.Trim())
         .Replace("{locality}", Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim())
         .Replace("{addressLine}", Model.ShippingAddressSame ?
-          Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.BillingAddress2.Trim()) :
-          Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : " " + Model.ShippingAddress2.Trim()))
+          Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || 
+          (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : 
+          " " + Model.BillingAddress2.Trim()) :
+          Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || 
+          (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : 
+          " " + Model.ShippingAddress2.Trim()))
         .Replace("{includeNeighborhood}", "0")
         .Replace("{includeValue}", String.Empty)
         .Replace("{maxResults}", "1")
