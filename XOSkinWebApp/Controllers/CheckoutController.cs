@@ -682,9 +682,8 @@ namespace XOSkinWebApp.Controllers
                 _context.AspNetUsers.Update(user);
                 _context.SaveChanges();
               }
-              catch (Exception ex)
+              catch
               {
-                throw new Exception("HERE!", ex);
                 Model.CardDeclined = true;
                 Model.CalculatedShippingAndTaxes = true;
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
@@ -865,9 +864,8 @@ namespace XOSkinWebApp.Controllers
               }
             }
           }
-          catch (Exception ex)
+          catch
           {
-            throw new Exception("HERE!", ex);
             Model.CardDeclined = true;
             Model.CalculatedShippingAndTaxes = true;
             return RedirectToAction("CalculateShippingCostAndTaxes", Model);
