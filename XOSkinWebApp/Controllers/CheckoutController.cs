@@ -443,11 +443,11 @@ namespace XOSkinWebApp.Controllers
       TokenCreateOptions stTokenCreateOptions = null;
       Token stToken = null;
       TokenCardOptions stTokenCardOptions = null;
-      AspNetUser xoUser = null;
+      AspNetUser user = null;
+      OrderBillTo previousOrderBillTo = null;
       Stripe.Charge stCharge = null;
       String geoLocationUrl = null;
       String geoLocationJson = null;
-      
       TaxResponseAttributes tjTaxRate = null;
       OrderResponseAttributes tjOrder = null;
       object[] tjLineItem = null;
@@ -618,10 +618,34 @@ namespace XOSkinWebApp.Controllers
           try
           {
             Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
+            previousOrderBillTo = _context.OrderBillTos.OrderByDescending(x => x.Order).FirstOrDefault();
 
             if (_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(
-              x => x.StripeCustomerId).FirstOrDefault() == null)
+              x => x.StripeCustomerId).FirstOrDefault() == null ||
+              (previousOrderBillTo != null &&
+              (previousOrderBillTo.NameOnCreditCard == null ? (Model.BillingName == null || 
+              Model.BillingName.Trim().Equals(String.Empty)) : 
+              !previousOrderBillTo.NameOnCreditCard.Equals(Model.BillingName == null ? String.Empty : Model.BillingName.Trim())) ||
+              (previousOrderBillTo.AddressLine1 == null ? (Model.BillingAddress1 == null ||
+              Model.BillingAddress1.Trim().Equals(String.Empty)) :
+              !previousOrderBillTo.AddressLine1.Equals(Model.BillingAddress1 == null ? String.Empty : Model.BillingAddress1.Trim())) ||
+              (previousOrderBillTo.AddressLine2 == null ? (Model.BillingAddress2 == null ||
+              Model.BillingAddress2.Trim().Equals(String.Empty)) :
+              !previousOrderBillTo.AddressLine2.Equals(Model.BillingAddress2 == null ? String.Empty : Model.BillingAddress2.Trim())) ||
+              (previousOrderBillTo.CityName == null ? (Model.BillingCity == null ||
+              Model.BillingCity.Trim().Equals(String.Empty)) :
+              !previousOrderBillTo.CityName.Equals(Model.BillingCity == null ? String.Empty : Model.BillingCity.Trim())) ||
+              (previousOrderBillTo.StateName == null ? (Model.BillingState == null ||
+              Model.BillingState.Trim().Equals(String.Empty)) :
+              !previousOrderBillTo.StateName.Equals(Model.BillingState == null ? String.Empty : Model.BillingState.Trim())) ||
+              (previousOrderBillTo.CountryName == null ? (Model.BillingCountry == null ||
+              Model.BillingCountry.Trim().Equals(String.Empty)) :
+              !previousOrderBillTo.CountryName.Equals(Model.BillingCountry == null ? String.Empty : Model.BillingCountry.Trim())) ||
+              (previousOrderBillTo.PostalCode == null ? (Model.BillingPostalCode == null ||
+              Model.BillingPostalCode.Trim().Equals(String.Empty)) :
+              !previousOrderBillTo.PostalCode.Equals(Model.BillingPostalCode == null ? 
+              String.Empty : Model.BillingPostalCode.Trim()))))
             {
               try
               {
@@ -653,13 +677,14 @@ namespace XOSkinWebApp.Controllers
                 Model.CreditCardCVC = null;
                 Model.CreditCardExpirationDate = DateTime.MinValue;
                 
-                xoUser = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
-                xoUser.StripeCustomerId = stCustomer.Id;
-                _context.AspNetUsers.Update(xoUser);
+                user = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
+                user.StripeCustomerId = stCustomer.Id;
+                _context.AspNetUsers.Update(user);
                 _context.SaveChanges();
               }
-              catch
+              catch (Exception ex)
               {
+                throw new Exception("HERE!", ex);
                 Model.CardDeclined = true;
                 Model.CalculatedShippingAndTaxes = true;
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
@@ -840,8 +865,9 @@ namespace XOSkinWebApp.Controllers
               }
             }
           }
-          catch
+          catch (Exception ex)
           {
+            throw new Exception("HERE!", ex);
             Model.CardDeclined = true;
             Model.CalculatedShippingAndTaxes = true;
             return RedirectToAction("CalculateShippingCostAndTaxes", Model);
@@ -967,6 +993,7 @@ namespace XOSkinWebApp.Controllers
               CurrencyCode = stCharge.Currency
             }
           };
+
           shOrder.PresentmentCurrency = stCharge.Currency.ToUpper();
           shOrder.Currency = stCharge.Currency.ToUpper();
           shOrder.Name = "#XO" + (order.Id + 10000).ToString();
