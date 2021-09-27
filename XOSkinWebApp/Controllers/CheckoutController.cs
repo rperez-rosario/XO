@@ -1471,7 +1471,8 @@ namespace XOSkinWebApp.Controllers
             CarrierName = Model.CarrierName,
             TrackingNumber = Model.TrackingNumber,
             Order = order.Id,
-            Arrives = Model.ExpectedToArrive
+            Arrives = Model.ExpectedToArrive,
+            ShipEngineId = Model.ShipEngineShipmentId
           });
 
           _context.SaveChanges();
@@ -1519,7 +1520,8 @@ namespace XOSkinWebApp.Controllers
             CarrierName = Model.CarrierName,
             TrackingNumber = Model.TrackingNumber,
             Order = order.Id,
-            Arrives = Model.ExpectedToArrive
+            Arrives = Model.ExpectedToArrive,
+            ShipEngineId = Model.ShipEngineShipmentId
           });
 
           _context.SaveChanges();

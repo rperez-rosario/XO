@@ -1,0 +1,97 @@
+﻿@model IEnumerable<XOSkinWebApp.Areas.Administration.Models.ShipmentViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Shipments</h1>
+
+<table class="table" id="Shipments">
+  <thead>
+    <tr>
+      <th>
+        Status
+      </th>
+      <th>
+        Date Placed
+      </th>
+      <th>
+        Promised Ship Date
+      </th>
+      <th>
+        Actual Ship Date
+      </th>
+      <th>
+        Promised Arrival
+      </th>
+      <th>
+        Actual Proj. Arrival
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.Recipient)
+      </th>
+      <th>
+        Number of Items
+      </th>
+      <th>
+        Tracking Number
+      </th>
+      <th>
+        Label
+      </th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+@foreach (var item in Model) {
+    <tr>
+      <td>
+        @Html.DisplayFor(modelItem => item.ShipmentStatus)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.DatePlaced)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.Shipped)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.ActualDateShipped)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.Arrives)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.ActualArrives)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.Recipient)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.NumberOfItems)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.TrackingNumber)
+      </td>
+      <td>
+        <a href="@item.ShippingLabelURL">View/Print</a>
+      </td>
+      <td>
+        <a asp-action="Edit" asp-route-id="@item.ShipmentId">Edit</a>
+      </td>
+    </tr>
+}
+    </tbody>
+</table>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#Shipments').DataTable({
+      'order': [[ 2, 'asc']]
+    });
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+</script>

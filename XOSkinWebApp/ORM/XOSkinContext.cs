@@ -644,6 +644,10 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("OrderShipTo");
 
+                entity.Property(e => e.ActualArrives).HasColumnType("datetime");
+
+                entity.Property(e => e.ActualShipDate).HasColumnType("datetime");
+
                 entity.Property(e => e.AddressLine1)
                     .IsRequired()
                     .IsUnicode(false);
@@ -681,6 +685,11 @@ namespace XOSkinWebApp.ORM
                 entity.Property(e => e.ShipEngineId)
                     .HasMaxLength(100)
                     .IsUnicode(false);
+
+                entity.Property(e => e.ShippingLabelUrl)
+                    .HasMaxLength(256)
+                    .IsUnicode(false)
+                    .HasColumnName("ShippingLabelURL");
 
                 entity.Property(e => e.StateName)
                     .IsRequired()

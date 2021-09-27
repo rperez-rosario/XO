@@ -16,11 +16,15 @@ namespace XOSkinWebApp.ORM
         public string StateName { get; set; }
         public string CountryName { get; set; }
         public string PostalCode { get; set; }
+        public bool? Shipped { get; set; }
         public string CarrierName { get; set; }
         public string ShipEngineId { get; set; }
+        public string ShippingLabelUrl { get; set; }
         public string TrackingNumber { get; set; }
         public DateTime? ShipDate { get; set; }
+        public DateTime? ActualShipDate { get; set; }
         public DateTime? Arrives { get; set; }
+        public DateTime? ActualArrives { get; set; }
 
         public virtual ProductOrder OrderNavigation { get; set; }
     }
