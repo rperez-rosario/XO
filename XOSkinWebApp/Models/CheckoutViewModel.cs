@@ -65,6 +65,7 @@ namespace XOSkinWebApp.Models
     public String CarrierName { get; set; }
     public decimal TotalWeightInPounds { get; set; }
     public String ShipEngineShipmentId { get; set; }
+    public String ShipEngineLabelUrl { get; set; }
 
     public bool CalculatedShippingAndTaxes { get; set; }
     public bool CardDeclined { get; set; }

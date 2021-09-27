@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
@@ -11,6 +12,8 @@ using XOSkinWebApp.ORM;
 
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
+  [Area("Administration")]
+  [Authorize]
   public class ShipmentController : Controller
   {
     private readonly XOSkinContext _context;

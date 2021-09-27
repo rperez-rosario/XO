@@ -188,7 +188,10 @@ namespace XOSkinWebApp.Controllers
       TaxjarApi tjService = null;
       TaxResponseAttributes tjTaxRate = null;
       int i = 0;
-      
+      String seShippingLabelRequestJson = null;
+      String seShippingLabelResponseJson = null;
+      String seShippingLabelUrl = null;
+
       ViewData["Country"] = new SelectList(new List<String> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
       
@@ -344,6 +347,29 @@ namespace XOSkinWebApp.Controllers
             }
           }
 
+          using var streamB = new MemoryStream();
+          using var writerB = new Utf8JsonWriter(streamB, options);
+
+          writerB.WriteStartObject();
+          writerB.WritePropertyName("label_format");
+          writerB.WriteStringValue("pdf");
+          writerB.WritePropertyName("label_layout");
+          writerB.WriteStringValue("4x6");
+          writerB.WritePropertyName("label_download_type");
+          writerB.WriteStringValue("url");
+          writerB.WriteEndObject();
+          
+          writerB.Flush();
+
+          seShippingLabelRequestJson = Encoding.UTF8.GetString(streamB.ToArray());
+
+          //seShippingLabelResponseJson = 
+          //  (_option.Value.ShipEngineGetLabelUrlFromIdUrl + Model.ShipEngineShipmentId).PostJsonToUrlAsync(seShippingLabelRequestJson,
+          //  requestFilter: webReq =>
+          //  {
+          //    webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+          //  }).Result;
+
           tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
           tjTaxRate = tjService.TaxForOrder(new {
             amount = (decimal)Model.SubTotal,
@@ -380,7 +406,7 @@ namespace XOSkinWebApp.Controllers
           });
           Model.Taxes = tjTaxRate.AmountToCollect;
         }
-        catch
+        catch (Exception ex)
         {
           Model.ShippingAddressDeclined = true;
           return RedirectToAction("Index", Model);
@@ -1472,7 +1498,8 @@ namespace XOSkinWebApp.Controllers
             TrackingNumber = Model.TrackingNumber,
             Order = order.Id,
             Arrives = Model.ExpectedToArrive,
-            ShipEngineId = Model.ShipEngineShipmentId
+            ShipEngineId = Model.ShipEngineShipmentId,
+            ShippingLabelUrl = Model.ShipEngineLabelUrl
           });
 
           _context.SaveChanges();
@@ -1521,7 +1548,8 @@ namespace XOSkinWebApp.Controllers
             TrackingNumber = Model.TrackingNumber,
             Order = order.Id,
             Arrives = Model.ExpectedToArrive,
-            ShipEngineId = Model.ShipEngineShipmentId
+            ShipEngineId = Model.ShipEngineShipmentId,
+            ShippingLabelUrl = Model.ShipEngineLabelUrl
           });
 
           _context.SaveChanges();

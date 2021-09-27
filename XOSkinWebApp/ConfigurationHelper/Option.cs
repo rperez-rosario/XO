@@ -44,5 +44,6 @@ namespace XOSkinWebApp.ConfigurationHelper
 		public String GoogleMapsUrl { get; set; }
 		public String TaxJarApiKey { get; set; }
 		public String TaxJarSkinCareProductTaxCode { get; set; }
+		public String ShipEngineGetLabelUrlFromIdUrl { get; set; }
 	}
 }
