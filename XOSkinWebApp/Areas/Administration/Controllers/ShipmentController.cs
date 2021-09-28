@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using ServiceStack;
+using ShopifySharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,16 +66,14 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       return View(model);
     }
 
-    // POST: ShipmentController/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
+    // GET: ShipmentController/Edit/5
     public IActionResult Edit(long Id)
     {
       ProductOrder order = null;
       List<ProductOrderLineItem> lineItem = null;
       OrderBillTo billing = null;
       OrderShipTo shipping = null;
-      CheckoutViewModel checkout = null;
+      ShipOutViewModel checkout = null;
       String geoLocationUrl = null;
       String geoLocationJson = null;
 
@@ -85,7 +84,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         billing = _context.OrderBillTos.Where(x => x.Order == Id).FirstOrDefault();
         shipping = _context.OrderShipTos.Where(x => x.Order == Id).FirstOrDefault();
 
-        checkout = new CheckoutViewModel()
+        checkout = new ShipOutViewModel()
         {
           BilledOn = billing.BillingDate == null ? new DateTime(1754, 1, 1) : billing.BillingDate.Value,
           BillingAddress1 = billing.AddressLine1,
@@ -97,15 +96,12 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           BillingState = billing.StateName,
           CodeDiscount = order.CodeDiscount,
           CouponDiscount = order.CouponDiscount,
-          ShippedOn = shipping.ShipDate == null ? new DateTime(1754, 1, 1) : shipping.ShipDate.Value,
+          ExpectedToShipOn = shipping.ShipDate == null ? new DateTime(1754, 1, 1) : shipping.ShipDate.Value,
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
           ShippingAddress1 = shipping.AddressLine1,
           ShippingAddress2 = shipping.AddressLine2,
           ShippingAddressSame = ShippingAddressSame(billing, shipping),
-          CreditCardCVC = null,
-          CreditCardExpirationDate = new DateTime(1754, 1, 1),
-          CreditCardNumber = null,
           ExpectedToArrive = shipping.Arrives == null ? new DateTime(1754, 1, 1) : shipping.Arrives.Value,
           IsGift = (bool)order.GiftOrder,
           OrderId = Id,
@@ -118,14 +114,17 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           SubTotal = order.Subtotal,
           Taxes = order.ApplicableTaxes,
           Total = order.Total,
-          TrackingNumber = shipping.TrackingNumber
+          TrackingNumber = shipping.TrackingNumber,
+          ShipEngineLabelUrl = shipping.ShippingLabelUrl,
+          ShipmentStatus = shipping.Shipped == null ? "PENDING" : (bool)shipping.Shipped ? "SHIPPED" : "PENDING",
+          ShippedOn = shipping.ActualShipDate
         };
 
-        checkout.LineItem = new List<ShoppingCartLineItemViewModel>();
+        checkout.LineItem = new List<ShippingLineItemViewModel>();
 
         foreach (ProductOrderLineItem li in lineItem)
         {
-          checkout.LineItem.Add(new ShoppingCartLineItemViewModel()
+          checkout.LineItem.Add(new ShippingLineItemViewModel()
           {
             Id = li.Id,
             ImageSource = li.ImageSource,
@@ -181,6 +180,49 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         x => x.PlacementPointCode.Equals("OrderDetails.WelcomeText")).Select(x => x.Text).FirstOrDefault());
 
       return View(checkout);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    // POST: ShipmentController/Edit/5
+    public async Task<IActionResult> Edit(long OrderId, ShipOutViewModel Model)
+    {
+      OrderShipTo order = null;
+      LocationService shLocationService = null;
+      FulfillmentService shFulfillmentService = null;
+      Fulfillment shFulfillment = null;
+      Location shLocation = null;
+
+      shLocationService = new LocationService(
+        _option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+
+      shLocation = shLocationService.ListAsync().Result.First();
+
+      shFulfillmentService = new FulfillmentService(
+        _option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+
+      shFulfillment = new Fulfillment()
+      {
+        LocationId = shLocation.Id,
+        TrackingCompany = _option.Value.TrackingCompany,
+        TrackingUrl = _option.Value.StampsDotComPackageTrackingUrl + _context.OrderShipTos.Where(
+          x => x.Order == OrderId).Select(x => x.TrackingNumber).FirstOrDefault(),
+        TrackingNumber = _context.OrderShipTos.Where(
+          x => x.Order == OrderId).Select(x => x.TrackingNumber).FirstOrDefault()
+      };
+
+      shFulfillment = await shFulfillmentService.CreateAsync((long)_context.ProductOrders.Where(
+        x => x.Id == OrderId).Select(x => x.ShopifyId).FirstOrDefault(), shFulfillment);
+
+      order = _context.OrderShipTos.Where(
+        x => x.Order == OrderId).FirstOrDefault();
+      order.Shipped = true;
+      order.ActualShipDate = DateTime.UtcNow;
+      order.ActualArrives = DateTime.UtcNow.AddDays(3);
+      _context.OrderShipTos.Update(order);
+      _context.SaveChanges();
+
+      return RedirectToAction("Index");
     }
 
     private bool ShippingAddressSame(OrderBillTo Billing, OrderShipTo Shipping)

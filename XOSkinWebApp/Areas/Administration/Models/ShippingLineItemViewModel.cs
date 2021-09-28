@@ -2,7 +2,7 @@
 
 namespace XOSkinWebApp.Areas.Administration.Models
 {
-  public class ShoppingCartLineItemViewModel
+  public class ShippingLineItemViewModel
   {
     public long Id { get; set; }
     public long ProductId { get; set; }

@@ -6,35 +6,19 @@ using System.Threading.Tasks;
 
 namespace XOSkinWebApp.Areas.Administration.Models
 {
-  public class CheckoutViewModel
+  public class ShipOutViewModel
   {
     [Key]
     public long OrderId { get; set; }
-    
     public long ShopifyId { get; set; }
-
-    public List<ShoppingCartLineItemViewModel> LineItem { get; set; }
-
-    [Required(ErrorMessage = "Name on credit card required.")]
+    public List<ShippingLineItemViewModel> LineItem { get; set; }
     public String BillingName { get; set; }
-
-    [Required(ErrorMessage = "Billing address line 1 required.")]
     public String BillingAddress1 { get; set; }
-
     public String BillingAddress2 { get; set; }
-
-    [Required(ErrorMessage = "Billing city required.")]
     public String BillingCity { get; set; }
-
-    [Required(ErrorMessage = "Billing state required.")]
     public String BillingState { get; set; }
-
-    [Required(ErrorMessage = "Billing country required.")]
     public String BillingCountry { get; set; }
-
-    [Required(ErrorMessage = "Billing postal code required.")]
     public String BillingPostalCode { get; set; }
-
     public DateTime BilledOn { get; set; }
     public decimal? SubTotal { get; set; }
     public decimal? ShippingCharges { get; set; }
@@ -56,27 +40,24 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public String GoogleMapsUrl { get; set; }
     public String ShippingCarrier { get; set; }
     public String TrackingNumber { get; set; }
-    public DateTime ShippedOn { get; set; }
+    public DateTime ExpectedToShipOn { get; set; }
     public DateTime ExpectedToArrive { get; set; }
-    public String CreditCardNumber { get; set; }
-    public String CreditCardCVC { get; set; }
-    public DateTime CreditCardExpirationDate { get; set; }
+    public DateTime? ShippedOn { get; set; }
     public String SelectedCarrierId { get; set; }
     public String CarrierName { get; set; }
     public decimal TotalWeightInPounds { get; set; }
     public String ShipEngineShipmentId { get; set; }
     public String ShipEngineRateId { get; set; }
     public String ShipEngineLabelUrl { get; set; }
-
     public bool CalculatedShippingAndTaxes { get; set; }
     public bool CardDeclined { get; set; }
     public bool ShippingAddressDeclined { get; set; }
-
     public String clientIpAddress { get; set; }
+    public String ShipmentStatus { get; set; }
 
-    public CheckoutViewModel()
+    public ShipOutViewModel()
     {
-      LineItem = new List<ShoppingCartLineItemViewModel>();
+      LineItem = new List<ShippingLineItemViewModel>();
       CalculatedShippingAndTaxes = false;
       ShippingAddressDeclined = false;
       CardDeclined = false;

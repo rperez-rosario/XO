@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace XOSkinWebApp.Areas.Administration.Models
 {
-  public class OrderViewModel
+  public class ShipOrderViewModel
   {
     public long OrderId { get; set; }
     public DateTime? DatePlaced { get; set; }

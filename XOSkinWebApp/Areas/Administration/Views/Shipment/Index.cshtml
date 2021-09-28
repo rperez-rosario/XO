@@ -14,9 +14,6 @@
         Status
       </th>
       <th>
-        Pre-Paid Label
-      </th>
-      <th>
         Date Order Placed
       </th>
       <th>
@@ -44,9 +41,6 @@
         @Html.DisplayFor(modelItem => item.ShipmentStatus)
       </td>
       <td>
-        <a href="@item.ShippingLabelURL" target="_blank">Print</a>
-      </td>
-      <td>
         @Html.DisplayFor(modelItem => item.DatePlaced)
       </td>
       <td>
@@ -71,11 +65,23 @@
 }
     </tbody>
 </table>
-
 <script type="text/javascript">
   $(document).ready(function () {
+    function highlight_pending() {
+      const page = document.body.innerHTML;
+      document.body.innerHTML = page.replace(new RegExp("PENDING", "gi"), (match) => `<mark style="background-color: #FF7F7F">${match}</mark>`);
+    }
+
+    function highlight_shipped() {
+      const page = document.body.innerHTML;
+      document.body.innerHTML = page.replace(new RegExp("SHIPPED", "gi"), (match) => `<mark style="background-color: #90EE90">${match}</mark>`);
+    }
+
+    highlight_pending();
+    highlight_shipped();
+
     var table = $('#Shipments').DataTable({
-      'order': [[ 2, 'asc']]
+      'order': [[0, 'asc']]
     });
 
     new $.fn.dataTable.Responsive(table, {
