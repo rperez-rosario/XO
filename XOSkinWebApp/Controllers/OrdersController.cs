@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using XOSkinWebApp.ORM;
-using XOSkinWebApp.Models;
 using XOSkinWebApp.ConfigurationHelper;
 using Microsoft.Extensions.Options;
 using System.Web;
 using System.Text.Json;
 using ServiceStack;
+using XOSkinWebApp.Models;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -135,7 +135,6 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while retrieving order details.", ex);
       }
 
-      
       try
       {
         geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)

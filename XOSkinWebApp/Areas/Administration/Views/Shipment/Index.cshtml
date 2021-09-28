@@ -5,8 +5,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Shipments</h1>
-
+<h1>Order Fulfillment</h1>
+<h4>All Dates and Times UTC</h4>
 <table class="table" id="Shipments">
   <thead>
     <tr>
@@ -14,7 +14,10 @@
         Status
       </th>
       <th>
-        Date Placed
+        Pre-Paid Label
+      </th>
+      <th>
+        Date Order Placed
       </th>
       <th>
         Promised Ship Date
@@ -23,16 +26,13 @@
         Actual Ship Date
       </th>
       <th>
-        @Html.DisplayNameFor(model => model.Recipient)
+        Items
       </th>
       <th>
-        Number of Items
+        Recipient
       </th>
       <th>
-        Tracking Number
-      </th>
-      <th>
-        Label
+        State
       </th>
       <th></th>
     </tr>
@@ -44,28 +44,28 @@
         @Html.DisplayFor(modelItem => item.ShipmentStatus)
       </td>
       <td>
+        <a href="@item.ShippingLabelURL" target="_blank">Print</a>
+      </td>
+      <td>
         @Html.DisplayFor(modelItem => item.DatePlaced)
       </td>
       <td>
-        @Html.DisplayFor(modelItem => item.Shipped)
+        @Html.DisplayFor(modelItem => item.DateShipped)
       </td>
       <td>
         @Html.DisplayFor(modelItem => item.ActualDateShipped)
       </td>
       <td>
-        @Html.DisplayFor(modelItem => item.Recipient)
-      </td>
-      <td>
         @Html.DisplayFor(modelItem => item.NumberOfItems)
       </td>
       <td>
-        @Html.DisplayFor(modelItem => item.TrackingNumber)
+        @Html.DisplayFor(modelItem => item.Recipient)
       </td>
       <td>
-        <a href="@item.ShippingLabelURL">View/Print</a>
+        @Html.DisplayFor(modelItem => item.StateName)
       </td>
       <td>
-        <a asp-action="Edit" asp-route-id="@item.ShipmentId">Edit</a>
+        <a asp-action="Edit" asp-route-id="@item.OrderId">Edit</a>
       </td>
     </tr>
 }

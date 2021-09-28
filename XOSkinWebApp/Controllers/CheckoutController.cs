@@ -188,9 +188,6 @@ namespace XOSkinWebApp.Controllers
       TaxjarApi tjService = null;
       TaxResponseAttributes tjTaxRate = null;
       int i = 0;
-      String seShippingLabelRequestJson = null;
-      String seShippingLabelResponseJson = null;
-      String seShippingLabelUrl = null;
 
       ViewData["Country"] = new SelectList(new List<String> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
@@ -342,33 +339,11 @@ namespace XOSkinWebApp.Controllers
               {
                 Model.ShippingCharges = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
                 Model.ShipEngineShipmentId = root.GetProperty("shipment_id").ToString();
+                Model.ShipEngineRateId = rate.GetProperty("rate_id").ToString();
                 break;
               }
             }
           }
-
-          using var streamB = new MemoryStream();
-          using var writerB = new Utf8JsonWriter(streamB, options);
-
-          writerB.WriteStartObject();
-          writerB.WritePropertyName("label_format");
-          writerB.WriteStringValue("pdf");
-          writerB.WritePropertyName("label_layout");
-          writerB.WriteStringValue("4x6");
-          writerB.WritePropertyName("label_download_type");
-          writerB.WriteStringValue("url");
-          writerB.WriteEndObject();
-          
-          writerB.Flush();
-
-          seShippingLabelRequestJson = Encoding.UTF8.GetString(streamB.ToArray());
-
-          //seShippingLabelResponseJson = 
-          //  (_option.Value.ShipEngineGetLabelUrlFromIdUrl + Model.ShipEngineShipmentId).PostJsonToUrlAsync(seShippingLabelRequestJson,
-          //  requestFilter: webReq =>
-          //  {
-          //    webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
-          //  }).Result;
 
           tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
           tjTaxRate = tjService.TaxForOrder(new {
@@ -406,7 +381,7 @@ namespace XOSkinWebApp.Controllers
           });
           Model.Taxes = tjTaxRate.AmountToCollect;
         }
-        catch (Exception ex)
+        catch
         {
           Model.ShippingAddressDeclined = true;
           return RedirectToAction("Index", Model);
@@ -481,6 +456,8 @@ namespace XOSkinWebApp.Controllers
       int i = 0;
       List<Transaction> shOrderTransactions = null;
       String clientIpAddress = null;
+      String seShippingLabelRequestJson = null;
+      String seShippingLabelResponseJson = null;
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -646,11 +623,11 @@ namespace XOSkinWebApp.Controllers
             Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
             previousOrderBillTo = _context.OrderBillTos.OrderByDescending(x => x.Order).FirstOrDefault();
 
-            if (_context.AspNetUsers.Where(
+            if ((_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(
-              x => x.StripeCustomerId).FirstOrDefault() == null ||
-              (previousOrderBillTo != null &&
-              (previousOrderBillTo.NameOnCreditCard == null ? (Model.BillingName == null || 
+              x => x.StripeCustomerId).FirstOrDefault() == null &&
+              previousOrderBillTo != null) &&
+              ((previousOrderBillTo.NameOnCreditCard == null ? (Model.BillingName == null || 
               Model.BillingName.Trim().Equals(String.Empty)) : 
               !previousOrderBillTo.NameOnCreditCard.Equals(Model.BillingName == null ? String.Empty : Model.BillingName.Trim())) ||
               (previousOrderBillTo.AddressLine1 == null ? (Model.BillingAddress1 == null ||
@@ -1437,6 +1414,41 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while saving the order's line items.", ex);
       }
 
+      var options = new JsonWriterOptions
+      {
+        Indented = true
+      };
+
+      using var stream = new MemoryStream();
+      using var writer = new Utf8JsonWriter(stream, options);
+
+      writer.WriteStartObject();
+      writer.WritePropertyName("label_format");
+      writer.WriteStringValue("pdf");
+      writer.WritePropertyName("label_layout");
+      writer.WriteStringValue("4x6");
+      writer.WritePropertyName("label_download_type");
+      writer.WriteStringValue("url");
+      writer.WriteEndObject();
+
+      writer.Flush();
+
+      seShippingLabelRequestJson = Encoding.UTF8.GetString(stream.ToArray());
+
+      seShippingLabelResponseJson =
+        (_option.Value.ShipEngineGetLabelUrlFromIdUrl + Model.ShipEngineRateId).PostJsonToUrlAsync(seShippingLabelRequestJson,
+        requestFilter: webReq =>
+        {
+          webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+        }).Result;
+
+      using (JsonDocument document = JsonDocument.Parse(seShippingLabelResponseJson))
+      {
+        JsonElement root = document.RootElement;
+        Model.TrackingNumber = root.GetProperty("tracking_number").ToString();
+        Model.ShipEngineLabelUrl = root.GetProperty("label_download").GetProperty("pdf").ToString();
+      }
+
       try
       {
         _context.OrderBillTos.Add(new OrderBillTo()
@@ -1499,6 +1511,7 @@ namespace XOSkinWebApp.Controllers
             Order = order.Id,
             Arrives = Model.ExpectedToArrive,
             ShipEngineId = Model.ShipEngineShipmentId,
+            ShipEngineRateId = Model.ShipEngineRateId,
             ShippingLabelUrl = Model.ShipEngineLabelUrl
           });
 
@@ -1549,6 +1562,7 @@ namespace XOSkinWebApp.Controllers
             Order = order.Id,
             Arrives = Model.ExpectedToArrive,
             ShipEngineId = Model.ShipEngineShipmentId,
+            ShipEngineRateId = Model.ShipEngineRateId,
             ShippingLabelUrl = Model.ShipEngineLabelUrl
           });
 
@@ -1591,20 +1605,20 @@ namespace XOSkinWebApp.Controllers
       try
       {
         geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
-        .Replace("{adminDistrict}", Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState)
-        .Replace("{postalCode}", Model.ShippingAddressSame ? Model.BillingPostalCode.Trim() : Model.ShippingPostalCode.Trim())
-        .Replace("{locality}", Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim())
-        .Replace("{addressLine}", Model.ShippingAddressSame ?
+          .Replace("{adminDistrict}", Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState)
+          .Replace("{postalCode}", Model.ShippingAddressSame ? Model.BillingPostalCode.Trim() : Model.ShippingPostalCode.Trim())
+          .Replace("{locality}", Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim())
+          .Replace("{addressLine}", Model.ShippingAddressSame ?
           Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || 
           (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : 
           " " + Model.BillingAddress2.Trim()) :
           Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || 
           (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : 
           " " + Model.ShippingAddress2.Trim()))
-        .Replace("{includeNeighborhood}", "0")
-        .Replace("{includeValue}", String.Empty)
-        .Replace("{maxResults}", "1")
-        .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
+          .Replace("{includeNeighborhood}", "0")
+          .Replace("{includeValue}", String.Empty)
+          .Replace("{maxResults}", "1")
+          .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
 
         geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
         geoLocationJson = (geoLocationUrl).GetJsonFromUrl();

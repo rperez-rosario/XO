@@ -686,6 +686,10 @@ namespace XOSkinWebApp.ORM
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
+                entity.Property(e => e.ShipEngineRateId)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.ShippingLabelUrl)
                     .HasMaxLength(256)
                     .IsUnicode(false)

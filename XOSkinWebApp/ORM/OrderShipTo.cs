@@ -19,6 +19,7 @@ namespace XOSkinWebApp.ORM
         public bool? Shipped { get; set; }
         public string CarrierName { get; set; }
         public string ShipEngineId { get; set; }
+        public string ShipEngineRateId { get; set; }
         public string ShippingLabelUrl { get; set; }
         public string TrackingNumber { get; set; }
         public DateTime? ShipDate { get; set; }

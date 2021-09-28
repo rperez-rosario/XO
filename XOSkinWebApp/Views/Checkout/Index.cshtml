@@ -191,9 +191,10 @@ else
   <input type="hidden" asp-for="CalculatedShippingAndTaxes" value="@Model.CalculatedShippingAndTaxes" id="calculated-shipping" />
   <input type="hidden" asp-for="TotalWeightInPounds" value="@Model.TotalWeightInPounds" />
   <input type="hidden" asp-for="ShippedOn" value="@Model.ShippedOn" />
-  <input type="hidden" asp-for="ShipEngineShipmentId" value="@Model.ShipEngineShipmentId" />
   <input type="hidden" asp-for="CardDeclined" value="@Model.CardDeclined" id="card-declined" />
   <input type="hidden" asp-for="ShippingAddressDeclined" value="@Model.ShippingAddressDeclined" id="shipping-address-declined" />
+  <input type="hidden" asp-for="ShipEngineShipmentId" value="@Model.ShipEngineShipmentId" />
+  <input type="hidden" asp-for="ShipEngineRateId" value="@Model.ShipEngineRateId" />
 </form>
 <script type="text/javascript">
   $(document).ready(function () {

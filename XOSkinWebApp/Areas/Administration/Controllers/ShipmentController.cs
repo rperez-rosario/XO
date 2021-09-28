@@ -2,10 +2,13 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using ServiceStack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using XOSkinWebApp.Areas.Administration.Models;
 using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.ORM;
@@ -53,80 +56,161 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           Recipient = shipment.RecipientName,
           NumberOfItems = numberOfItems,
           TrackingNumber = shipment.TrackingNumber,
-          ShippingLabelURL = shipment.ShippingLabelUrl
+          ShippingLabelURL = shipment.ShippingLabelUrl,
+          StateName = shipment.StateName,
+          OrderId = shipment.Order
         });
       }
 
       return View(model);
     }
 
-    // GET: ShipmentController/Details/5
-    public ActionResult Details(int id)
-    {
-      return View();
-    }
-
-    // GET: ShipmentController/Create
-    public ActionResult Create()
-    {
-      return View();
-    }
-
-    // POST: ShipmentController/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Create(IFormCollection collection)
-    {
-      try
-      {
-        return RedirectToAction(nameof(Index));
-      }
-      catch
-      {
-        return View();
-      }
-    }
-
-    // GET: ShipmentController/Edit/5
-    public ActionResult Edit(int id)
-    {
-      return View();
-    }
-
     // POST: ShipmentController/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Edit(int id, IFormCollection collection)
+    public IActionResult Edit(long Id)
     {
+      ProductOrder order = null;
+      List<ProductOrderLineItem> lineItem = null;
+      OrderBillTo billing = null;
+      OrderShipTo shipping = null;
+      CheckoutViewModel checkout = null;
+      String geoLocationUrl = null;
+      String geoLocationJson = null;
+
       try
       {
-        return RedirectToAction(nameof(Index));
+        order = _context.ProductOrders.Where(x => x.Id == Id).FirstOrDefault();
+        lineItem = _context.ProductOrderLineItems.Where(x => x.ProductOrder == Id).ToList<ProductOrderLineItem>();
+        billing = _context.OrderBillTos.Where(x => x.Order == Id).FirstOrDefault();
+        shipping = _context.OrderShipTos.Where(x => x.Order == Id).FirstOrDefault();
+
+        checkout = new CheckoutViewModel()
+        {
+          BilledOn = billing.BillingDate == null ? new DateTime(1754, 1, 1) : billing.BillingDate.Value,
+          BillingAddress1 = billing.AddressLine1,
+          BillingAddress2 = billing.AddressLine2,
+          BillingCity = billing.CityName,
+          BillingCountry = billing.CountryName,
+          BillingName = billing.NameOnCreditCard,
+          BillingPostalCode = billing.PostalCode,
+          BillingState = billing.StateName,
+          CodeDiscount = order.CodeDiscount,
+          CouponDiscount = order.CouponDiscount,
+          ShippedOn = shipping.ShipDate == null ? new DateTime(1754, 1, 1) : shipping.ShipDate.Value,
+          ShippingName = shipping.RecipientName,
+          ShippingCountry = shipping.CountryName,
+          ShippingAddress1 = shipping.AddressLine1,
+          ShippingAddress2 = shipping.AddressLine2,
+          ShippingAddressSame = ShippingAddressSame(billing, shipping),
+          CreditCardCVC = null,
+          CreditCardExpirationDate = new DateTime(1754, 1, 1),
+          CreditCardNumber = null,
+          ExpectedToArrive = shipping.Arrives == null ? new DateTime(1754, 1, 1) : shipping.Arrives.Value,
+          IsGift = (bool)order.GiftOrder,
+          OrderId = Id,
+          CarrierName = shipping.CarrierName,
+          ShippingCharges = order.ShippingCost,
+          ShippingCity = shipping.CityName,
+          ShippingPostalCode = shipping.PostalCode,
+          ShippingState = shipping.StateName,
+          ShopifyId = order.ShopifyId == null ? long.MinValue : order.ShopifyId.Value,
+          SubTotal = order.Subtotal,
+          Taxes = order.ApplicableTaxes,
+          Total = order.Total,
+          TrackingNumber = shipping.TrackingNumber
+        };
+
+        checkout.LineItem = new List<ShoppingCartLineItemViewModel>();
+
+        foreach (ProductOrderLineItem li in lineItem)
+        {
+          checkout.LineItem.Add(new ShoppingCartLineItemViewModel()
+          {
+            Id = li.Id,
+            ImageSource = li.ImageSource,
+            ProductDescription = _context.Products.Where(x => x.Id == li.Product).Select(x => x.Description).FirstOrDefault(),
+            ProductId = li.Product,
+            ProductName = _context.Products.Where(x => x.Id == li.Product).Select(x => x.Name).FirstOrDefault(),
+            Quantity = li.Quantity,
+            Total = li.Total
+          });
+        }
+      }
+      catch (Exception ex)
+      {
+        throw new Exception("An error was encountered while retrieving order details.", ex);
+      }
+
+      try
+      {
+        geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
+        .Replace("{adminDistrict}", checkout.ShippingState)
+        .Replace("{postalCode}", checkout.ShippingPostalCode.Trim())
+        .Replace("{locality}", checkout.ShippingCity.Trim())
+        .Replace("{addressLine}", (checkout.ShippingAddress1.Trim() + (checkout.ShippingAddress2 == null ||
+          (checkout.ShippingAddress2 != null && checkout.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
+          " " + checkout.ShippingAddress2.Trim())))
+        .Replace("{includeNeighborhood}", "0")
+        .Replace("{includeValue}", String.Empty)
+        .Replace("{maxResults}", "1")
+        .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
+
+        geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
+        geoLocationJson = (geoLocationUrl).GetJsonFromUrl();
+
+        using (JsonDocument document = JsonDocument.Parse(geoLocationJson))
+        {
+          JsonElement root = document.RootElement;
+          JsonElement resourceSetElement = root.GetProperty("resourceSets");
+          JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
+          JsonElement resourcePoint = resource.GetProperty("point");
+          JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
+          checkout.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
+          checkout.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
+        }
       }
       catch
       {
-        return View();
+        // Address was not found. Fail silently and continue. Geolocation will not be displayed for this address.
       }
+
+      checkout.GoogleMapsUrl = _option.Value.GoogleMapsUrl;
+
+      ViewData.Add("OrderDetails.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("OrderDetails.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+
+      return View(checkout);
     }
 
-    // GET: ShipmentController/Delete/5
-    public ActionResult Delete(int id)
+    private bool ShippingAddressSame(OrderBillTo Billing, OrderShipTo Shipping)
     {
-      return View();
+      if (!Object.Equals(Billing.NameOnCreditCard, Shipping.RecipientName))
+        return false;
+      if (!Object.Equals(Billing.AddressLine1, Shipping.AddressLine1))
+        return false;
+      if (!Object.Equals(Billing.AddressLine2, Shipping.AddressLine2))
+        return false;
+      if (!Object.Equals(Billing.CityName, Shipping.CityName))
+        return false;
+      if (!Object.Equals(Billing.StateName, Shipping.StateName))
+        return false;
+      if (!Object.Equals(Billing.CountryName, Shipping.CountryName))
+        return false;
+      if (!Object.Equals(Billing.PostalCode, Shipping.PostalCode))
+        return false;
+      return true;
     }
 
-    // POST: ShipmentController/Delete/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Delete(int id, IFormCollection collection)
+    private int TotalQuantityOfItems(long OrderId)
     {
-      try
-      {
-        return RedirectToAction(nameof(Index));
-      }
-      catch
-      {
-        return View();
-      }
+      int total = 0;
+
+      foreach (ProductOrderLineItem lineItem in _context.ProductOrderLineItems.Where(
+        x => x.ProductOrder == OrderId).ToList())
+        total += lineItem.Quantity;
+
+      return total;
     }
   }
 }
