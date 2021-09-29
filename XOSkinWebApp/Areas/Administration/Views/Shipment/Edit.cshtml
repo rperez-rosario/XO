@@ -79,7 +79,7 @@
       <div style="text-align: right; margin-right: 40px">Placed: @Html.Raw(Model.BilledOn.ToShortDateString())</div>
       <br />
       <div style="text-align: right; margin-right: 40px">
-        Promised Fulfilled: <span>
+        Promised: <span>
           @Html.Raw(Model.ExpectedToShipOn.ToShortDateString())
         </span>
       </div>
@@ -89,7 +89,7 @@
         </span>
       </div>
       <div style="text-align: right; margin-right: 40px">
-        Fulfilled By: <span style="font-weight: 100">
+        By: <span style="font-weight: 100">
           @Html.Raw(Model.ShippedBy)
         </span>
       </div>

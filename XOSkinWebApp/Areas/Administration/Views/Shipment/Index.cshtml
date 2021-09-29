@@ -4,10 +4,9 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <h1>Order Fulfillment</h1>
 <h4>All Dates and Times UTC</h4>
-<table class="table" id="Fulfillments">
+<table class="table" id="Fulfillment">
   <thead>
     <tr>
       <th>
@@ -69,18 +68,20 @@
   $(document).ready(function () {
     function highlight_pending() {
       const page = document.body.innerHTML;
-      document.body.innerHTML = page.replace(new RegExp("PENDING", "gi"), (match) => `<mark style="background-color: #FF7F7F">${match}</mark>`);
+      document.body.innerHTML = page.replace(new RegExp("PENDING", "gi"), (match) =>
+        `<mark style="background-color: #FF7F7F">${match}</mark>`);
     }
 
     function highlight_shipped() {
       const page = document.body.innerHTML;
-      document.body.innerHTML = page.replace(new RegExp("SHIPPED", "gi"), (match) => `<mark style="background-color: #90EE90">${match}</mark>`);
+      document.body.innerHTML = page.replace(new RegExp("SHIPPED", "gi"), (match) =>
+        `<mark style="background-color: #90EE90">${match}</mark>`);
     }
 
     highlight_pending();
     highlight_shipped();
 
-    var table = $('#Fulfillments').DataTable({
+    var table = $('#Fulfillment').DataTable({
       'order': [[0, 'asc']]
     });
 
