@@ -7,20 +7,20 @@
 
 <h1>Order Fulfillment</h1>
 <h4>All Dates and Times UTC</h4>
-<table class="table" id="Shipments">
+<table class="table" id="Fulfillments">
   <thead>
     <tr>
       <th>
         Status
       </th>
       <th>
-        Date Order Placed
+        Order Placed
       </th>
       <th>
-        Promised Ship Date
+        Promised Fulfillment
       </th>
       <th>
-        Actual Ship Date
+        Fulfilled
       </th>
       <th>
         Items
@@ -44,10 +44,10 @@
         @Html.DisplayFor(modelItem => item.DatePlaced)
       </td>
       <td>
-        @Html.DisplayFor(modelItem => item.DateShipped)
+        @Html.Raw(item.DateShipped == null ? String.Empty : ((DateTime)item.DateShipped).ToShortDateString())
       </td>
       <td>
-        @Html.DisplayFor(modelItem => item.ActualDateShipped)
+        @Html.Raw(item.ActualDateShipped == null ? "PENDING" : item.ActualDateShipped)
       </td>
       <td>
         @Html.DisplayFor(modelItem => item.NumberOfItems)
@@ -59,7 +59,7 @@
         @Html.DisplayFor(modelItem => item.StateName)
       </td>
       <td>
-        <a asp-action="Edit" asp-route-id="@item.OrderId">Edit</a>
+        <a asp-action="Edit" asp-route-id="@item.OrderId">View</a>
       </td>
     </tr>
 }
@@ -80,7 +80,7 @@
     highlight_pending();
     highlight_shipped();
 
-    var table = $('#Shipments').DataTable({
+    var table = $('#Fulfillments').DataTable({
       'order': [[0, 'asc']]
     });
 

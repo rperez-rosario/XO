@@ -18,6 +18,7 @@ namespace XOSkinWebApp.ORM
             DiscountCodeLastUpdatedByNavigations = new HashSet<DiscountCode>();
             DiscountCouponCreatedByNavigations = new HashSet<DiscountCoupon>();
             DiscountCouponLastUpdatedByNavigations = new HashSet<DiscountCoupon>();
+            OrderShipTos = new HashSet<OrderShipTo>();
             PaymentPlanCreatedByNavigations = new HashSet<PaymentPlan>();
             PaymentPlanLastUpdatedByNavigations = new HashSet<PaymentPlan>();
             PaymentPlanProductOrderCreatedByNavigations = new HashSet<PaymentPlanProductOrder>();
@@ -73,6 +74,7 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<DiscountCode> DiscountCodeLastUpdatedByNavigations { get; set; }
         public virtual ICollection<DiscountCoupon> DiscountCouponCreatedByNavigations { get; set; }
         public virtual ICollection<DiscountCoupon> DiscountCouponLastUpdatedByNavigations { get; set; }
+        public virtual ICollection<OrderShipTo> OrderShipTos { get; set; }
         public virtual ICollection<PaymentPlan> PaymentPlanCreatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlan> PaymentPlanLastUpdatedByNavigations { get; set; }
         public virtual ICollection<PaymentPlanProductOrder> PaymentPlanProductOrderCreatedByNavigations { get; set; }

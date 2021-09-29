@@ -26,7 +26,9 @@ namespace XOSkinWebApp.ORM
         public DateTime? ActualShipDate { get; set; }
         public DateTime? Arrives { get; set; }
         public DateTime? ActualArrives { get; set; }
+        public string ShippedBy { get; set; }
 
         public virtual ProductOrder OrderNavigation { get; set; }
+        public virtual AspNetUser ShippedByNavigation { get; set; }
     }
 }

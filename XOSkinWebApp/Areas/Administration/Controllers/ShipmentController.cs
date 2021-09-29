@@ -117,7 +117,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           TrackingNumber = shipping.TrackingNumber,
           ShipEngineLabelUrl = shipping.ShippingLabelUrl,
           ShipmentStatus = shipping.Shipped == null ? "PENDING" : (bool)shipping.Shipped ? "SHIPPED" : "PENDING",
-          ShippedOn = shipping.ActualShipDate
+          ShippedOn = shipping.ActualShipDate,
+          ShippedBy = _context.AspNetUsers.Where(
+            x => x.Id.Equals(shipping.ShippedBy)).Select(x => x.Email).FirstOrDefault()
         };
 
         checkout.LineItem = new List<ShippingLineItemViewModel>();
@@ -219,9 +221,12 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       order.Shipped = true;
       order.ActualShipDate = DateTime.UtcNow;
       order.ActualArrives = DateTime.UtcNow.AddDays(3);
+      order.ShippedBy = _context.AspNetUsers.Where(
+        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
+
       _context.OrderShipTos.Update(order);
       _context.SaveChanges();
-
+     
       return RedirectToAction("Index");
     }
 

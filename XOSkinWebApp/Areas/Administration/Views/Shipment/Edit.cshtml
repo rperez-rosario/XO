@@ -6,7 +6,7 @@
 
 <h1>Order Fulfillment</h1>
 <h4>All Dates and Times UTC</h4>
-<h4>Shipment Status: @Model.ShipmentStatus</h4>
+<h4>Fulfillment Status: @Model.ShipmentStatus</h4>
 <br />
 @Html.ActionLink("Back to List", "Index")
 <br /><br />
@@ -76,20 +76,21 @@
     </div>
     <div class="col-sm-4" style="font-weight: 500; line-height: 1.2; font-size: 1.5rem">
       <div style="text-align: right; margin-right: 40px">Order: @Html.Raw("#XO" + (Model.OrderId + 10000))</div>
-      <div style="text-align: right; margin-right: 40px">Order Placed: @Html.Raw(Model.BilledOn.ToShortDateString())</div>
+      <div style="text-align: right; margin-right: 40px">Placed: @Html.Raw(Model.BilledOn.ToShortDateString())</div>
+      <br />
       <div style="text-align: right; margin-right: 40px">
-        Promised Shipping: <span>
+        Promised Fulfilled: <span>
           @Html.Raw(Model.ExpectedToShipOn.ToShortDateString())
         </span>
       </div>
       <div style="text-align: right; margin-right: 40px">
-        Promised Arrival: <span>
-          @Html.Raw(Model.ExpectedToArrive.ToShortDateString())
+        Fulfilled: <span>
+          @Html.Raw(Model.ShippedOn == null ? String.Empty : ((DateTime)Model.ShippedOn).ToShortDateString())
         </span>
       </div>
       <div style="text-align: right; margin-right: 40px">
-        Order Shipped On: <span>
-          @Html.Raw(Model.ShippedOn == null ? String.Empty : ((DateTime)Model.ShippedOn).ToShortDateString())
+        Fulfilled By: <span style="font-weight: 100">
+          @Html.Raw(Model.ShippedBy)
         </span>
       </div>
       <br />
@@ -97,7 +98,7 @@
       <div style="text-align: right; margin-right: 40px">
         <form asp-action="Edit">
           <a class="btn-outline-dark btn" href="@Model.ShipEngineLabelUrl" target="_blank">Print Shipping Label</a>
-          <input type="submit" class="btn-outline-dark btn" value="Mark As Fulfilled" disabled="@(Model.ShipmentStatus.Equals("SHIPPED"))"/>
+          <input type="submit" class="btn-outline-dark btn" value="Mark As Fulfilled" disabled="@(Model.ShipmentStatus.Equals("SHIPPED"))" />
           <input type="hidden" asp-for="OrderId" value="@Model.OrderId" />
         </form>
       </div>
@@ -110,7 +111,6 @@
     <tr>
       <th></th>
       <th class="text-nowrap">Product Name</th>
-      <th>Description</th>
       <th>Quantity</th>
     </tr>
   </thead>
@@ -120,10 +120,9 @@
       <tr>
         <td><img src="@lineItem.ImageSource" style="height: 100px; display: inline; float: left" /></td>
         <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
-        <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
         <td style="width: 170px">
-          <div style="display: inline; float: left">
-            @lineItem.Quantity
+          <div style="display: inline; float: left; font-weight: bold">
+            (@lineItem.Quantity)
           </div>
         </td>
       </tr>

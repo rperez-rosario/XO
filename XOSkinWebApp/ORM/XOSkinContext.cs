@@ -690,6 +690,8 @@ namespace XOSkinWebApp.ORM
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
+                entity.Property(e => e.ShippedBy).HasMaxLength(450);
+
                 entity.Property(e => e.ShippingLabelUrl)
                     .HasMaxLength(256)
                     .IsUnicode(false)
@@ -707,6 +709,11 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.Order)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_OrderShipTo_ProductOrder");
+
+                entity.HasOne(d => d.ShippedByNavigation)
+                    .WithMany(p => p.OrderShipTos)
+                    .HasForeignKey(d => d.ShippedBy)
+                    .HasConstraintName("FK_OrderShipTo_AspNetUsers");
             });
 
             modelBuilder.Entity<Page>(entity =>

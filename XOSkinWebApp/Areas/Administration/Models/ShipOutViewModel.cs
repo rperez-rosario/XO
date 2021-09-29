@@ -54,6 +54,7 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public bool ShippingAddressDeclined { get; set; }
     public String clientIpAddress { get; set; }
     public String ShipmentStatus { get; set; }
+    public String ShippedBy { get; set; }
 
     public ShipOutViewModel()
     {
