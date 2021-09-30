@@ -19,7 +19,8 @@ namespace XOSkinWebApp.Areas.Administration.Models
 
     [StringLength(500, ErrorMessage = "Maximum field length is 500.")]
     [Required(ErrorMessage = "Placement code required.")]
-    [Remote("PlacementCodeAvailable", "LocalizedImages", ErrorMessage = "Placement code already registered.", AdditionalFields = "ActionCreate, Page, Language, OriginalLanguage, OriginalPlacementCode")]
+    [Remote("PlacementCodeAvailable", "LocalizedImages", ErrorMessage = "Placement code already registered.", 
+      AdditionalFields = "ActionCreate, Page, Language, OriginalLanguage, OriginalPlacementCode")]
     public string PlacementPointCode { get; set; }
 
     public int Page { get; set; }

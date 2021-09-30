@@ -1,0 +1,51 @@
+﻿@model XOSkinWebApp.Areas.Administration.Models.CostViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>Cost</h4>
+<hr />
+<div class="row">
+  <div class="col-md-4">
+  <form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+      <label asp-for="Amount" class="control-label">Amount (USD)</label>
+      <input asp-for="Amount" class="form-control" id="Amount" readonly />
+      <span asp-validation-for="Amount" class="text-danger"></span>
+    </div>
+    <div class="form-group form-check">
+      <label class="form-check-label">
+        <input class="form-check-input" asp-for="Active" /> @Html.DisplayNameFor(model => model.Active)
+      </label>
+    </div>
+    <div class="form-group">
+      <label asp-for="CreatedBy" class="control-label"></label>
+      <input asp-for="CreatedBy" class="form-control" readonly />
+      <span asp-validation-for="CreatedBy" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+      <label asp-for="CreatedOn" class="control-label"></label>
+      <input asp-for="CreatedOn" class="form-control" readonly />
+      <span asp-validation-for="CreatedOn" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+      <input type="submit" value="Save" class="btn btn-primary" />
+    </div>
+    @Html.Hidden("ActionCreate", "False")
+  </form>
+  </div>
+</div>
+
+<div>
+  <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+  @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

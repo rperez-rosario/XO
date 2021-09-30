@@ -1,0 +1,64 @@
+﻿@model IEnumerable<XOSkinWebApp.Areas.Administration.Models.PriceViewModel>
+
+@{
+  ViewData["Title"] = "Prices";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Prices</h1>
+
+<p>
+  <a asp-action="Create">Create New</a>
+</p>
+<table class="table" id="Prices">
+  <thead>
+    <tr>
+      <th>
+        @Html.DisplayNameFor(model => model.Amount)
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.Active)
+      </th>
+      <th>
+        Created By
+      </th>
+      <th>
+        Created On
+      </th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+@foreach (var item in Model) {
+    <tr>
+      <td>
+        $@Html.DisplayFor(modelItem => item.Amount)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.Active)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.CreatedBy)
+      </td>
+      <td>
+         @Html.DisplayFor(modelItem => item.CreatedOn)
+      </td>
+      <td>
+        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+      </td>
+    </tr>
+}
+    </tbody>
+</table>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#Prices').DataTable({
+      'order': [[3, 'desc']]
+    });
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+</script>

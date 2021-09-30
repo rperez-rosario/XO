@@ -22,7 +22,8 @@ namespace XOSkinWebApp.Areas.Administration.Models
 
     [StringLength(200, ErrorMessage = "Maximum field length is 200.")]
     [Required(ErrorMessage = "Questionnaire name required.")]
-    [Remote("QuestionnaireNameAvailable", "Questionnaires", ErrorMessage = "Questionnaire name already registered.", AdditionalFields = "ActionCreate, OriginalQuestionnaireName")]
+    [Remote("QuestionnaireNameAvailable", "Questionnaires", ErrorMessage = "Questionnaire name already registered.", 
+      AdditionalFields = "ActionCreate, OriginalQuestionnaireName")]
     public string QuestionnaireName { get; set; }
 
     public string Description { get; set; }

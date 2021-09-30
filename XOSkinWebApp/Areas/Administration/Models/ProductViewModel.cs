@@ -19,7 +19,8 @@ namespace XOSkinWebApp.Areas.Administration.Models
     [Required(ErrorMessage = "An SKU is required.")]
     public String Sku { get; set; }
 
-    [Remote("ProductNameAvailable", "Product", ErrorMessage = "Product name already registered.", AdditionalFields = "ActionCreate, OriginalProductName")]
+    [Remote("ProductNameAvailable", "Product", ErrorMessage = "Product name already registered.", 
+      AdditionalFields = "ActionCreate, OriginalProductName")]
     [Required(ErrorMessage = "A name is required.")]
     public String Name { get; set; }
 
