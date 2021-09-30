@@ -88,15 +88,13 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       {
         ViewData["ProductType"] = new MultiSelectList(_context.ProductTypes, "Id", "Name");
         ViewData["Price"] = new SelectList(_context.Prices.Where(
-          x => x.ValidFrom <= DateTime.UtcNow).Where(
-          x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
+          x => x.Active), "Id", "Amount");
         ViewData["Cost"] = new SelectList(_context.Costs.Where(
-          x => x.ValidFrom <= DateTime.UtcNow).Where(
-          x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
+          x => x.Active), "Id", "Amount");
         ViewData["Ingredient"] = new MultiSelectList(_context.Ingredients.OrderBy(x => x.Name), "Id", "Name");
         ViewData["KitType"] = new SelectList(_context.KitTypes, "Id", "Name");
         ViewData["Product"] = new SelectList(_context.Products.Where(
-          x => x.Active == true).Where(
+          x => x.Active).Where(
           x => x.KitType == null).OrderBy(x => x.Name), "Id", "Name");
       }
       catch (Exception ex)
@@ -405,11 +403,9 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         
         ViewData["ProductType"] = new MultiSelectList(_context.ProductTypes, "Id", "Name");
         ViewData["Price"] = new SelectList(_context.Prices.Where(
-          x => x.ValidFrom <= DateTime.UtcNow).Where(
-          x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
+          x => x.Active), "Id", "Amount");
         ViewData["Cost"] = new SelectList(_context.Costs.Where(
-          x => x.ValidFrom <= DateTime.UtcNow).Where(
-          x => x.ValidTo >= DateTime.UtcNow), "Id", "Amount");
+          x => x.Active), "Id", "Amount");
         ViewData["Ingredient"] = new MultiSelectList(ingredientList, "Id", "Name");
         ViewData["KitType"] = new SelectList(_context.KitTypes, "Id", "Name");
         ViewData["Product"] = new SelectList(productList, "Id", "Name");

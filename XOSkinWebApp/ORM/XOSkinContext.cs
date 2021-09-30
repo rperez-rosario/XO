@@ -353,10 +353,6 @@ namespace XOSkinWebApp.ORM
                     .HasMaxLength(450);
 
                 entity.Property(e => e.CreatedOn).HasColumnType("datetime");
-
-                entity.Property(e => e.ValidFrom).HasColumnType("datetime");
-
-                entity.Property(e => e.ValidTo).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<DiscountCode>(entity =>
@@ -927,10 +923,6 @@ namespace XOSkinWebApp.ORM
                     .HasMaxLength(450);
 
                 entity.Property(e => e.CreatedOn).HasColumnType("datetime");
-
-                entity.Property(e => e.ValidFrom).HasColumnType("datetime");
-
-                entity.Property(e => e.ValidTo).HasColumnType("datetime");
 
                 entity.HasOne(d => d.CreatedByNavigation)
                     .WithMany(p => p.Prices)

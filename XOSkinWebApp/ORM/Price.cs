@@ -14,8 +14,7 @@ namespace XOSkinWebApp.ORM
 
         public long Id { get; set; }
         public decimal Amount { get; set; }
-        public DateTime ValidFrom { get; set; }
-        public DateTime ValidTo { get; set; }
+        public bool Active { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
 
