@@ -12,8 +12,10 @@ Bootstrap
 DataTables
 Razor
 3.	Latest releases
-0.1 Visual Studio project created, repository initiated with seed project files. (5/2021)
-0.8 About 80% of work towards launch version 1.0 completed. (10/2021)
+<ul>
+<li>0.1 Visual Studio project created, repository initiated with seed project files. (5/2021)</li>
+<li>0.8 About 80% of work towards launch version 1.0 completed. (10/2021)</li>
+</ul>
 4.	API references
 https://docs.microsoft.com/en-us/dotnet/csharp/
 https://getbootstrap.com/
