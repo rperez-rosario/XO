@@ -8,12 +8,7 @@ Including but not limited to:
 # Getting Started
 1.	Installation process
 
-A. Create and configure a private application within the target Shopify store.<br /><br /> 
-B. Extract and deploy current .dacpac to SQL Server. Configure security, and domain entities 
-as needed.<br /><br />
-C. Web or folder deploy to IIS or Azure Cloud App (.NET Core 5.0 application pool), 
-configure appsettings.json as needed.<br /><br />
-D. Access using a web browser or build and execute Visual Studio solution.
+(See "Build and Test" section of this document.)
 
 2.	Software dependencies
 
