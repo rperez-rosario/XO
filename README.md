@@ -1,5 +1,5 @@
 # Introduction 
-This private project repository houses source code and project documents for the XO Skin project. 
+This private project repository houses source code and project documents for the XO Skin Project. 
 Including but not limited to:
 
 1. The electronic commerce web application.
