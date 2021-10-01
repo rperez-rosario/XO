@@ -1,5 +1,5 @@
 # Introduction 
-This orivate project repository houses source code and project documents for the XO Skin project. 
+This private project repository houses source code and project documents for the XO Skin project. 
 Including but not limited to: 1. the electronic commerce web application, 2. the mobile applications.
 # Getting Started
 1.	Installation process
