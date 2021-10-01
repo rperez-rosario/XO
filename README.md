@@ -1,6 +1,12 @@
 # Introduction 
 This private project repository houses source code and project documents for the XO Skin project. 
-Including but not limited to: 1. the electronic commerce web application, 2. the mobile applications.
+Including but not limited to:
+ 
+<ul>
+<li>The electronic commerce web application.</li> 
+<li>The mobile applications.<li>
+<ul>
+
 # Getting Started
 1.	Installation process
 TODO: To be detailed as the project progresses.
@@ -13,12 +19,14 @@ Bootstrap
 DataTables
 Razor
 3.	Latest releases
+
 <ul>
 <li>0.1 Visual Studio project created, repository initiated with seed project files. (5/2021)</li>
 <li>0.8 About 80% of work towards launch version 1.0 completed. (10/2021)</li>
 </ul>
 
 4.	Web API, languages and technology stack references
+
 <ul>
 <li>https://docs.microsoft.com/en-us/dotnet/csharp/</li>
 <li>https://getbootstrap.com/</li>
