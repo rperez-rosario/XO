@@ -6,7 +6,8 @@ Including but not limited to:
 2. The mobile applications.
 
 # Getting Started
-1.	Installation process<br />
+1.	Installation process
+
 (See "Build and Test" section of this document.)
 
 2.	Software dependencies
