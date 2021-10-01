@@ -29,6 +29,7 @@ namespace XOSkinWebApp.Controllers
     public IActionResult Index()
     {
       List<OrderViewModel> order = new List<OrderViewModel>();
+      OrderShipTo shipping = null;
 
       foreach (ProductOrder o in _context.ProductOrders.Where(
         x => x.User.Equals(_context.AspNetUsers.Where(
@@ -37,15 +38,18 @@ namespace XOSkinWebApp.Controllers
         x => x.Completed != null).Where(
         x => x.Completed == true).OrderByDescending(x => x.DatePlaced).ToList())
       {
+        shipping = _context.OrderShipTos.Where(x => x.Order == o.Id).FirstOrDefault();
         order.Add(new OrderViewModel()
         {
           OrderId = o.Id,
-          Arrives = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.Arrives).FirstOrDefault(),
+          Arrives = (shipping.Shipped == null || (bool)!shipping.Shipped) ? 
+            _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.Arrives).FirstOrDefault() : 
+            ((DateTime)shipping.ActualArrives),
           Recipient = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.RecipientName).FirstOrDefault(),
-          NumberOfItems = TotalQuantityOfItems(o.Id),
-          Carrier = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.CarrierName).FirstOrDefault(),
           DatePlaced = o.DatePlaced,
-          TrackingNumber = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault()
+          TrackingNumber = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault(),
+          Status = shipping.Shipped == null ? "Shipping Soon" : ((bool)shipping.Shipped ?
+            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "Shipping Soon")
         });
       }
 
@@ -90,7 +94,8 @@ namespace XOSkinWebApp.Controllers
           BillingState = billing.StateName,
           CodeDiscount = order.CodeDiscount,
           CouponDiscount = order.CouponDiscount,
-          ShippedOn = shipping.ShipDate == null ? new DateTime(1754, 1, 1) : shipping.ShipDate.Value,
+          ShippedOn = (shipping.Shipped == null || (bool)!shipping.Shipped) ? (DateTime)shipping.ShipDate : (DateTime)shipping.ActualShipDate,
+          FulfillmentStatus = (shipping.Shipped == null || (bool)!shipping.Shipped) ? "Shipping Soon" : "Shipped",
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
           ShippingAddress1 = shipping.AddressLine1,
@@ -99,7 +104,7 @@ namespace XOSkinWebApp.Controllers
           CreditCardCVC = null,
           CreditCardExpirationDate = new DateTime(1754, 1, 1),
           CreditCardNumber = null,
-          ExpectedToArrive = shipping.Arrives == null ? new DateTime(1754, 1, 1) : shipping.Arrives.Value,
+          ExpectedToArrive = (shipping.Shipped == null || (bool)!shipping.Shipped) ? (DateTime)shipping.Arrives : (DateTime)shipping.ActualArrives,
           IsGift = (bool)order.GiftOrder,
           OrderId = Id,
           CarrierName = shipping.CarrierName,

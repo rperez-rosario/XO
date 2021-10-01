@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using XOSkinWebApp.Areas.Administration.Models;
 
-namespace XOSkinWebApp.Models
+namespace XOSkinWebApp.Areas.Administration.Models
 {
   public class CheckoutViewModel
   {

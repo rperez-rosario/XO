@@ -14,6 +14,7 @@ namespace XOSkinWebApp.ORM
             AspNetUserLogins = new HashSet<AspNetUserLogin>();
             AspNetUserRoles = new HashSet<AspNetUserRole>();
             AspNetUserTokens = new HashSet<AspNetUserToken>();
+            Costs = new HashSet<Cost>();
             DiscountCodeCreatedByNavigations = new HashSet<DiscountCode>();
             DiscountCodeLastUpdatedByNavigations = new HashSet<DiscountCode>();
             DiscountCouponCreatedByNavigations = new HashSet<DiscountCoupon>();
@@ -70,6 +71,7 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<AspNetUserLogin> AspNetUserLogins { get; set; }
         public virtual ICollection<AspNetUserRole> AspNetUserRoles { get; set; }
         public virtual ICollection<AspNetUserToken> AspNetUserTokens { get; set; }
+        public virtual ICollection<Cost> Costs { get; set; }
         public virtual ICollection<DiscountCode> DiscountCodeCreatedByNavigations { get; set; }
         public virtual ICollection<DiscountCode> DiscountCodeLastUpdatedByNavigations { get; set; }
         public virtual ICollection<DiscountCoupon> DiscountCouponCreatedByNavigations { get; set; }

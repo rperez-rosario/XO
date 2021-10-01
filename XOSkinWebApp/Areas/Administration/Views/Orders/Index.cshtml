@@ -1,0 +1,72 @@
+﻿@model IEnumerable<XOSkinWebApp.Areas.Administration.Models.OrderViewModel>
+
+@{
+  ViewData["Title"] = "Your Orders";
+}
+
+<h1>Orders</h1>
+
+<table class="table" id="Orders">
+  <thead>
+    <tr>
+      <th>
+        Confirmation Number
+      </th>
+      <th>
+        Date Placed
+      </th>
+      <th>
+        Recipient
+      </th>
+      <th>
+        Status
+      </th>
+      <th>
+        Cancellation
+      </th>
+      <th>
+        Refund
+      </th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  @foreach (var item in Model)
+  {
+  <tr>
+    <td>
+      @Html.Raw("#XO" + (item.OrderId + 10000))
+    </td>
+    <td>
+      @Html.Raw(item.DatePlaced == null ? String.Empty : item.DatePlaced.Value.ToShortDateString())
+    </td>
+    <td>
+      @Html.Raw(item.Recipient)
+    </td>
+    <td>
+      @Html.Raw(item.Status)
+    </td>
+    <td>
+      @Html.Raw(item.CancellationStatus == null ? String.Empty : item.CancellationStatus.ToString())
+    </td>
+    <td>
+      @Html.Raw(item.RefundStatus == null ? String.Empty : item.RefundStatus.ToString())
+    </td>
+    <td>
+      <a asp-action="Edit" asp-route-id="@item.OrderId">Details</a>
+    </td>
+  </tr>
+  }
+  </tbody>
+</table>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#Orders').DataTable({
+      'order': [[0, 'desc']]
+    });
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+</script>

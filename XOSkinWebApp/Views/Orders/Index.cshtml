@@ -21,13 +21,10 @@
       Recipient
     </th>
     <th>
-      Items
+      Status
     </th>
     <th>
-      Arrival
-    </th>
-    <th>
-      Carrier
+      Arrives
     </th>
     <th>
       Tracking Number
@@ -49,13 +46,10 @@
       @Html.Raw(item.Recipient)
     </td>
     <td>
-      @Html.Raw(item.NumberOfItems)
+      @Html.Raw(item.Status)
     </td>
     <td>
       @Html.Raw(item.Arrives == null ? String.Empty : item.Arrives.Value.ToShortDateString())
-    </td>
-    <td>
-      @Html.DisplayFor(modelItem => item.Carrier)
     </td>
     <td>
       @Html.DisplayFor(modelItem => item.TrackingNumber)

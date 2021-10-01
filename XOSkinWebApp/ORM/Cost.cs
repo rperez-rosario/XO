@@ -18,6 +18,7 @@ namespace XOSkinWebApp.ORM
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
 
+        public virtual AspNetUser CreatedByNavigation { get; set; }
         public virtual ICollection<Product> Products { get; set; }
     }
 }

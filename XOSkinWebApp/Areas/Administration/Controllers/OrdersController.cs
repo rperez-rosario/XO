@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using ServiceStack;
-using ShopifySharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using ServiceStack;
 using XOSkinWebApp.Areas.Administration.Models;
 using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.ORM;
@@ -17,74 +16,80 @@ using XOSkinWebApp.ORM;
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
   [Area("Administration")]
-  [Authorize]
-  public class ShipmentController : Controller
+  public class OrdersController : Controller
   {
     private readonly XOSkinContext _context;
     private readonly IOptions<Option> _option;
 
-    public ShipmentController(XOSkinContext context, IOptions<Option> option)
+    public OrdersController(XOSkinContext context, IOptions<Option> option)
     {
       _context = context;
       _option = option;
     }
 
-    // GET: ShipmentController
-    public ActionResult Index()
+    // GET: Administration/Orders
+    public async Task<IActionResult> Index()
     {
-      List<ShipmentViewModel> model = new List<ShipmentViewModel>();
-      int numberOfItems;
+      List<OrderViewModel> order = null;
+      OrderShipTo shipment = null;
+      OrderBillTo billing = null;
 
-      foreach (OrderShipTo shipment in _context.OrderShipTos.ToList())
+      order = new List<OrderViewModel>();
+
+      foreach (ProductOrder po in await _context.ProductOrders.ToListAsync())
       {
-        numberOfItems = 0;
-
-        foreach (ProductOrderLineItem item in _context.ProductOrderLineItems.Where(
-          x => x.ProductOrder == shipment.Order))
+        shipment = _context.OrderShipTos.Where(x => x.Order == po.Id).FirstOrDefault();
+        billing = _context.OrderBillTos.Where(x => x.Order == po.Id).FirstOrDefault();
+        order.Add(new OrderViewModel()
         {
-          numberOfItems += item.Quantity;
-        }
-
-        model.Add(new ShipmentViewModel()
-        {
-          ShipmentStatus = shipment.Shipped == true ? "SHIPPED" : "PENDING",
-          DatePlaced = _context.ProductOrders.Where(
-            x => x.Id == shipment.Order).Select(x => x.DatePlaced).FirstOrDefault(),
-          DateShipped = shipment.ShipDate,
-          ActualDateShipped = shipment.ActualShipDate,
           Arrives = shipment.Arrives,
-          ActualArrives = shipment.ActualArrives,
+          Carrier = shipment.CarrierName,
+          DatePlaced = po.DatePlaced,
+          NumberOfItems = TotalQuantityOfItems(po.Id),
+          OrderId = po.Id,
           Recipient = shipment.RecipientName,
-          NumberOfItems = numberOfItems,
           TrackingNumber = shipment.TrackingNumber,
-          ShippingLabelURL = shipment.ShippingLabelUrl,
-          StateName = shipment.StateName,
-          OrderId = shipment.Order
+          Status = shipment.Shipped == null ? "Shipping Soon" : ((bool)shipment.Shipped ?
+            "Shipped: " + ((DateTime)shipment.ActualShipDate).ToShortDateString() : "Shipping Soon"),
+          RefundStatus = (billing.RefundRequested == null || (bool)!billing.RefundRequested) ? "NOT REQUESTED" :
+            (bool)billing.RefundRequested && (billing.Refunded == null || (bool)!billing.Refunded) ? "REQUESTED" :
+            ((billing.Refunded == null || (bool)!billing.Refunded) ? "NOT REQUESTED" : "REFUNDED"),
+          RefundDate = billing.RefundedOn,
+          RefundReason = billing.RefundReason,
+          CancellationStatus = (po.Cancelled == null || (bool)!po.Cancelled) ? "NOT REQUESTED" : "CANCELLED",
+          CancellationDate = po.CancelledOn,
+          CancelReason = po.CancelReason
         });
       }
 
-      return View(model);
+      return View(order);
     }
 
-    // GET: ShipmentController/Edit/5
+    // GET: Administration/Orders/Edit/5
     public IActionResult Edit(long Id)
     {
       ProductOrder order = null;
       List<ProductOrderLineItem> lineItem = null;
       OrderBillTo billing = null;
       OrderShipTo shipping = null;
-      ShipOutViewModel checkout = null;
+      CheckoutViewModel checkout = null;
       String geoLocationUrl = null;
       String geoLocationJson = null;
 
       try
       {
         order = _context.ProductOrders.Where(x => x.Id == Id).FirstOrDefault();
+
+        // Check if order belongs to currently logged-in user.
+        if (!order.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
+          return new RedirectToActionResult("Index", "Orders", null);
+
         lineItem = _context.ProductOrderLineItems.Where(x => x.ProductOrder == Id).ToList<ProductOrderLineItem>();
         billing = _context.OrderBillTos.Where(x => x.Order == Id).FirstOrDefault();
         shipping = _context.OrderShipTos.Where(x => x.Order == Id).FirstOrDefault();
 
-        checkout = new ShipOutViewModel()
+        checkout = new CheckoutViewModel()
         {
           BilledOn = billing.BillingDate == null ? new DateTime(1754, 1, 1) : billing.BillingDate.Value,
           BillingAddress1 = billing.AddressLine1,
@@ -96,13 +101,17 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           BillingState = billing.StateName,
           CodeDiscount = order.CodeDiscount,
           CouponDiscount = order.CouponDiscount,
-          ExpectedToShipOn = shipping.ShipDate == null ? new DateTime(1754, 1, 1) : shipping.ShipDate.Value,
+          ShippedOn = (shipping.Shipped == null || (bool)!shipping.Shipped) ? (DateTime)shipping.ShipDate : (DateTime)shipping.ActualShipDate,
+          FulfillmentStatus = (shipping.Shipped == null || (bool)!shipping.Shipped) ? "Shipping Soon" : "Shipped",
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
           ShippingAddress1 = shipping.AddressLine1,
           ShippingAddress2 = shipping.AddressLine2,
           ShippingAddressSame = ShippingAddressSame(billing, shipping),
-          ExpectedToArrive = shipping.Arrives == null ? new DateTime(1754, 1, 1) : shipping.Arrives.Value,
+          CreditCardCVC = null,
+          CreditCardExpirationDate = new DateTime(1754, 1, 1),
+          CreditCardNumber = null,
+          ExpectedToArrive = (shipping.Shipped == null || (bool)!shipping.Shipped) ? (DateTime)shipping.Arrives : (DateTime)shipping.ActualArrives,
           IsGift = (bool)order.GiftOrder,
           OrderId = Id,
           CarrierName = shipping.CarrierName,
@@ -114,19 +123,14 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           SubTotal = order.Subtotal,
           Taxes = order.ApplicableTaxes,
           Total = order.Total,
-          TrackingNumber = shipping.TrackingNumber,
-          ShipEngineLabelUrl = shipping.ShippingLabelUrl,
-          ShipmentStatus = shipping.Shipped == null ? "PENDING" : (bool)shipping.Shipped ? "SHIPPED" : "PENDING",
-          ShippedOn = shipping.ActualShipDate,
-          ShippedBy = _context.AspNetUsers.Where(
-            x => x.Id.Equals(shipping.ShippedBy)).Select(x => x.Email).FirstOrDefault()
+          TrackingNumber = shipping.TrackingNumber
         };
 
-        checkout.LineItem = new List<ShippingLineItemViewModel>();
+        checkout.LineItem = new List<ShoppingCartLineItemViewModel>();
 
         foreach (ProductOrderLineItem li in lineItem)
         {
-          checkout.LineItem.Add(new ShippingLineItemViewModel()
+          checkout.LineItem.Add(new ShoppingCartLineItemViewModel()
           {
             Id = li.Id,
             ImageSource = li.ImageSource,
@@ -184,50 +188,50 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       return View(checkout);
     }
 
+    // POST: Administration/Orders/Edit/5
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    // POST: ShipmentController/Edit/5
-    public async Task<IActionResult> Edit(long OrderId, ShipOutViewModel Model)
+    public async Task<IActionResult> Edit(long id, [Bind("OrderId,ShopifyId,BillingName,BillingAddress1,BillingAddress2," +
+      "BillingCity,BillingState,BillingCountry,BillingPostalCode,BilledOn,SubTotal,ShippingCharges,Taxes,CodeDiscount," +
+      "CouponDiscount,Total,IsGift,ShippingAddressSame,ShippingName,ShippingAddress1,ShippingAddress2,ShippingCity,ShippingState," +
+      "ShippingCountry,ShippingPostalCode,ShippingLongitude,ShippingLatitude,GoogleMapsUrl,ShippingCarrier,TrackingNumber,ShippedOn," +
+      "ExpectedToArrive,CreditCardNumber,CreditCardCVC,CreditCardExpirationDate,SelectedCarrierId,CarrierName,TotalWeightInPounds," +
+      "ShipEngineShipmentId,ShipEngineRateId,ShipEngineLabelUrl,CalculatedShippingAndTaxes,CardDeclined,ShippingAddressDeclined," +
+      "FulfillmentStatus,clientIpAddress")] CheckoutViewModel checkoutViewModel)
     {
-      OrderShipTo order = null;
-      LocationService shLocationService = null;
-      FulfillmentService shFulfillmentService = null;
-      Fulfillment shFulfillment = null;
-      Location shLocation = null;
-
-      shLocationService = new LocationService(
-        _option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
-
-      shLocation = shLocationService.ListAsync().Result.First();
-
-      shFulfillmentService = new FulfillmentService(
-        _option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
-
-      shFulfillment = new Fulfillment()
+      if (id != checkoutViewModel.OrderId)
       {
-        LocationId = shLocation.Id,
-        TrackingCompany = _option.Value.TrackingCompany,
-        TrackingUrl = _option.Value.StampsDotComPackageTrackingUrl + _context.OrderShipTos.Where(
-          x => x.Order == OrderId).Select(x => x.TrackingNumber).FirstOrDefault(),
-        TrackingNumber = _context.OrderShipTos.Where(
-          x => x.Order == OrderId).Select(x => x.TrackingNumber).FirstOrDefault()
-      };
+        return NotFound();
+      }
 
-      shFulfillment = await shFulfillmentService.CreateAsync((long)_context.ProductOrders.Where(
-        x => x.Id == OrderId).Select(x => x.ShopifyId).FirstOrDefault(), shFulfillment);
+      if (ModelState.IsValid)
+      {
+        try
+        {
+            _context.Update(checkoutViewModel);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!CheckoutViewModelExists(checkoutViewModel.OrderId))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+        return RedirectToAction(nameof(Index));
+      }
+      return View(checkoutViewModel);
+    }
 
-      order = _context.OrderShipTos.Where(
-        x => x.Order == OrderId).FirstOrDefault();
-      order.Shipped = true;
-      order.ActualShipDate = DateTime.UtcNow;
-      order.ActualArrives = DateTime.UtcNow.AddDays(2);
-      order.ShippedBy = _context.AspNetUsers.Where(
-        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
-
-      _context.OrderShipTos.Update(order);
-      _context.SaveChanges();
-     
-      return RedirectToAction("Index");
+    private bool CheckoutViewModelExists(long id)
+    {
+      return _context.ProductOrders.Any(e => e.Id == id);
     }
 
     private bool ShippingAddressSame(OrderBillTo Billing, OrderShipTo Shipping)

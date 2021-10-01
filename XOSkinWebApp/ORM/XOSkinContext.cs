@@ -353,6 +353,12 @@ namespace XOSkinWebApp.ORM
                     .HasMaxLength(450);
 
                 entity.Property(e => e.CreatedOn).HasColumnType("datetime");
+
+                entity.HasOne(d => d.CreatedByNavigation)
+                    .WithMany(p => p.Costs)
+                    .HasForeignKey(d => d.CreatedBy)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Cost_AspNetUsers");
             });
 
             modelBuilder.Entity<DiscountCode>(entity =>
@@ -623,6 +629,12 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
+
+                entity.Property(e => e.RefundAmount).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.RefundReason).IsUnicode(false);
+
+                entity.Property(e => e.RefundedOn).HasColumnType("datetime");
 
                 entity.Property(e => e.StateName)
                     .IsRequired()

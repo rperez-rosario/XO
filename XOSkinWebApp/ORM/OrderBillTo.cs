@@ -17,6 +17,11 @@ namespace XOSkinWebApp.ORM
         public string CountryName { get; set; }
         public string PostalCode { get; set; }
         public DateTime? BillingDate { get; set; }
+        public bool? RefundRequested { get; set; }
+        public bool? Refunded { get; set; }
+        public DateTime? RefundedOn { get; set; }
+        public decimal? RefundAmount { get; set; }
+        public string RefundReason { get; set; }
 
         public virtual ProductOrder OrderNavigation { get; set; }
     }
