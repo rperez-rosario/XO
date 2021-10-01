@@ -7,7 +7,6 @@ Including but not limited to:
 
 # Getting Started
 1.	Installation process
-
 (See "Build and Test" section of this document.)
 
 2.	Software dependencies
