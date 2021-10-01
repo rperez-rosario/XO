@@ -28,6 +28,10 @@ Razor
 <li>https://www.microsoft.com/en-us/sql-server/sql-server-2019</li>
 <li>https://www.iis.net/</li>
 <li>https://azure.microsoft.com/en-us/</li>
+<li>https://www.shipengine.com/docs/getting-started/</li>
+<li>https://www.taxjar.com/product/api</li>
+<li>https://shopify.dev/api</li>
+<li>https://stripe.com/docs/api</li>
 </ul>
 
 # Build and Test
