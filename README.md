@@ -12,7 +12,8 @@ Including but not limited to:
 2.	Software dependencies
 
 <ul>
-<li>ASP.NET MVC</li>
+<li>ASP.NET Core 5.0 MVC</li>
+<li>Entity Framework Core</li>
 <li>C#</li>
 <li>Javascript</li>
 <li>JQuery</li>
