@@ -6,11 +6,11 @@ Including but not limited to:
 2. The mobile applications.
 
 # Getting Started
-1.	Installation process
+1.	Installation process:
 
 (See "Build and Test" section of this document.)
 
-2.	Software dependencies
+2.	Software dependencies:
 
 <ul>
 <li>ASP.NET Core 5.0 MVC</li>
@@ -27,14 +27,14 @@ Including but not limited to:
 <li>Stripe Payment Gateway Web API</li>
 </ul>
 
-3.	Latest releases
+3.	Latest releases:
 
 <ul>
 <li>0.1 Visual Studio project created, repository initiated with seed project files. (5/2021)</li>
 <li>0.8 About 80% of work towards launch version 1.0 completed. (10/2021)</li>
 </ul>
 
-4.	Web API, languages and technology stack references
+4.	Web API, languages and technology stack references:
 
 <ul>
 <li>https://docs.microsoft.com/en-us/dotnet/csharp/</li>
