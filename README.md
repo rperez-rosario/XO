@@ -1,11 +1,11 @@
 # Introduction 
 This private project repository houses source code and project documents for the XO Skin project. 
 Including but not limited to:
- 
+
 <ul>
 <li>The electronic commerce web application.</li> 
-<li>The mobile applications.<li>
-<ul>
+<li>The mobile applications.</li>
+</ul>
 
 # Getting Started
 1.	Installation process
