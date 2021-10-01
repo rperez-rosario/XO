@@ -53,11 +53,12 @@ Including but not limited to:
 </ul>
 
 # Build and Test
-1. Create and configure a private application within the target Shopify store. 
-2. Extract and deploy current .dacpac to SQL Server. Configure security, and domain entities as needed.
-3. Web or folder deploy to IIS or Azure Cloud App (.NET Core 5.0 application pool), 
+1. Create and configure a private application within the target Shopify store.
+2. Configure additional external services (ShipEngine, TaxJar and Stripe.) 
+3. Extract and deploy current .dacpac to SQL Server. Configure security, and domain entities as needed.
+4. Web or folder deploy to IIS or Azure Cloud App (.NET Core 5.0 application pool), 
 configure appsettings.json as needed.
-4. Access using a web browser or build and execute Visual Studio solution.
+5. Access using a web browser or build and execute Visual Studio solution.
 
 # Contribute
 You can review the existing codebase at any time and point out any discrepancies to 
