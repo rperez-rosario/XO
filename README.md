@@ -37,6 +37,7 @@ Including but not limited to:
 
 <ul>
 <li>https://docs.microsoft.com/en-us/dotnet/csharp/</li>
+<li>https://docs.microsoft.com/en-us/ef/<li>
 <li>https://getbootstrap.com/</li>
 <li>https://www.javascript.com/</li>
 <li>https://jquery.com/</li>
