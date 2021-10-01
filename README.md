@@ -2,14 +2,19 @@
 This private project repository houses source code and project documents for the XO Skin project. 
 Including but not limited to:
 
-<ul>
-<li>The electronic commerce web application.</li> 
-<li>The mobile applications.</li>
-</ul>
+1. The electronic commerce web application.
+2. The mobile applications.
 
 # Getting Started
 1.	Installation process
-TODO: To be detailed as the project progresses.
+
+A. Create and configure a private application within the target Shopify store.<br /> 
+B. Extract and deploy current .dacpac to SQL Server. Configure security, and domain entities 
+as needed.<br />
+C. Web or folder deploy to IIS or Azure Cloud App (.NET Core 5.0 application pool), 
+configure appsettings.json as needed.<br />
+D. Access using a web browser or build and execute Visual Studio solution.
+
 2.	Software dependencies
 
 <ul>
@@ -52,7 +57,13 @@ TODO: To be detailed as the project progresses.
 </ul>
 
 # Build and Test
-TODO: To be detailed as the project progresses. 
+1. Create and configure a private application within the target Shopify store. 
+2. Extract and deploy current .dacpac to SQL Server. Configure security, and domain entities as needed.
+3. Web or folder deploy to IIS or Azure Cloud App (.NET Core 5.0 application pool), 
+configure appsettings.json as needed.
+4. Access using a web browser or build and execute Visual Studio solution.
+
 # Contribute
-You can review the existing codebase at any time and point out any discrepancies to rperezrosario@outlook.com.
-There is a ProjectDocuments folder that can be used as a general private repository for project documents accessible to all team members.
+You can review the existing codebase at any time and point out any discrepancies to 
+rperezrosario@outlook.com. There is a ProjectDocuments folder that can be used as a general 
+private repository for project documents accessible to all team members.
