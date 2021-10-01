@@ -7,13 +7,19 @@ TODO: To be detailed as the project progresses.
 ASP.NET MVC
 C#
 Javascript
+JQuery
 Bootstrap
+DataTables
 Razor
 3.	Latest releases
-0.1 Visual Studio project created, repository initiated with seed project files.
+0.1 Visual Studio project created, repository initiated with seed project files. (5/2021)
+0.8 About 80% of work towards launch version 1.0 completed. (10/2021)
 4.	API references
 https://docs.microsoft.com/en-us/dotnet/csharp/
 https://getbootstrap.com/
+https://www.javascript.com/
+https://jquery.com/
+https://datatables.net/
 https://dotnet.microsoft.com/apps/aspnet/mvc
 https://www.microsoft.com/en-us/sql-server/sql-server-2019
 https://www.iis.net/
