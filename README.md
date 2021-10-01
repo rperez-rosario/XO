@@ -11,13 +11,21 @@ Including but not limited to:
 1.	Installation process
 TODO: To be detailed as the project progresses.
 2.	Software dependencies
-ASP.NET MVC
-C#
-Javascript
-JQuery
-Bootstrap
-DataTables
-Razor
+
+<ul>
+<li>ASP.NET MVC</li>
+<li>C#</li>
+<li>Javascript</li>
+<li>JQuery</li>
+<li>Bootstrap</li>
+<li>DataTables</li>
+<li>Razor</li>
+<li>ShipEngine Web API</li>
+<li>TaxJar Web API</li>
+<li>Shopify Web API</li>
+<li>Stripe Payment Gateway Web API</li>
+</ul>
+
 3.	Latest releases
 
 <ul>
