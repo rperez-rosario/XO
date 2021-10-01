@@ -17,7 +17,7 @@ Razor
 <li>0.8 About 80% of work towards launch version 1.0 completed. (10/2021)</li>
 </ul>
 
-4.	API references
+4.	Web API, languages and technology stack references
 <ul>
 <li>https://docs.microsoft.com/en-us/dotnet/csharp/</li>
 <li>https://getbootstrap.com/</li>
