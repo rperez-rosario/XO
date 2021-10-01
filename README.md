@@ -18,15 +18,17 @@ Razor
 </ul>
 
 4.	API references
-https://docs.microsoft.com/en-us/dotnet/csharp/
-https://getbootstrap.com/
-https://www.javascript.com/
-https://jquery.com/
-https://datatables.net/
-https://dotnet.microsoft.com/apps/aspnet/mvc
-https://www.microsoft.com/en-us/sql-server/sql-server-2019
-https://www.iis.net/
-https://azure.microsoft.com/en-us/
+<ul>
+<li>https://docs.microsoft.com/en-us/dotnet/csharp/</li>
+<li>https://getbootstrap.com/</li>
+<li>https://www.javascript.com/</li>
+<li>https://jquery.com/</li>
+<li>https://datatables.net/</li>
+<li>https://dotnet.microsoft.com/apps/aspnet/mvc</li>
+<li>https://www.microsoft.com/en-us/sql-server/sql-server-2019</li>
+<li>https://www.iis.net/</li>
+<li>https://azure.microsoft.com/en-us/</li>
+</ul>
 # Build and Test
 TODO: To be detailed as the project progresses. 
 # Contribute
