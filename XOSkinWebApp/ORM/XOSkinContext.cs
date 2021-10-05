@@ -634,6 +634,10 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.RefundReason).IsUnicode(false);
 
+                entity.Property(e => e.RefundedBy)
+                    .HasMaxLength(450)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.RefundedOn).HasColumnType("datetime");
 
                 entity.Property(e => e.StateName)

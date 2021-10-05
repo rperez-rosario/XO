@@ -28,5 +28,6 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public String TrackingNumber { get; set; }
     public String ShipEngineId { get; set; }
     public String ShippingLabelURL { get; set; }
+    public bool OrderCancelled { get; set; }
   }
 }

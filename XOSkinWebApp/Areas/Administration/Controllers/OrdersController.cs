@@ -49,8 +49,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           OrderId = po.Id,
           Recipient = shipment.RecipientName,
           TrackingNumber = shipment.TrackingNumber,
-          Status = shipment.Shipped == null ? "Shipping Soon" : ((bool)shipment.Shipped ?
-            "Shipped: " + ((DateTime)shipment.ActualShipDate).ToShortDateString() : "Shipping Soon"),
+          Status = shipment.Shipped == null ? "SHIPPING SOON" : ((bool)shipment.Shipped ?
+            "SHIPPED: " + ((DateTime)shipment.ActualShipDate).ToShortDateString() : "SHIPPING SOON"),
           RefundStatus = (billing.RefundRequested == null || (bool)!billing.RefundRequested) ? "NOT REQUESTED" :
             (bool)billing.RefundRequested && (billing.Refunded == null || (bool)!billing.Refunded) ? "REQUESTED" :
             ((billing.Refunded == null || (bool)!billing.Refunded) ? "NOT REQUESTED" : "REFUNDED"),
@@ -80,11 +80,6 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       {
         order = _context.ProductOrders.Where(x => x.Id == Id).FirstOrDefault();
 
-        // Check if order belongs to currently logged-in user.
-        if (!order.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
-          return new RedirectToActionResult("Index", "Orders", null);
-
         lineItem = _context.ProductOrderLineItems.Where(x => x.ProductOrder == Id).ToList<ProductOrderLineItem>();
         billing = _context.OrderBillTos.Where(x => x.Order == Id).FirstOrDefault();
         shipping = _context.OrderShipTos.Where(x => x.Order == Id).FirstOrDefault();
@@ -101,17 +96,17 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           BillingState = billing.StateName,
           CodeDiscount = order.CodeDiscount,
           CouponDiscount = order.CouponDiscount,
-          ShippedOn = (shipping.Shipped == null || (bool)!shipping.Shipped) ? (DateTime)shipping.ShipDate : (DateTime)shipping.ActualShipDate,
-          FulfillmentStatus = (shipping.Shipped == null || (bool)!shipping.Shipped) ? "Shipping Soon" : "Shipped",
+          ShippedOn = (shipping.Shipped == null || (bool)!shipping.Shipped) ? 
+            (DateTime)shipping.ShipDate : (DateTime)shipping.ActualShipDate,
+          FulfillmentStatus = order.Cancelled == null ? ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "SHIPPING SOON" : "SHIPPED") : 
+            (bool)order.Cancelled ? "CANCELLED" : ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "SHIPPING SOON" : "SHIPPED"),
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
           ShippingAddress1 = shipping.AddressLine1,
           ShippingAddress2 = shipping.AddressLine2,
           ShippingAddressSame = ShippingAddressSame(billing, shipping),
-          CreditCardCVC = null,
-          CreditCardExpirationDate = new DateTime(1754, 1, 1),
-          CreditCardNumber = null,
-          ExpectedToArrive = (shipping.Shipped == null || (bool)!shipping.Shipped) ? (DateTime)shipping.Arrives : (DateTime)shipping.ActualArrives,
+          ExpectedToArrive = (shipping.Shipped == null || (bool)!shipping.Shipped) ? 
+            (DateTime)shipping.Arrives : (DateTime)shipping.ActualArrives,
           IsGift = (bool)order.GiftOrder,
           OrderId = Id,
           CarrierName = shipping.CarrierName,
@@ -123,7 +118,22 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           SubTotal = order.Subtotal,
           Taxes = order.ApplicableTaxes,
           Total = order.Total,
-          TrackingNumber = shipping.TrackingNumber
+          TrackingNumber = shipping.TrackingNumber,
+          CancellationStatus = (order.Cancelled == null || (bool)!order.Cancelled) ? "NOT REQUESTED" : "CANCELLED",
+          CancellationDate = order.CancelledOn,
+          CancelReason = order.CancelReason,
+          CancelledBy = order.CancelledBy == null ? String.Empty : 
+            _context.AspNetUsers.FindAsync(order.CancelledBy).Result.Email,
+          RefundStatus = (billing.RefundRequested == null || (bool)!billing.RefundRequested) ? "NOT REQUESTED" :
+            (billing.Refunded == null || (bool)!billing.Refunded) ? "REQUESTED" : "REFUNDED",
+          RefundDate = billing.RefundedOn,
+          RefundAmount = billing.RefundAmount,
+          RefundReason = billing.RefundReason,
+          RefundedBy = billing.RefundedBy == null ? String.Empty : 
+            _context.AspNetUsers.FindAsync(billing.RefundedBy).Result.Email,
+          Shipped = shipping.Shipped == null ? false : (bool)shipping.Shipped,
+          Cancelled = order.Cancelled == null ? false : (bool)order.Cancelled,
+          Refunded = billing.Refunded == null ? false : (bool)billing.Refunded
         };
 
         checkout.LineItem = new List<ShoppingCartLineItemViewModel>();
@@ -188,45 +198,47 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       return View(checkout);
     }
 
-    // POST: Administration/Orders/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(long id, [Bind("OrderId,ShopifyId,BillingName,BillingAddress1,BillingAddress2," +
-      "BillingCity,BillingState,BillingCountry,BillingPostalCode,BilledOn,SubTotal,ShippingCharges,Taxes,CodeDiscount," +
-      "CouponDiscount,Total,IsGift,ShippingAddressSame,ShippingName,ShippingAddress1,ShippingAddress2,ShippingCity,ShippingState," +
-      "ShippingCountry,ShippingPostalCode,ShippingLongitude,ShippingLatitude,GoogleMapsUrl,ShippingCarrier,TrackingNumber,ShippedOn," +
-      "ExpectedToArrive,CreditCardNumber,CreditCardCVC,CreditCardExpirationDate,SelectedCarrierId,CarrierName,TotalWeightInPounds," +
-      "ShipEngineShipmentId,ShipEngineRateId,ShipEngineLabelUrl,CalculatedShippingAndTaxes,CardDeclined,ShippingAddressDeclined," +
-      "FulfillmentStatus,clientIpAddress")] CheckoutViewModel checkoutViewModel)
+    public async Task<IActionResult> CancelOrder([Bind("OrderId, CancelReason")] CheckoutViewModel Model)
     {
-      if (id != checkoutViewModel.OrderId)
-      {
-        return NotFound();
-      }
+      ProductOrder order = _context.ProductOrders.FindAsync(Model.OrderId).Result;
+      OrderShipTo shipping = _context.OrderShipTos.Where(x => x.Order == Model.OrderId).FirstOrDefault();
+      OrderBillTo billing = _context.OrderBillTos.Where(x => x.Order == Model.OrderId).FirstOrDefault();
+      ShopifySharp.OrderService shOrderService = null;
+      ShopifySharp.Order shOrder = null;
 
-      if (ModelState.IsValid)
-      {
-        try
-        {
-            _context.Update(checkoutViewModel);
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!CheckoutViewModelExists(checkoutViewModel.OrderId))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-        return RedirectToAction(nameof(Index));
-      }
-      return View(checkoutViewModel);
+      // Cancel order on app and Shopify.
+      order.Cancelled = true;
+      order.CancelledOn = DateTime.UtcNow;
+      order.CancelReason = Model.CancelReason;
+      order.CancelledBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
+      _context.ProductOrders.Update(order);
+      _context.SaveChanges();
+      shOrderService = new ShopifySharp.OrderService(_option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+      await shOrderService.CancelAsync((long)order.ShopifyId);
+      shOrder = await shOrderService.GetAsync((long)order.ShopifyId);
+      shOrder.CancelledAt = order.CancelledOn;
+      shOrder.CancelReason = order.CancelReason;
+      shOrder = await shOrderService.UpdateAsync((long)shOrder.Id, shOrder);
+      // Increment inventory on app and Shopify.
+
+      // Issue refund on app and Stripe.
+
+      // Affect app ledger with cancel information.
+
+      return View("Index");
+    }
+
+    public IActionResult RefundOrder([Bind("OrderId")] CheckoutViewModel Model)
+    {
+      // Cancel order on app and Shopify.
+
+      // Increment inventory on app and Shopify.
+
+      // Issue refund on app and Stripe.
+
+      // Affect app ledger with cancel information.
+
+      return View("Index");
     }
 
     private bool CheckoutViewModelExists(long id)

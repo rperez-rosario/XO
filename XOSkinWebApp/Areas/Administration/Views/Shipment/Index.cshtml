@@ -46,7 +46,7 @@
         @Html.Raw(item.DateShipped == null ? String.Empty : ((DateTime)item.DateShipped).ToShortDateString())
       </td>
       <td>
-        @Html.Raw(item.ActualDateShipped == null ? "PENDING" : item.ActualDateShipped)
+        @Html.Raw(item.OrderCancelled ? "CANCELLED" : (item.ActualDateShipped == null ? "PENDING" : item.ActualDateShipped))
       </td>
       <td>
         @Html.DisplayFor(modelItem => item.NumberOfItems)
@@ -78,8 +78,15 @@
         `<mark style="background-color: #90EE90">${match}</mark>`);
     }
 
+    function highlight_cancelled() {
+      const page = document.body.innerHTML;
+      document.body.innerHTML = page.replace(new RegExp("CANCELLED", "gi"), (match) =>
+        `<mark style="background-color: #90EE90">${match}</mark>`);
+    }
+
     highlight_pending();
     highlight_shipped();
+    highlight_cancelled();
 
     var table = $('#Fulfillment').DataTable({
       'order': [[0, 'asc']]

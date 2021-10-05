@@ -5,7 +5,16 @@
 }
 
 <h1>Edit Order</h1>
-<h4>Status: @Model.FulfillmentStatus</h4>
+<h4>Fulfillment Status: @Model.FulfillmentStatus</h4>
+<h4>Cancellation Status: @Model.CancellationStatus</h4>
+<h4>Cancellation Date: @Model.CancellationDate</h4>
+<h4>Cancellation Reason: @Model.CancelReason</h4>
+<h4>Cancelled By: @Model.CancelledBy</h4>
+<h4>Refund Status: @Model.RefundStatus</h4>
+<h4>Refund Date: @Model.RefundDate</h4>
+<h4>Refund Amount: @Model.RefundAmount</h4>
+<h4>Refund Reason: @Model.RefundReason</h4>
+<h4>Refunded By: @Model.RefundedBy</h4>
 
 <p>
   <div style="display: inline">
@@ -15,147 +24,158 @@
   </div>
 </p>
 <br />
-<div class="container-fluid">
-  <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
-    <div class="col-sm-4">
-      <h4>Billing Address</h4>
-      <div class="form-group">
-        <label class="control-label">Name on Credit Card</label>
-        <input asp-for="BillingName" class="form-control" readonly />
+<form asp-action="RefundOrder" id="RefundOrder" aria-hidden="true">
+  <div class="container-fluid">
+    <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
+      <div class="col-sm-4">
+        <h4>Billing Address</h4>
+        <div class="form-group">
+          <label class="control-label">Name on Credit Card</label>
+          <input asp-for="BillingName" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Address Line 1</label>
+          <input asp-for="BillingAddress1" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Address Line 2</label>
+          <input asp-for="BillingAddress2" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">City</label>
+          <input asp-for="BillingCity" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">State</label>
+          <input asp-for="BillingState" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Country</label>
+          <input asp-for="BillingCountry" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Postal Code</label>
+          <input asp-for="BillingPostalCode" class="form-control" readonly />
+        </div>
       </div>
-      <div class="form-group">
-        <label class="control-label">Address Line 1</label>
-        <input asp-for="BillingAddress1" class="form-control" readonly />
+      <div class="col-sm-4" style="padding-left: 10px; padding-right: 10px">
+        <h4>Shipping Address, Same? <input asp-for="ShippingAddressSame" id="same-address" type="checkbox" disabled /></h4>
+        <div class="form-group">
+          <label class="control-label">Recipient's Name</label>
+          <input asp-for="ShippingName" class="form-control" id="shipping-name" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Address Line 1</label>
+          <input asp-for="ShippingAddress1" class="form-control" id="shipping-address1" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Address Line 2</label>
+          <input asp-for="ShippingAddress2" class="form-control" id="shipping-address2" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">City</label>
+          <input asp-for="ShippingCity" class="form-control" id="shipping-city" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">State</label>
+          <input asp-for="ShippingState" class="form-control" id="shipping-state" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Country</label>
+          <input asp-for="ShippingCountry" class="form-control" id="shipping-country" readonly />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Postal Code</label>
+          <input asp-for="ShippingPostalCode" class="form-control" id="shipping-postal-code" readonly />
+        </div>
       </div>
-      <div class="form-group">
-        <label class="control-label">Address Line 2</label>
-        <input asp-for="BillingAddress2" class="form-control" readonly />
+      <div class="col-sm-4" style="font-weight: 500; line-height: 1.2; font-size: 1.5rem">
+        <div style="text-align: right; margin-right: 40px">Order: @Html.Raw("#XO" + (Model.OrderId + 10000))</div>
+        <div style="text-align: right; margin-right: 40px">
+          Shipping: <span style="font-weight: 100">
+            @Html.Raw(Model.ShippedOn.ToShortDateString())
+          </span>
+        </div>
+        <div style="text-align: right; margin-right: 40px">
+          Arrival: <span style="font-weight: 100">
+            @Html.Raw(Model.ExpectedToArrive.ToShortDateString())
+          </span>
+        </div>
+        <div style="text-align: right; margin-right: 40px">
+          Sub-Total: <span style="font-weight: 100">
+            $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))
+          </span>
+        </div>
+        <div style="text-align: right; margin-right: 40px">
+          Taxes: <span style="font-weight: 100">
+            +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))
+          </span>
+        </div>
+        <div style="text-align: right; margin-right: 40px">
+          USPS Priority Mail: <span style="font-weight: 100">
+            +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))
+          </span>
+        </div>
+        <div style="text-align: right; margin-right: 40px">
+          Code Discount: <span style="font-weight: 100">
+            -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))
+          </span>
+        </div>
+        <div style="text-align: right; margin-right: 40px">
+          Coupon Discount: <span style="font-weight: 100">
+            -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))
+          </span>
+        </div>
+        <div style="text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
+        <div style="text-align: right; margin-right: 40px">
+          Tracking Number: <span style="font-weight: 100">
+            @Html.Raw(Model.TrackingNumber)
+          </span>
+        </div>
+        <br />
+        <div class="form-group">
+          <label class="control-label">Cancel Reason</label>
+          <input asp-for="CancelReason" class="form-control" id="cancel-reason" />
+        </div>
+        <div class="form-group">
+          <label class="control-label">Refund Reason</label>
+          <input asp-for="RefundReason" class="form-control" id="refund-reason" />
+        </div>
+        <div style="text-align:right; margin-right: 40px">
+          <input type="submit" formaction="@Url.Action("CancelOrder")"
+                 value="Cancel Order" class="btn btn-outline-dark" disabled="@(Model.Shipped || Model.Cancelled)" />
+          <input type="submit" formaction="@Url.Action("RefundOrder")"
+                 value="Refund Order" class="btn btn-outline-dark" disabled="@Model.Refunded" />
+        </div>
+        <br />
+        <div id="map"></div>
       </div>
-      <div class="form-group">
-        <label class="control-label">City</label>
-        <input asp-for="BillingCity" class="form-control" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">State</label>
-        <input asp-for="BillingState" class="form-control" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">Country</label>
-        <input asp-for="BillingCountry" class="form-control" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">Postal Code</label>
-        <input asp-for="BillingPostalCode" class="form-control" readonly />
-      </div>
-    </div>
-    <div class="col-sm-4" style="padding-left: 10px; padding-right: 10px">
-      <h4>Shipping Address, Same? <input asp-for="ShippingAddressSame" id="same-address" type="checkbox" disabled /></h4>
-      <div class="form-group">
-        <label class="control-label">Recipient's Name</label>
-        <input asp-for="ShippingName" class="form-control" id="shipping-name" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">Address Line 1</label>
-        <input asp-for="ShippingAddress1" class="form-control" id="shipping-address1" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">Address Line 2</label>
-        <input asp-for="ShippingAddress2" class="form-control" id="shipping-address2" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">City</label>
-        <input asp-for="ShippingCity" class="form-control" id="shipping-city" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">State</label>
-        <input asp-for="ShippingState" class="form-control" id="shipping-state" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">Country</label>
-        <input asp-for="ShippingCountry" class="form-control" id="shipping-country" readonly />
-      </div>
-      <div class="form-group">
-        <label class="control-label">Postal Code</label>
-        <input asp-for="ShippingPostalCode" class="form-control" id="shipping-postal-code" readonly />
-      </div>
-    </div>
-    <div class="col-sm-4" style="font-weight: 500; line-height: 1.2; font-size: 1.5rem">
-      <div style="text-align: right; margin-right: 40px">Order: @Html.Raw("#XO" + (Model.OrderId + 10000))</div>
-      <div style="text-align: right; margin-right: 40px">
-        Shipping: <span style="font-weight: 100">
-          @Html.Raw(Model.ShippedOn.ToShortDateString())
-        </span>
-      </div>
-      <div style="text-align: right; margin-right: 40px">
-        Arrival: <span style="font-weight: 100">
-          @Html.Raw(Model.ExpectedToArrive.ToShortDateString())
-        </span>
-      </div>
-      <div style="text-align: right; margin-right: 40px">
-        Sub-Total: <span style="font-weight: 100">
-          $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))
-        </span>
-      </div>
-      <div style="text-align: right; margin-right: 40px">
-        Taxes: <span style="font-weight: 100">
-          +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))
-        </span>
-      </div>
-      <div style="text-align: right; margin-right: 40px">
-        USPS Priority Mail: <span style="font-weight: 100">
-          +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))
-        </span>
-      </div>
-      <div style="text-align: right; margin-right: 40px">
-        Code Discount: <span style="font-weight: 100">
-          -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))
-        </span>
-      </div>
-      <div style="text-align: right; margin-right: 40px">
-        Coupon Discount: <span style="font-weight: 100">
-          -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))
-        </span>
-      </div>
-      <div style="text-align: right; margin-right: 40px">Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
-      <div style="text-align: right; margin-right: 40px">
-        Tracking Number: <span style="font-weight: 100">
-          @Html.Raw(Model.TrackingNumber)
-        </span>
-      </div>
-      <br />
-      <div id="map"></div>
     </div>
   </div>
-</div>
-<h4>Items in Your Order</h4>
-<table class="table table-responsive" id="OrderItems" style="margin-left: auto; margin-right: auto">
-  <thead>
-    <tr>
-      <th></th>
-      <th class="text-nowrap">Product Name</th>
-      <th>Description</th>
-      <th>Quantity</th>
-      <th class="text-nowrap">Sub-Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    @foreach (XOSkinWebApp.Areas.Administration.Models.ShoppingCartLineItemViewModel lineItem in Model.LineItem)
-    {
+  <h4>Items in This Order</h4>
+  <table class="table table-responsive" id="OrderItems" style="margin-left: auto; margin-right: auto">
+    <thead>
       <tr>
-        <td><img src="@lineItem.ImageSource" style="height: 100px; display: inline; float: left" /></td>
-        <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
-        <td>@Html.DisplayFor(modelItem => lineItem.ProductDescription)</td>
-        <td style="width: 170px">
-          <div style="display: inline; float: left">
-            @lineItem.Quantity
-          </div>
-        </td>
-        <td>@Html.DisplayFor(modelItem => lineItem.Total)</td>
+        <th></th>
+        <th class="text-nowrap">Product Name</th>
+        <th>Quantity</th>
       </tr>
-    }
-  </tbody>
-</table>
-<form asp-action="PlaceOrder" id="PlaceOrder">
+    </thead>
+    <tbody>
+      @foreach (XOSkinWebApp.Areas.Administration.Models.ShoppingCartLineItemViewModel lineItem in Model.LineItem)
+      {
+        <tr>
+          <td><img src="@lineItem.ImageSource" style="height: 100px; display: inline; float: left" /></td>
+          <td style="font-weight: bold">@Html.DisplayFor(modelItem => lineItem.ProductName)</td>
+          <td style="width: 170px">
+            <div style="display: inline; float: left">
+              @lineItem.Quantity
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
   <input type="hidden" asp-for="OrderId" value="@Model.OrderId" />
   <input type="hidden" asp-for="ShippingLongitude" value="@Model.ShippingLongitude" id="shipping-longitude" />
   <input type="hidden" asp-for="ShippingLatitude" value="@Model.ShippingLatitude" id="shipping-latitude" />

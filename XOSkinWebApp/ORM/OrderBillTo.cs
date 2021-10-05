@@ -22,6 +22,7 @@ namespace XOSkinWebApp.ORM
         public DateTime? RefundedOn { get; set; }
         public decimal? RefundAmount { get; set; }
         public string RefundReason { get; set; }
+        public string RefundedBy { get; set; }
 
         public virtual ProductOrder OrderNavigation { get; set; }
     }

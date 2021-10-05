@@ -30,13 +30,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     }
 
     // GET: ShipmentController
-    public ActionResult Index()
+    public async Task<ActionResult> Index()
     {
       List<ShipmentViewModel> model = new List<ShipmentViewModel>();
       int numberOfItems;
+      ProductOrder order = null;
 
       foreach (OrderShipTo shipment in _context.OrderShipTos.ToList())
       {
+        order = await _context.ProductOrders.FindAsync(shipment.Order);
         numberOfItems = 0;
 
         foreach (ProductOrderLineItem item in _context.ProductOrderLineItems.Where(
@@ -47,7 +49,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
         model.Add(new ShipmentViewModel()
         {
-          ShipmentStatus = shipment.Shipped == true ? "SHIPPED" : "PENDING",
+          ShipmentStatus = order.Cancelled == null ? (shipment.Shipped == true ? "SHIPPED" : "PENDING") : 
+            (bool)order.Cancelled ? "CANCELLED" : (shipment.Shipped == true ? "SHIPPED" : "PENDING"),
           DatePlaced = _context.ProductOrders.Where(
             x => x.Id == shipment.Order).Select(x => x.DatePlaced).FirstOrDefault(),
           DateShipped = shipment.ShipDate,
@@ -59,7 +62,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           TrackingNumber = shipment.TrackingNumber,
           ShippingLabelURL = shipment.ShippingLabelUrl,
           StateName = shipment.StateName,
-          OrderId = shipment.Order
+          OrderId = shipment.Order,
+          OrderCancelled = order.Cancelled == null ? false : (bool)order.Cancelled
         });
       }
 
@@ -116,7 +120,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           Total = order.Total,
           TrackingNumber = shipping.TrackingNumber,
           ShipEngineLabelUrl = shipping.ShippingLabelUrl,
-          ShipmentStatus = shipping.Shipped == null ? "PENDING" : (bool)shipping.Shipped ? "SHIPPED" : "PENDING",
+          ShipmentStatus = order.Cancelled == null ? (shipping.Shipped == true ? "SHIPPED" : "PENDING") :
+            (bool)order.Cancelled ? "CANCELLED" : (shipping.Shipped == true ? "SHIPPED" : "PENDING"),
           ShippedOn = shipping.ActualShipDate,
           ShippedBy = _context.AspNetUsers.Where(
             x => x.Id.Equals(shipping.ShippedBy)).Select(x => x.Email).FirstOrDefault()

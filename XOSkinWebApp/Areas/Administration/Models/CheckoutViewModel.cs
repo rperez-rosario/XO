@@ -68,11 +68,23 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public String ShipEngineShipmentId { get; set; }
     public String ShipEngineRateId { get; set; }
     public String ShipEngineLabelUrl { get; set; }
-
     public bool CalculatedShippingAndTaxes { get; set; }
     public bool CardDeclined { get; set; }
     public bool ShippingAddressDeclined { get; set; }
     public String FulfillmentStatus { get; set; }
+    public bool Shipped { get; set; }
+    public String CancellationStatus { get; set; }
+    public bool Cancelled { get; set; }
+    public DateTime? CancellationDate { get; set; }
+    public String CancelReason { get; set; }
+    public String CancelledBy { get; set; }
+    public String RefundStatus { get; set; }
+    public bool Refunded { get; set; }
+    public DateTime? RefundDate { get; set; }
+    public String RefundReason { get; set; }
+    public decimal? RefundAmount { get; set; }
+    public String RefundedBy { get; set; }
+
 
     public String clientIpAddress { get; set; }
 

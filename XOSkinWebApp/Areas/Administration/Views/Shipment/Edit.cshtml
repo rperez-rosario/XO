@@ -99,7 +99,8 @@
       <div style="text-align: right; margin-right: 40px">
         <form asp-action="Edit">
           <a class="btn-outline-dark btn" href="@Model.ShipEngineLabelUrl" target="_blank">Print Shipping Label</a>
-          <input type="submit" class="btn-outline-dark btn" value="Mark As Fulfilled" disabled="@(Model.ShipmentStatus.Equals("SHIPPED"))" />
+          <input type="submit" class="btn-outline-dark btn" value="Mark As Fulfilled" 
+            disabled="@(Model.ShipmentStatus.Equals("SHIPPED") || Model.ShipmentStatus.Equals("CANCELLED"))" />
           <input type="hidden" asp-for="OrderId" value="@Model.OrderId" />
         </form>
       </div>
