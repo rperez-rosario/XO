@@ -1091,6 +1091,10 @@ namespace XOSkinWebApp.ORM
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
+                entity.Property(e => e.StripeRefundId)
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");

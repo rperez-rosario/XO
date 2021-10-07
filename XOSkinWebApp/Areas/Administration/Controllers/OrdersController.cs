@@ -98,7 +98,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           CouponDiscount = order.CouponDiscount,
           ShippedOn = (shipping.Shipped == null || (bool)!shipping.Shipped) ? 
             (DateTime)shipping.ShipDate : (DateTime)shipping.ActualShipDate,
-          FulfillmentStatus = order.Cancelled == null ? ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "SHIPPING SOON" : "SHIPPED") : 
+          FulfillmentStatus = order.Cancelled == null ? ((shipping.Shipped == null || (bool)!shipping.Shipped) ? 
+            "SHIPPING SOON" : "SHIPPED") : 
             (bool)order.Cancelled ? "CANCELLED" : ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "SHIPPING SOON" : "SHIPPED"),
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
@@ -203,8 +204,27 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       ProductOrder order = _context.ProductOrders.FindAsync(Model.OrderId).Result;
       OrderShipTo shipping = _context.OrderShipTos.Where(x => x.Order == Model.OrderId).FirstOrDefault();
       OrderBillTo billing = _context.OrderBillTos.Where(x => x.Order == Model.OrderId).FirstOrDefault();
+      List<ProductOrderLineItem> orderProduct = await _context.ProductOrderLineItems.Where(
+        x => x.ProductOrder == Model.OrderId).ToListAsync();
+      Product product = null;
+      ShopifySharp.ProductService shProductService = null;
+      ShopifySharp.ProductVariantService shProductVariantService = null;
+      ShopifySharp.InventoryItemService shInventoryItemService = null;
+      ShopifySharp.LocationService shLocationService = null;
+      ShopifySharp.InventoryLevelService shInventoryLevelService = null;
+      ShopifySharp.Product shProduct = null;
+      ShopifySharp.ProductVariant shProductVariant = null;
+      ShopifySharp.InventoryItem shInventoryItem = null;
+      List<ShopifySharp.Location> shLocation = null;
       ShopifySharp.OrderService shOrderService = null;
       ShopifySharp.Order shOrder = null;
+      long lowestStock = long.MaxValue;
+      long originalKitStock = long.MaxValue;
+      Stripe.RefundService stRefundService = null;
+      Stripe.Refund stRefund = null;
+      Stripe.RefundCreateOptions stRefundCreateOptions = null;
+      UserLedgerTransaction userLedgerTransaction = null;
+      decimal balanceBeforeTransaction = 0.0M;
 
       // Cancel order on app and Shopify.
       order.Cancelled = true;
@@ -212,7 +232,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       order.CancelReason = Model.CancelReason;
       order.CancelledBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
       _context.ProductOrders.Update(order);
-      _context.SaveChanges();
+      await _context.SaveChangesAsync();
       shOrderService = new ShopifySharp.OrderService(_option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
       await shOrderService.CancelAsync((long)order.ShopifyId);
       shOrder = await shOrderService.GetAsync((long)order.ShopifyId);
@@ -220,12 +240,140 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       shOrder.CancelReason = order.CancelReason;
       shOrder = await shOrderService.UpdateAsync((long)shOrder.Id, shOrder);
       // Increment inventory on app and Shopify.
-
+      shProductService = new ShopifySharp.ProductService(_option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+      shProductVariantService = new ShopifySharp.ProductVariantService(
+        _option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+      shInventoryItemService = new ShopifySharp.InventoryItemService(
+        _option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+      shLocationService = new ShopifySharp.LocationService(_option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+      shInventoryLevelService = new ShopifySharp.InventoryLevelService(
+        _option.Value.ShopifyUrl, _option.Value.ShopifyStoreFrontAccessToken);
+      foreach (ProductOrderLineItem pli in orderProduct)
+      {
+        product = await _context.Products.FindAsync(pli.Product);
+        if (pli.KitType != null)
+        {
+          lowestStock = long.MaxValue;
+          originalKitStock = long.MaxValue;
+          foreach (KitProduct kp in await _context.KitProducts.Where(x => x.Kit == pli.Product).ToListAsync())
+          {
+            product = await _context.Products.FindAsync(kp.Product);
+            product.Stock += pli.Quantity;
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+            shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
+            shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
+            shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
+            shLocation = (List<ShopifySharp.Location>)await shLocationService.ListAsync();
+            await shInventoryLevelService.AdjustAsync(new ShopifySharp.InventoryLevelAdjust()
+            {
+              AvailableAdjustment = (int?)(pli.Quantity),
+              InventoryItemId = shInventoryItem.Id,
+              LocationId = shLocation.First().Id // Change this when we get multiple locations.
+            });
+            if (product.Stock < lowestStock)
+            {
+              lowestStock = (long)product.Stock;
+            }
+          }
+          product = await _context.Products.FindAsync(pli.Product);
+          originalKitStock = (long)product.Stock;
+          product.Stock = lowestStock;
+          _context.Products.Update(product);
+          await _context.SaveChangesAsync();
+          shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
+          shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
+          shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
+          shLocation = (List<ShopifySharp.Location>)await shLocationService.ListAsync();
+          await shInventoryLevelService.AdjustAsync(new ShopifySharp.InventoryLevelAdjust()
+          {
+            AvailableAdjustment = (int?)(product.Stock - originalKitStock),
+            InventoryItemId = shInventoryItem.Id,
+            LocationId = shLocation.First().Id // Change this when we get multiple locations.
+          });
+        }
+        else
+        {
+          product.Stock += pli.Quantity;
+          _context.Products.Update(product);
+          await _context.SaveChangesAsync();
+          shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
+          shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
+          shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
+          shLocation = (List<ShopifySharp.Location>)await shLocationService.ListAsync();
+          await shInventoryLevelService.AdjustAsync(new ShopifySharp.InventoryLevelAdjust()
+          {
+            AvailableAdjustment = (int?)(pli.Quantity),
+            InventoryItemId = shInventoryItem.Id,
+            LocationId = shLocation.First().Id // Change this when we get multiple locations.
+          });
+        }
+      }
       // Issue refund on app and Stripe.
-
+      Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
+      stRefundService = new Stripe.RefundService();
+      stRefundCreateOptions = new Stripe.RefundCreateOptions()
+      {
+        Amount = (long)((order.Subtotal + order.ApplicableTaxes) * 100),
+        Reason = Stripe.RefundReasons.RequestedByCustomer,
+        Charge = order.StripeChargeId
+      };
+      stRefund = await stRefundService.CreateAsync(stRefundCreateOptions);
+      order.StripeRefundId = stRefund.Id;
+      _context.ProductOrders.Update(order);
+      await _context.SaveChangesAsync();
       // Affect app ledger with cancel information.
+      if (_context.UserLedgerTransactions.Where(
+          x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault() != null)
+      {
+        balanceBeforeTransaction = _context.UserLedgerTransactions.Where(
+          x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault().BalanceAfterTransaction;
+      }
+      userLedgerTransaction = new UserLedgerTransaction()
+      {
+        Amount = (stRefund.Amount / 100),
+        BalanceBeforeTransaction = balanceBeforeTransaction,
+        BalanceAfterTransaction = balanceBeforeTransaction + (stRefund.Amount / 100),
+        Concept = 5, // Refund.
+        ProductOrder = order.Id,
+        Created = DateTime.UtcNow,
+        CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+        Description = "Order #" + order.Id + ". Cancelled order refund credit.",
+        TransactionType = 1, // Credit.
+        User = order.User
+      };
+      _context.UserLedgerTransactions.Add(userLedgerTransaction);
+      _context.SaveChanges();
 
-      return View("Index");
+      balanceBeforeTransaction += (stRefund.Amount / 100);
+
+      userLedgerTransaction = new UserLedgerTransaction()
+      {
+        Amount = stRefund.Amount / 100,
+        BalanceBeforeTransaction = balanceBeforeTransaction,
+        BalanceAfterTransaction = balanceBeforeTransaction - (stRefund.Amount / 100),
+        Concept = 5, // Refund.
+        ProductOrder = order.Id,
+        Created = DateTime.UtcNow,
+        CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+        Description = "Order #" + order.Id + ". Cancelled order refund debit. Refund identification: " + stRefund.Id + ".",
+        TransactionType = 2, // Debit.
+        User = order.User
+      };
+      _context.UserLedgerTransactions.Add(userLedgerTransaction);
+      _context.SaveChanges();
+
+      billing.RefundAmount = stRefund.Amount / 100;
+      billing.Refunded = true;
+      billing.RefundedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
+      billing.RefundedOn = DateTime.UtcNow;
+      billing.RefundReason = Model.CancelReason;
+      billing.RefundRequested = true;
+
+      _context.OrderBillTos.Update(billing);
+      await _context.SaveChangesAsync();
+
+      return RedirectToAction("Index");
     }
 
     public IActionResult RefundOrder([Bind("OrderId")] CheckoutViewModel Model)
@@ -238,7 +386,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
       // Affect app ledger with cancel information.
 
-      return View("Index");
+      return RedirectToAction("Index");
     }
 
     private bool CheckoutViewModelExists(long id)

@@ -48,8 +48,10 @@ namespace XOSkinWebApp.Controllers
           Recipient = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.RecipientName).FirstOrDefault(),
           DatePlaced = o.DatePlaced,
           TrackingNumber = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault(),
-          Status = shipping.Shipped == null ? "Shipping Soon" : ((bool)shipping.Shipped ?
-            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "Shipping Soon")
+          Status = o.Cancelled == null ? ((shipping.Shipped == null || (bool)!shipping.Shipped) ?
+            "Shipping Soon" : "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString()) :
+            (bool)o.Cancelled ? "Cancelled" : ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "Shipping Soon" : 
+            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString())
         });
       }
 
@@ -95,7 +97,10 @@ namespace XOSkinWebApp.Controllers
           CodeDiscount = order.CodeDiscount,
           CouponDiscount = order.CouponDiscount,
           ShippedOn = (shipping.Shipped == null || (bool)!shipping.Shipped) ? (DateTime)shipping.ShipDate : (DateTime)shipping.ActualShipDate,
-          FulfillmentStatus = (shipping.Shipped == null || (bool)!shipping.Shipped) ? "Shipping Soon" : "Shipped",
+          FulfillmentStatus = order.Cancelled == null ? ((shipping.Shipped == null || (bool)!shipping.Shipped) ?
+            "Shipping Soon" : "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString()) :
+            (bool)order.Cancelled ? "Cancelled" : ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "Shipping Soon" :
+            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString()),
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
           ShippingAddress1 = shipping.AddressLine1,

@@ -398,7 +398,7 @@ namespace XOSkinWebApp.Controllers
 
     public async Task<IActionResult> PlaceOrder(CheckoutViewModel Model)
     {
-      ShopifySharp.ProductService sProductService = null;
+      ShopifySharp.ProductService shProductService = null;
       ProductVariantService shProductVariantService = null;
       InventoryLevelService shInventoryLevelService = null;
       InventoryItemService shInventoryItemService = null;
@@ -424,7 +424,7 @@ namespace XOSkinWebApp.Controllers
       List<KitProduct> kitProduct = null;
       long stock = long.MaxValue;
       ShopifySharp.Transaction shTransaction = null;
-      ShopifySharp.Product sProduct = null;
+      ShopifySharp.Product shProduct = null;
       ProductVariant shProductVariant = null;
       List<Location> shLocation = null;
       InventoryItem shInventoryItem = null;
@@ -473,7 +473,7 @@ namespace XOSkinWebApp.Controllers
 
       try
       {
-        sProductService = new ShopifySharp.ProductService(_option.Value.ShopifyUrl,
+        shProductService = new ShopifySharp.ProductService(_option.Value.ShopifyUrl,
             _option.Value.ShopifyStoreFrontAccessToken);
         shProductVariantService = new ProductVariantService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
@@ -542,7 +542,7 @@ namespace XOSkinWebApp.Controllers
           shLineItemList.Add(new ShopifySharp.LineItem()
           {
             ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault(),
-            VariantId = sProductService.GetAsync((long)_context.Products.Where(
+            VariantId = shProductService.GetAsync((long)_context.Products.Where(
               x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault()).Result.Variants.First().Id,
             Quantity = cli.Quantity,
             Taxable = true,
@@ -1155,8 +1155,8 @@ namespace XOSkinWebApp.Controllers
 
             try
             {
-              sProduct = await sProductService.GetAsync((long)product.ShopifyProductId);
-              shProductVariant = await shProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+              shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
+              shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
               shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
               shLocation = (List<Location>)await shLocationService.ListAsync();
               
@@ -1164,7 +1164,7 @@ namespace XOSkinWebApp.Controllers
               {
                 AvailableAdjustment = (int?)(-1 * item.Quantity),
                 InventoryItemId = shInventoryItem.Id,
-                LocationId = shLocation.First().Id
+                LocationId = shLocation.First().Id // Change this when we get multiple locations.
               });
             }
             catch (Exception ex)
@@ -1203,8 +1203,8 @@ namespace XOSkinWebApp.Controllers
 
                   try
                   {
-                    sProduct = await sProductService.GetAsync((long)kit.ShopifyProductId);
-                    shProductVariant = await shProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                    shProduct = await shProductService.GetAsync((long)kit.ShopifyProductId);
+                    shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
                     shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
                     shLocation = (List<Location>)await shLocationService.ListAsync();
 
@@ -1212,7 +1212,7 @@ namespace XOSkinWebApp.Controllers
                     {
                       AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
                       InventoryItemId = shInventoryItem.Id,
-                      LocationId = shLocation.First().Id
+                      LocationId = shLocation.First().Id // Change this when we get multiple locations.
                     });
 
                     updatedKit.Add(kit.Id);
@@ -1239,8 +1239,8 @@ namespace XOSkinWebApp.Controllers
 
               try
               {
-                sProduct = await sProductService.GetAsync((long)product.ShopifyProductId);
-                shProductVariant = await shProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
+                shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
                 shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
                 shLocation = (List<Location>)await shLocationService.ListAsync();
                 
@@ -1287,8 +1287,8 @@ namespace XOSkinWebApp.Controllers
 
                     try
                     {
-                      sProduct = await sProductService.GetAsync((long)kit.ShopifyProductId);
-                      shProductVariant = await shProductVariantService.GetAsync((long)sProduct.Variants.First().Id);
+                      shProduct = await shProductService.GetAsync((long)kit.ShopifyProductId);
+                      shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
                       shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
                       shLocation = (List<Location>)await shLocationService.ListAsync();
 
@@ -1339,6 +1339,13 @@ namespace XOSkinWebApp.Controllers
           _context.SaveChanges();
         }
 
+        if (_context.UserLedgerTransactions.Where(
+          x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault() != null)
+        {
+          balanceBeforeTransaction = _context.UserLedgerTransactions.Where(
+            x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault().BalanceAfterTransaction;
+        }
+        
         _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
         {
           User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
