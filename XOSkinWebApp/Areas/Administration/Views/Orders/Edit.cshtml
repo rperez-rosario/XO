@@ -5,17 +5,24 @@
 }
 
 <h1>Edit Order</h1>
-<h4>Fulfillment Status: @Model.FulfillmentStatus</h4>
-<h4>Cancellation Status: @Model.CancellationStatus</h4>
-<h4>Cancellation Date: @Model.CancellationDate</h4>
-<h4>Cancellation Reason: @Model.CancelReason</h4>
-<h4>Cancelled By: @Model.CancelledBy</h4>
-<h4>Refund Status: @Model.RefundStatus</h4>
-<h4>Refund Date: @Model.RefundDate</h4>
-<h4>Refund Amount: @Model.RefundAmount</h4>
-<h4>Refund Reason: @Model.RefundReason</h4>
-<h4>Refunded By: @Model.RefundedBy</h4>
-
+<div class="container-fluid">
+  <div class="row" style="width: 100%; margin-left: auto; margin-right: auto">
+    <div class="col-sm-4">
+      <b>Fulfillment Status:</b> @Model.FulfillmentStatus<br />
+      <b>Cancellation Status:</b> @Model.CancellationStatus<br />
+      <b>Cancellation Date:</b> @Model.CancellationDate<br />
+      <b>Cancellation Reason:</b> @Model.CancelReason<br />
+      <b>Cancelled By:</b> @Model.CancelledBy<br />
+    </div>
+    <div class="col-sm-4">
+      <b>Refund Status:</b> @Model.RefundStatus<br />
+      <b>Refund Date:</b> @Model.RefundDate<br />
+      <b>Refund Amount:</b> $@Model.RefundAmount<br />
+      <b>Refund Reason:</b> @Model.RefundReason<br />
+      <b>Refunded By:</b> @Model.RefundedBy
+    </div>
+  </div>
+</div>
 <p>
   <div style="display: inline">
     <a asp-controller="Orders" asp-action="Index">
@@ -134,25 +141,23 @@
         </div>
         <br />
         <div class="form-group">
-          <label class="control-label">Cancel Reason</label>
-          <input asp-for="CancelReason" class="form-control" id="cancel-reason" />
+          <label class="control-label">Cancellation Reason</label>
+          <input asp-for="CancelReason" class="form-control" id="cancel-reason" disabled="@(Model.Shipped || Model.Cancelled || Model.Refunded)" />
         </div>
         <div class="form-group">
           <label class="control-label">Refund Reason</label>
-          <input asp-for="RefundReason" class="form-control" id="refund-reason" />
+          <input asp-for="RefundReason" class="form-control" id="refund-reason" disabled="@(Model.Refunded || !Model.Shipped)" />
         </div>
         <div style="text-align:right; margin-right: 40px">
           <input type="submit" formaction="@Url.Action("CancelOrder")"
-                 value="Cancel Order" class="btn btn-outline-dark" disabled="@(Model.Shipped || Model.Cancelled)" />
+                  value="Cancel Order" class="btn btn-outline-danger" disabled="@(Model.Shipped || Model.Cancelled || Model.Refunded)" />
           <input type="submit" formaction="@Url.Action("RefundOrder")"
-                 value="Refund Order" class="btn btn-outline-dark" disabled="@Model.Refunded" />
+                  value="Refund Order" class="btn btn-outline-danger" disabled="@(Model.Refunded || !Model.Shipped)" />
         </div>
-        <br />
-        <div id="map"></div>
       </div>
     </div>
   </div>
-  <h4>Items in This Order</h4>
+  <h4>Items Shipped With This Order</h4>
   <table class="table table-responsive" id="OrderItems" style="margin-left: auto; margin-right: auto">
     <thead>
       <tr>
@@ -177,8 +182,6 @@
     </tbody>
   </table>
   <input type="hidden" asp-for="OrderId" value="@Model.OrderId" />
-  <input type="hidden" asp-for="ShippingLongitude" value="@Model.ShippingLongitude" id="shipping-longitude" />
-  <input type="hidden" asp-for="ShippingLatitude" value="@Model.ShippingLatitude" id="shipping-latitude" />
 </form>
 <script type="text/javascript">
   $(document).ready(function () {
@@ -193,99 +196,4 @@
       details: true
     });
   });
-</script>
-
-<script type="text/javascript" src="@Model.GoogleMapsUrl" async></script>
-<script type="text/javascript">
-  function initMap() {
-    const shipmentGeolocation = { lat: @Model.ShippingLatitude, lng: @Model.ShippingLongitude };
-    const map = new google.maps.Map(document.getElementById("map"), {
-      zoom: 14,
-      disableDefaultUI: true,
-      center: shipmentGeolocation,
-      styles: [
-        { elementType: "geometry", stylers: [{ color: "#424242" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#424242" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#797979" }] },
-        {
-          featureType: "administrative.locality",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#ffffff" }],
-        },
-        {
-          featureType: "poi",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#d5d5d5" }],
-        },
-        {
-          featureType: "poi.park",
-          elementType: "geometry",
-          stylers: [{ color: "#404040" }],
-        },
-        {
-          featureType: "poi.park",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#9b9b9b" }],
-        },
-        {
-          featureType: "road",
-          elementType: "geometry",
-          stylers: [{ color: "#535353" }],
-        },
-        {
-          featureType: "road",
-          elementType: "geometry.stroke",
-          stylers: [{ color: "#3c3c3c" }],
-        },
-        {
-          featureType: "road",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#b5b5b5" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "geometry",
-          stylers: [{ color: "#797979" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "geometry.stroke",
-          stylers: [{ color: "#393939" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#f3f3f3" }],
-        },
-        {
-          featureType: "transit",
-          elementType: "geometry",
-          stylers: [{ color: "#494949" }],
-        },
-        {
-          featureType: "transit.station",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#d4d4d4" }],
-        },
-        {
-          featureType: "water",
-          elementType: "geometry",
-          stylers: [{ color: "#3f3f3f" }],
-        },
-        {
-          featureType: "water",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#6e6e6e" }],
-        },
-        {
-          featureType: "water",
-          elementType: "labels.text.stroke",
-          stylers: [{ color: "#404040" }],
-        }]
-    });
-    const marker = new google.maps.Marker({
-      position: shipmentGeolocation,
-      map: map,
-    });
-  }
 </script>

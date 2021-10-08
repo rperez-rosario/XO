@@ -30,6 +30,7 @@ namespace XOSkinWebApp.Controllers
     {
       List<OrderViewModel> order = new List<OrderViewModel>();
       OrderShipTo shipping = null;
+      OrderBillTo billing = null;
 
       foreach (ProductOrder o in _context.ProductOrders.Where(
         x => x.User.Equals(_context.AspNetUsers.Where(
@@ -38,6 +39,7 @@ namespace XOSkinWebApp.Controllers
         x => x.Completed != null).Where(
         x => x.Completed == true).OrderByDescending(x => x.DatePlaced).ToList())
       {
+        billing = _context.OrderBillTos.Where(x => x.Order == o.Id).FirstOrDefault();
         shipping = _context.OrderShipTos.Where(x => x.Order == o.Id).FirstOrDefault();
         order.Add(new OrderViewModel()
         {
@@ -48,10 +50,11 @@ namespace XOSkinWebApp.Controllers
           Recipient = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.RecipientName).FirstOrDefault(),
           DatePlaced = o.DatePlaced,
           TrackingNumber = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault(),
-          Status = o.Cancelled == null ? ((shipping.Shipped == null || (bool)!shipping.Shipped) ?
-            "Shipping Soon" : "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString()) :
-            (bool)o.Cancelled ? "Cancelled" : ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "Shipping Soon" : 
-            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString())
+          Status = billing.Refunded != null ? ((bool)billing.Refunded ? "Refunded" :
+            (shipping.Shipped == null ? "Shipping Soon" : (bool)shipping.Shipped ?
+            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "Shipping Soon")) :
+            (shipping.Shipped == null ? "Shipping Soon" : (bool)shipping.Shipped ?
+            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "Shipping Soon")
         });
       }
 
@@ -97,10 +100,11 @@ namespace XOSkinWebApp.Controllers
           CodeDiscount = order.CodeDiscount,
           CouponDiscount = order.CouponDiscount,
           ShippedOn = (shipping.Shipped == null || (bool)!shipping.Shipped) ? (DateTime)shipping.ShipDate : (DateTime)shipping.ActualShipDate,
-          FulfillmentStatus = order.Cancelled == null ? ((shipping.Shipped == null || (bool)!shipping.Shipped) ?
-            "Shipping Soon" : "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString()) :
-            (bool)order.Cancelled ? "Cancelled" : ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "Shipping Soon" :
-            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString()),
+          FulfillmentStatus = billing.Refunded != null ? ((bool)billing.Refunded ? "Refunded" :
+            (shipping.Shipped == null ? "Shipping Soon" : (bool)shipping.Shipped ?
+            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "Shipping Soon")) :
+            (shipping.Shipped == null ? "Shipping Soon" : (bool)shipping.Shipped ?
+            "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "Shipping Soon"),
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
           ShippingAddress1 = shipping.AddressLine1,

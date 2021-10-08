@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ServiceStack;
@@ -49,7 +48,10 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           OrderId = po.Id,
           Recipient = shipment.RecipientName,
           TrackingNumber = shipment.TrackingNumber,
-          Status = shipment.Shipped == null ? "SHIPPING SOON" : ((bool)shipment.Shipped ?
+          Status = billing.Refunded != null ? ((bool)billing.Refunded ? "REFUNDED" : 
+            (shipment.Shipped == null ? "SHIPPING SOON" : (bool)shipment.Shipped ?
+            "SHIPPED: " + ((DateTime)shipment.ActualShipDate).ToShortDateString() : "SHIPPING SOON")) :
+            (shipment.Shipped == null ? "SHIPPING SOON" : (bool)shipment.Shipped ?
             "SHIPPED: " + ((DateTime)shipment.ActualShipDate).ToShortDateString() : "SHIPPING SOON"),
           RefundStatus = (billing.RefundRequested == null || (bool)!billing.RefundRequested) ? "NOT REQUESTED" :
             (bool)billing.RefundRequested && (billing.Refunded == null || (bool)!billing.Refunded) ? "REQUESTED" :
@@ -98,9 +100,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           CouponDiscount = order.CouponDiscount,
           ShippedOn = (shipping.Shipped == null || (bool)!shipping.Shipped) ? 
             (DateTime)shipping.ShipDate : (DateTime)shipping.ActualShipDate,
-          FulfillmentStatus = order.Cancelled == null ? ((shipping.Shipped == null || (bool)!shipping.Shipped) ? 
-            "SHIPPING SOON" : "SHIPPED") : 
-            (bool)order.Cancelled ? "CANCELLED" : ((shipping.Shipped == null || (bool)!shipping.Shipped) ? "SHIPPING SOON" : "SHIPPED"),
+          FulfillmentStatus = billing.Refunded != null ? ((bool)billing.Refunded ? "REFUNDED" :
+            (shipping.Shipped == null ? "SHIPPING SOON" : (bool)shipping.Shipped ?
+            "SHIPPED: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "SHIPPING SOON")) :
+            (shipping.Shipped == null ? "SHIPPING SOON" : (bool)shipping.Shipped ?
+            "SHIPPED: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "SHIPPING SOON"),
           ShippingName = shipping.RecipientName,
           ShippingCountry = shipping.CountryName,
           ShippingAddress1 = shipping.AddressLine1,
@@ -157,41 +161,6 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       {
         throw new Exception("An error was encountered while retrieving order details.", ex);
       }
-
-      try
-      {
-        geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
-        .Replace("{adminDistrict}", checkout.ShippingState)
-        .Replace("{postalCode}", checkout.ShippingPostalCode.Trim())
-        .Replace("{locality}", checkout.ShippingCity.Trim())
-        .Replace("{addressLine}", (checkout.ShippingAddress1.Trim() + (checkout.ShippingAddress2 == null ||
-          (checkout.ShippingAddress2 != null && checkout.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
-          " " + checkout.ShippingAddress2.Trim())))
-        .Replace("{includeNeighborhood}", "0")
-        .Replace("{includeValue}", String.Empty)
-        .Replace("{maxResults}", "1")
-        .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
-
-        geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
-        geoLocationJson = (geoLocationUrl).GetJsonFromUrl();
-
-        using (JsonDocument document = JsonDocument.Parse(geoLocationJson))
-        {
-          JsonElement root = document.RootElement;
-          JsonElement resourceSetElement = root.GetProperty("resourceSets");
-          JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
-          JsonElement resourcePoint = resource.GetProperty("point");
-          JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
-          checkout.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
-          checkout.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
-        }
-      }
-      catch
-      {
-        // Address was not found. Fail silently and continue. Geolocation will not be displayed for this address.
-      }
-
-      checkout.GoogleMapsUrl = _option.Value.GoogleMapsUrl;
 
       ViewData.Add("OrderDetails.WelcomeText", _context.LocalizedTexts.Where(
         x => x.PlacementPointCode.Equals("OrderDetails.WelcomeText")).Select(x => x.Text).FirstOrDefault());
@@ -322,6 +291,16 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       order.StripeRefundId = stRefund.Id;
       _context.ProductOrders.Update(order);
       await _context.SaveChangesAsync();
+
+      billing.RefundAmount = order.Subtotal + order.ApplicableTaxes;
+      billing.Refunded = true;
+      billing.RefundedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
+      billing.RefundedOn = DateTime.UtcNow;
+      billing.RefundReason = Model.CancelReason;
+      billing.RefundRequested = true;
+      _context.OrderBillTos.Update(billing);
+      await _context.SaveChangesAsync();
+
       // Affect app ledger with cancel information.
       if (_context.UserLedgerTransactions.Where(
           x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault() != null)
@@ -333,7 +312,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       {
         Amount = (stRefund.Amount / 100),
         BalanceBeforeTransaction = balanceBeforeTransaction,
-        BalanceAfterTransaction = balanceBeforeTransaction + (stRefund.Amount / 100),
+        BalanceAfterTransaction = balanceBeforeTransaction + ((decimal)order.Subtotal + (decimal)order.ApplicableTaxes),
         Concept = 5, // Refund.
         ProductOrder = order.Id,
         Created = DateTime.UtcNow,
@@ -351,40 +330,95 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       {
         Amount = stRefund.Amount / 100,
         BalanceBeforeTransaction = balanceBeforeTransaction,
-        BalanceAfterTransaction = balanceBeforeTransaction - (stRefund.Amount / 100),
+        BalanceAfterTransaction = balanceBeforeTransaction - ((decimal)order.Subtotal + (decimal)order.ApplicableTaxes),
         Concept = 5, // Refund.
         ProductOrder = order.Id,
         Created = DateTime.UtcNow,
         CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-        Description = "Order #" + order.Id + ". Cancelled order refund debit. Refund identification: " + stRefund.Id + ".",
+        Description = "Order #" + order.Id + ". Cancelled order refund debit. Stripe refund identification: " + stRefund.Id + ".",
         TransactionType = 2, // Debit.
         User = order.User
       };
       _context.UserLedgerTransactions.Add(userLedgerTransaction);
       _context.SaveChanges();
 
-      billing.RefundAmount = stRefund.Amount / 100;
+      return RedirectToAction("Index");
+    }
+
+    public async Task<IActionResult> RefundOrder([Bind("OrderId", "RefundReason")] CheckoutViewModel Model)
+    {
+      ProductOrder order = _context.ProductOrders.FindAsync(Model.OrderId).Result;
+      OrderShipTo shipping = _context.OrderShipTos.Where(x => x.Order == Model.OrderId).FirstOrDefault();
+      OrderBillTo billing = _context.OrderBillTos.Where(x => x.Order == Model.OrderId).FirstOrDefault();
+      Stripe.RefundService stRefundService = null;
+      Stripe.Refund stRefund = null;
+      Stripe.RefundCreateOptions stRefundCreateOptions = null;
+      UserLedgerTransaction userLedgerTransaction = null;
+      decimal balanceBeforeTransaction = 0.0M;
+
+      // Issue refund on app and Stripe.
+      Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
+      stRefundService = new Stripe.RefundService();
+      stRefundCreateOptions = new Stripe.RefundCreateOptions()
+      {
+        Amount = (long)((order.Subtotal + order.ApplicableTaxes) * 100),
+        Reason = Stripe.RefundReasons.RequestedByCustomer,
+        Charge = order.StripeChargeId
+      };
+      stRefund = await stRefundService.CreateAsync(stRefundCreateOptions);
+      order.StripeRefundId = stRefund.Id;
+      _context.ProductOrders.Update(order);
+      await _context.SaveChangesAsync();
+      billing.RefundAmount = ((decimal)order.Subtotal + (decimal)order.ApplicableTaxes);
       billing.Refunded = true;
       billing.RefundedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault();
       billing.RefundedOn = DateTime.UtcNow;
-      billing.RefundReason = Model.CancelReason;
+      billing.RefundReason = Model.RefundReason;
       billing.RefundRequested = true;
 
       _context.OrderBillTos.Update(billing);
       await _context.SaveChangesAsync();
 
-      return RedirectToAction("Index");
-    }
-
-    public IActionResult RefundOrder([Bind("OrderId")] CheckoutViewModel Model)
-    {
-      // Cancel order on app and Shopify.
-
-      // Increment inventory on app and Shopify.
-
-      // Issue refund on app and Stripe.
-
       // Affect app ledger with cancel information.
+      if (_context.UserLedgerTransactions.Where(
+          x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault() != null)
+      {
+        balanceBeforeTransaction = _context.UserLedgerTransactions.Where(
+          x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault().BalanceAfterTransaction;
+      }
+      userLedgerTransaction = new UserLedgerTransaction()
+      {
+        Amount = ((decimal)order.Subtotal + (decimal)order.ApplicableTaxes),
+        BalanceBeforeTransaction = balanceBeforeTransaction,
+        BalanceAfterTransaction = balanceBeforeTransaction + ((decimal)order.Subtotal + (decimal)order.ApplicableTaxes),
+        Concept = 5, // Refund.
+        ProductOrder = order.Id,
+        Created = DateTime.UtcNow,
+        CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+        Description = "Order #" + order.Id + ". Refund request credit.",
+        TransactionType = 1, // Credit.
+        User = order.User
+      };
+      _context.UserLedgerTransactions.Add(userLedgerTransaction);
+      _context.SaveChanges();
+
+      balanceBeforeTransaction += ((decimal)order.Subtotal + (decimal)order.ApplicableTaxes);
+
+      userLedgerTransaction = new UserLedgerTransaction()
+      {
+        Amount = stRefund.Amount / 100,
+        BalanceBeforeTransaction = balanceBeforeTransaction,
+        BalanceAfterTransaction = balanceBeforeTransaction - ((decimal)order.Subtotal + (decimal)order.ApplicableTaxes),
+        Concept = 5, // Refund.
+        ProductOrder = order.Id,
+        Created = DateTime.UtcNow,
+        CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+        Description = "Order #" + order.Id + ". Refund request debit. Stripe refund identification: " + stRefund.Id + ".",
+        TransactionType = 2, // Debit.
+        User = order.User
+      };
+      _context.UserLedgerTransactions.Add(userLedgerTransaction);
+      _context.SaveChanges();
 
       return RedirectToAction("Index");
     }

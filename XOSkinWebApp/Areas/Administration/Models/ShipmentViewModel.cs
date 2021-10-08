@@ -29,5 +29,6 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public String ShipEngineId { get; set; }
     public String ShippingLabelURL { get; set; }
     public bool OrderCancelled { get; set; }
+    public String FulfillmentStatus { get; set; }
   }
 }

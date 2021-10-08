@@ -1405,7 +1405,7 @@ namespace XOSkinWebApp.Controllers
           User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
           ProductOrder = order.Id,
           TransactionType = 1, // Credit.
-          Description = "Order #" + order.Id + ". Payment.",
+          Description = "Order #" + order.Id + ". Payment. Stripe charge identification: " + stCharge.Id + ".",
           Concept = 4, // Total.
           Amount = total,
           BalanceBeforeTransaction = balanceBeforeTransaction,
