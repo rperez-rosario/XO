@@ -24,6 +24,7 @@ Including but not limited to:
 <li>ShipEngine Web API</li>
 <li>TaxJar Web API</li>
 <li>Shopify Web API</li>
+<li>SendGrid Web API</li>
 <li>Stripe Payment Gateway Web API</li>
 </ul>
 
@@ -31,7 +32,7 @@ Including but not limited to:
 
 <ul>
 <li>0.1 Visual Studio project created, repository initiated with seed project files. (5/2021)</li>
-<li>0.8 About 80% of work towards launch version 1.0 completed. (10/2021)</li>
+<li>0.8 About 80% of work towards launch version 1.0 completed. (10/1/2021)</li>
 </ul>
 
 4.	Web API, languages and technology stack references:
@@ -51,11 +52,12 @@ Including but not limited to:
 <li>https://www.taxjar.com/product/api</li>
 <li>https://shopify.dev/api</li>
 <li>https://stripe.com/docs/api</li>
+<li>https://docs.sendgrid.com/</li>
 </ul>
 
 # Build and Test
 1. Create and configure a private application within the target Shopify store.
-2. Configure additional external services (ShipEngine, TaxJar and Stripe.) 
+2. Configure additional external services (ShipEngine, SendGrid, TaxJar and Stripe.) 
 3. Extract and deploy current .dacpac to SQL Server. Configure security, and business-domain 
 entities as needed.
 4. Web or folder deploy to IIS or Azure Cloud App (.NET Core 5.0 application pool), 
