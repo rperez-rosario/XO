@@ -32,7 +32,7 @@ Including but not limited to:
 
 <ul>
 <li>0.1 Visual Studio project created, repository initiated with seed project files. (5/2021)</li>
-<li>0.8 About 80% of work towards launch version 1.0 completed. (10/1/2021)</li>
+<li>0.8 About 80% of work towards launch version 1.0 completed. (10/2021, 151 days later.)</li>
 </ul>
 
 4.	Web API, languages and technology stack references:
