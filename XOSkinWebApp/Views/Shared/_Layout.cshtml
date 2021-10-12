@@ -17,6 +17,7 @@
   <script type="text/javascript" src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script type="text/javascript" src="~/lib/jquery-inputmask/jquery.inputmask.min.js"></script>
   <script type="text/javascript" src="~/js/site.js" asp-append-version="true"></script>
+  <script type="text/javascript" src="~/lib/chartjs/chart.min.js"></script>
   @await RenderSectionAsync("Scripts", required: false)
 </head>
 <body>
@@ -162,8 +163,8 @@
                       Inventory</a>
                   </li>
                   <li>
-                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Finances" asp-action="Index">
-                      Finances</a>
+                    <a class="nav-link text-dark text-nowrap" asp-area="Administration" asp-controller="Ledgers" asp-action="Index">
+                      Account Ledger</a>
                   </li>
                 </ul>
               </li>

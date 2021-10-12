@@ -1,0 +1,242 @@
+﻿@model IEnumerable<XOSkinWebApp.Areas.Administration.Models.LedgerViewModel>
+
+@{
+    ViewData["Title"] = "Transaction Ledger";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Transaction Ledger</h1>
+<br />
+<p>
+  <a href="#" class="export btn btn-dark ">Download Current Ledger View as .csv</a>
+</p>
+<div class="row">
+  <div class="col-md-4">
+    <canvas id="Chart1"></canvas>
+  </div>
+  <div class="col-md-4">
+    <canvas id="Chart2"></canvas>
+  </div>
+</div>
+<table class="table table-striped" id="ledger">
+  <thead>
+    <tr>
+      <th>
+        @Html.Raw("Id")
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.User)
+      </th>
+      <th>
+        @Html.Raw("Order")
+      </th>
+      <th>
+        @Html.Raw("Type")
+      </th>
+      <th>
+        @Html.Raw("Concept")
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.Description)
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.Amount)
+      </th>
+      <th>
+        @Html.Raw("Balance")
+      </th>
+      <th>
+        @Html.Raw("Created By")
+      </th>
+      <th>
+        @Html.Raw("Created On")
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var item in Model)
+    {
+      <tr>
+        <td>
+          @Html.DisplayFor(modelItem => item.TransactionId)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.User)
+        </td>
+        <td>
+          <b>@Html.DisplayFor(modelItem => item.OrderID)</b>
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.TransactionType)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.TransactionConcept)
+        </td>
+        <td>
+          <i>@Html.DisplayFor(modelItem => item.Description)</i>
+        </td>
+        <td>
+          <b>@Html.DisplayFor(modelItem => item.Amount)</b>
+        </td>
+        <td>
+          <b>@Html.DisplayFor(modelItem => item.BalanceAfterTransaction)</b>
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.CreatedBy)
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.CreatedOn)
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#ledger').DataTable({
+      'order': [[1, 'desc']],
+      aLengthMenu: [
+        [25, 50, 100, 200, -1],
+        [25, 50, 100, 200, "All"]
+      ],
+      iDisplayLength: -1
+    });
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+
+    // CSV Export Function programmed by:
+    // Dave Jarvis and Terry Young.
+    // https://stackoverflow.com/users/59087/dave-jarvis
+    // https://stackoverflow.com/users/277666/terry-young
+    // Retrieved on 10/12/2021.
+    function exportTableToCSV($table, filename) {
+      var $rows = $table.find('tr:has(td)'),
+        tmpColDelim = String.fromCharCode(11), // vertical tab character
+        tmpRowDelim = String.fromCharCode(0), // null character
+        colDelim = '","',
+        rowDelim = '"\r\n"',
+        csv = '"' + $rows.map(function (i, row) {
+          var $row = $(row),
+            $cols = $row.find('td');
+          return $cols.map(function (j, col) {
+            var $col = $(col), text = $col.text();
+            return text.replace(/"/g, '""'); // escape double quotes
+          }).get().join(tmpColDelim);
+        }).get().join(tmpRowDelim)
+          .split(tmpRowDelim).join(rowDelim)
+          .split(tmpColDelim).join(colDelim) + '"';
+      if (false && window.navigator.msSaveBlob) {
+        var blob = new Blob([decodeURIComponent(csv)], {
+          type: 'text/csv;charset=utf8'
+        });
+        window.navigator.msSaveBlob(blob, filename);
+      } else if (window.Blob && window.URL) {
+        var blob = new Blob([csv], {
+          type: 'text/csv;charset=utf-8'
+        });
+        var csvUrl = URL.createObjectURL(blob);
+        $(this)
+          .attr({
+            'download': filename,
+            'href': csvUrl
+          });
+      } else {
+        var csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
+        $(this)
+          .attr({
+            'download': filename,
+            'href': csvData,
+            'target': '_blank'
+          });
+      }
+    }
+    $(".export").on('click', function (event) {
+      var args = [$('#ledger'), 'XOSkinLedger.csv'];
+      exportTableToCSV.apply(this, args);
+    });
+
+    var chart1Context = $('#Chart1');
+    var chart1 = new Chart(chart1Context, {
+      type: 'doughnut',
+      data: {
+        labels: ['Product Sales', 'Product Shipping', 'Sales Taxes', 'Product Refunds'],
+        datasets: [{
+          label: '# of Votes',
+          data: [@ViewData["ProductSales"], @ViewData["ProductShipping"], @ViewData["SalesTaxes"], @ViewData["ProductRefunds"]],
+          backgroundColor: [
+            'rgba(171, 255, 171, 0.8)',
+            'rgba(255, 229, 171, 0.8)',
+            'rgba(171, 246, 255, 0.8)',
+            'rgba(255, 171, 171, 0.8)'
+          ],
+          borderColor: [
+            'rgba(0, 0, 0, 1)',
+            'rgba(0, 0, 0, 1)',
+            'rgba(0, 0, 0, 1)',
+            'rgba(0, 0, 0, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+      }
+    })
+
+    var chart2Context = $('#Chart2');
+    var chart2 = new Chart(chart2Context, {
+      type: 'line',
+      data: {
+        labels: [@Html.Raw(ViewData["Series"])],
+        datasets: [{
+          label: 'Product Sales in USD',
+          data: [@Html.Raw(@ViewData["Data"])],
+          backgroundColor: [
+            'rgba(171, 255, 171, 0.8)',
+            'rgba(171, 255, 171, 0.8)',
+            'rgba(171, 255, 171, 0.8)',
+            'rgba(171, 255, 171, 0.8)',
+            'rgba(171, 255, 171, 0.8)',
+            'rgba(171, 255, 171, 0.8)'
+          ],
+          borderColor: [
+            'rgba(0, 0, 0, 1)',
+            'rgba(0, 0, 0, 1)',
+            'rgba(0, 0, 0, 1)',
+            'rgba(0, 0, 0, 1)',
+            'rgba(0, 0, 0, 1)',
+            'rgba(0, 0, 0, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        }
+      }
+    })
+  });
+
+  function highlight_credit() {
+    const page = document.body.innerHTML;
+    document.body.innerHTML = page.replace(new RegExp("CREDIT", "g"), (match) =>
+      `<mark style="background-color: #90EE90">${match}</mark>`);
+  }
+
+  function highlight_debit() {
+    const page = document.body.innerHTML;
+    document.body.innerHTML = page.replace(new RegExp("DEBIT", "g"), (match) =>
+      `<mark style="background-color: #FF7F7F">${match}</mark>`);
+  }
+
+  highlight_credit();
+  highlight_debit();
+</script>

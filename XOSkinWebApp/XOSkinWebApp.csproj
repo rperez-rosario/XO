@@ -29,9 +29,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational.Design" Version="1.1.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -50,6 +50,10 @@
 
   <ItemGroup>
     <Folder Include="ORM\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\lib\chartjs\chunks\helpers.segment.js" />
   </ItemGroup>
 
 </Project>

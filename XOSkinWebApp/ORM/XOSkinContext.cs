@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using XOSkinWebApp.Areas.Administration.Models;
 
 #nullable disable
 
@@ -1628,5 +1629,7 @@ namespace XOSkinWebApp.ORM
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+        public DbSet<XOSkinWebApp.Areas.Administration.Models.LedgerViewModel> LedgerViewModel { get; set; }
     }
 }
