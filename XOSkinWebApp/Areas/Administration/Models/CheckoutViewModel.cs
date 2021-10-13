@@ -84,8 +84,6 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public String RefundReason { get; set; }
     public decimal? RefundAmount { get; set; }
     public String RefundedBy { get; set; }
-
-
     public String clientIpAddress { get; set; }
 
     public CheckoutViewModel()

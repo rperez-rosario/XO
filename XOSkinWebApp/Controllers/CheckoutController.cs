@@ -1421,39 +1421,51 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while saving the order's line items.", ex);
       }
 
-      var options = new JsonWriterOptions
+      try
       {
-        Indented = true
-      };
-
-      using var stream = new MemoryStream();
-      using var writer = new Utf8JsonWriter(stream, options);
-
-      writer.WriteStartObject();
-      writer.WritePropertyName("label_format");
-      writer.WriteStringValue("pdf");
-      writer.WritePropertyName("label_layout");
-      writer.WriteStringValue("4x6");
-      writer.WritePropertyName("label_download_type");
-      writer.WriteStringValue("url");
-      writer.WriteEndObject();
-
-      writer.Flush();
-
-      seShippingLabelRequestJson = Encoding.UTF8.GetString(stream.ToArray());
-
-      seShippingLabelResponseJson =
-        (_option.Value.ShipEngineGetLabelUrlFromIdUrl + Model.ShipEngineRateId).PostJsonToUrlAsync(seShippingLabelRequestJson,
-        requestFilter: webReq =>
+        var options = new JsonWriterOptions
         {
-          webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
-        }).Result;
+          Indented = true
+        };
 
-      using (JsonDocument document = JsonDocument.Parse(seShippingLabelResponseJson))
+        using var stream = new MemoryStream();
+        using var writer = new Utf8JsonWriter(stream, options);
+
+        writer.WriteStartObject();
+        writer.WritePropertyName("label_format");
+        writer.WriteStringValue("pdf");
+        writer.WritePropertyName("label_layout");
+        writer.WriteStringValue("4x6");
+        writer.WritePropertyName("label_download_type");
+        writer.WriteStringValue("url");
+        writer.WriteEndObject();
+
+        writer.Flush();
+
+        seShippingLabelRequestJson = Encoding.UTF8.GetString(stream.ToArray());
+
+        seShippingLabelResponseJson =
+          (_option.Value.ShipEngineGetLabelUrlFromIdUrl + Model.ShipEngineRateId).PostJsonToUrlAsync(seShippingLabelRequestJson,
+          requestFilter: webReq =>
+          {
+            webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+          }).Result;
+
+        using (JsonDocument document = JsonDocument.Parse(seShippingLabelResponseJson))
+        {
+          JsonElement root = document.RootElement;
+          Model.TrackingNumber = root.GetProperty("tracking_number").ToString();
+          Model.ShipEngineLabelUrl = root.GetProperty("label_download").GetProperty("pdf").ToString();
+        }
+      }
+      catch
       {
-        JsonElement root = document.RootElement;
-        Model.TrackingNumber = root.GetProperty("tracking_number").ToString();
-        Model.ShipEngineLabelUrl = root.GetProperty("label_download").GetProperty("pdf").ToString();
+        // Continue processing order, shipping label will be created manually.
+      }
+
+      if (Model.TrackingNumber == null || Model.TrackingNumber.Trim().Count() == 0)
+      {
+        Model.TrackingNumber = "Will be Assigned Soon.";
       }
 
       try
@@ -1469,6 +1481,7 @@ namespace XOSkinWebApp.Controllers
           PostalCode = Model.BillingPostalCode,
           BillingDate = Model.BilledOn,
           Order = order.Id
+
         });
 
         _context.SaveChanges();

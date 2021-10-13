@@ -41,21 +41,26 @@ namespace XOSkinWebApp.Controllers
       {
         billing = _context.OrderBillTos.Where(x => x.Order == o.Id).FirstOrDefault();
         shipping = _context.OrderShipTos.Where(x => x.Order == o.Id).FirstOrDefault();
-        order.Add(new OrderViewModel()
+        if (billing != null && shipping != null)
         {
-          OrderId = o.Id,
-          Arrives = (shipping.Shipped == null || (bool)!shipping.Shipped) ? 
-            _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.Arrives).FirstOrDefault() : 
+          order.Add(new OrderViewModel()
+          {
+            OrderId = o.Id,
+            Arrives = (shipping.Shipped == null || (bool)!shipping.Shipped) ?
+            _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.Arrives).FirstOrDefault() :
             ((DateTime)shipping.ActualArrives),
-          Recipient = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.RecipientName).FirstOrDefault(),
-          DatePlaced = o.DatePlaced,
-          TrackingNumber = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault(),
-          Status = billing.Refunded != null ? ((bool)billing.Refunded ? "Refunded" :
+            Recipient = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.RecipientName).FirstOrDefault(),
+            DatePlaced = o.DatePlaced,
+            TrackingNumber = _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault() == null ||
+              _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault().Trim().Count() == 0 ? 
+              "To Be Assigned Soon" : _context.OrderShipTos.Where(x => x.Order == o.Id).Select(x => x.TrackingNumber).FirstOrDefault(),
+            Status = billing.Refunded != null ? ((bool)billing.Refunded ? "Refunded" :
             (shipping.Shipped == null ? "Shipping Soon" : (bool)shipping.Shipped ?
             "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "Shipping Soon")) :
             (shipping.Shipped == null ? "Shipping Soon" : (bool)shipping.Shipped ?
             "Shipped: " + ((DateTime)shipping.ActualShipDate).ToShortDateString() : "Shipping Soon")
-        });
+          });
+        }
       }
 
       ViewData.Add("Orders.WelcomeText", _context.LocalizedTexts.Where(
@@ -125,7 +130,8 @@ namespace XOSkinWebApp.Controllers
           SubTotal = order.Subtotal,
           Taxes = order.ApplicableTaxes,
           Total = order.Total,
-          TrackingNumber = shipping.TrackingNumber
+          TrackingNumber = shipping.TrackingNumber == null || shipping.TrackingNumber.Trim().Count() == 0 ? 
+            "To be Assigned Soon" : shipping.TrackingNumber
         };
 
         checkout.LineItem = new List<ShoppingCartLineItemViewModel>();

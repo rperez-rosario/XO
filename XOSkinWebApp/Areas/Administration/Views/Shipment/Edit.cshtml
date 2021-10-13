@@ -94,15 +94,43 @@
           @Html.Raw(Model.ShippedBy)
         </span>
       </div>
+      <div style="text-align: right; margin-right: 40px">
+        Tracking Number: <span style="font-weight: 100">
+          @Html.Raw(Model.TrackingNumber)
+        </span>
+      </div>
       <br />
       <div id="map"></div><br />
-      <div style="text-align: right; margin-right: 40px">
+      <div style="text-align: center">
         <form asp-action="Edit">
           <a class="btn-outline-dark btn" href="@Model.ShipEngineLabelUrl" target="_blank">Print Shipping Label</a>
-          <input type="submit" class="btn-outline-dark btn" value="Mark As Fulfilled" 
-            disabled="@(Model.ShipmentStatus.Equals("SHIPPED") || Model.ShipmentStatus.Equals("CANCELLED"))" />
+          <input type="submit" class="btn-outline-danger btn" value="Mark As Fulfilled"
+                 disabled="@(Model.ShipmentStatus.Equals("SHIPPED") || Model.ShipmentStatus.Equals("CANCELLED"))" />
           <input type="hidden" asp-for="OrderId" value="@Model.OrderId" />
         </form>
+        <br />
+        @if (Model.ShipEngineLabelUrl == null)
+        {
+          <div style="font-size: 10pt; text-align: right; margin-right: 40px">
+            <p>
+              This is an overlarge order, it requires manual shipment label printing.
+              <i>Contact your supervisor for instructions on how to
+                handle this.</i>
+            </p>
+            <p>Enter tracking number(s) here (separated by commas) as soon as they become available so the customer may 
+            track their order.</p>
+            <form asp-action="SaveTrackingNumbers">
+              <div class="form-group">
+                <label class="control-label">TrackingNumber(s)</label>
+                <input asp-for="TrackingNumber" class="form-control" id="shipping-country"
+                       disabled="@(Model.ShipmentStatus.Equals("SHIPPED") || Model.ShipmentStatus.Equals("CANCELLED"))" /><br />
+                <input type="submit" class="btn-outline-dark btn" value="Save Tracking Number(s)"
+                       disabled="@(Model.ShipmentStatus.Equals("SHIPPED") || Model.ShipmentStatus.Equals("CANCELLED"))" />
+                <input type="hidden" asp-for="OrderId" value="@Model.OrderId" />
+              </div>
+            </form>
+          </div>
+        }
       </div>
     </div>
   </div>
@@ -245,12 +273,12 @@
   $(document).ready(function () {
     function highlight_pending() {
       const page = document.body.innerHTML;
-      document.body.innerHTML = page.replace(new RegExp("PENDING", "g"), (match) => `<mark style="background-color: #FF7F7F">${match}</mark>`);
+      document.body.innerHTML = page.replace(new RegExp("PENDING", "g"), (match) => `<mark style="background-color: #ffabab">${match}</mark>`);
     }
 
     function highlight_shipped() {
       const page = document.body.innerHTML;
-      document.body.innerHTML = page.replace(new RegExp("SHIPPED", "g"), (match) => `<mark style="background-color: #90EE90">${match}</mark>`);
+      document.body.innerHTML = page.replace(new RegExp("SHIPPED", "g"), (match) => `<mark style="background-color: #abffab">${match}</mark>`);
     }
 
     highlight_pending();

@@ -39,31 +39,34 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       {
         shipment = _context.OrderShipTos.Where(x => x.Order == po.Id).FirstOrDefault();
         billing = _context.OrderBillTos.Where(x => x.Order == po.Id).FirstOrDefault();
-        order.Add(new OrderViewModel()
+        if (shipment != null && billing != null)
         {
-          Arrives = shipment.Arrives,
-          Carrier = shipment.CarrierName,
-          DatePlaced = po.DatePlaced,
-          NumberOfItems = TotalQuantityOfItems(po.Id),
-          OrderId = po.Id,
-          Recipient = shipment.RecipientName,
-          TrackingNumber = shipment.TrackingNumber,
-          Status = billing.Refunded != null ? ((bool)billing.Refunded ? "REFUNDED" : 
+          order.Add(new OrderViewModel()
+          {
+            Arrives = shipment.Arrives,
+            Carrier = shipment.CarrierName,
+            DatePlaced = po.DatePlaced,
+            NumberOfItems = TotalQuantityOfItems(po.Id),
+            OrderId = po.Id,
+            Recipient = shipment.RecipientName,
+            TrackingNumber = shipment.TrackingNumber,
+            Status = billing.Refunded != null ? ((bool)billing.Refunded ? "REFUNDED" :
             (shipment.Shipped == null ? "SHIPPING SOON" : (bool)shipment.Shipped ?
             "SHIPPED: " + ((DateTime)shipment.ActualShipDate).ToShortDateString() : "SHIPPING SOON")) :
             (shipment.Shipped == null ? "SHIPPING SOON" : (bool)shipment.Shipped ?
             "SHIPPED: " + ((DateTime)shipment.ActualShipDate).ToShortDateString() : "SHIPPING SOON"),
-          RefundStatus = (billing.RefundRequested == null || (bool)!billing.RefundRequested) ? "NOT REQUESTED" :
+            RefundStatus = (billing.RefundRequested == null || (bool)!billing.RefundRequested) ? "NOT REQUESTED" :
             (bool)billing.RefundRequested && (billing.Refunded == null || (bool)!billing.Refunded) ? "REQUESTED" :
             ((billing.Refunded == null || (bool)!billing.Refunded) ? "NOT REQUESTED" : "REFUNDED"),
-          RefundDate = billing.RefundedOn,
-          RefundReason = billing.RefundReason,
-          CancellationStatus = (po.Cancelled == null || (bool)!po.Cancelled) ? "NOT REQUESTED" : "CANCELLED",
-          CancellationDate = po.CancelledOn,
-          CancelReason = po.CancelReason
-        });
+            RefundDate = billing.RefundedOn,
+            RefundReason = billing.RefundReason,
+            CancellationStatus = (po.Cancelled == null || (bool)!po.Cancelled) ? "NOT REQUESTED" : "CANCELLED",
+            CancellationDate = po.CancelledOn,
+            CancelReason = po.CancelReason
+          });
+        }
       }
-
+        
       return View(order);
     }
 

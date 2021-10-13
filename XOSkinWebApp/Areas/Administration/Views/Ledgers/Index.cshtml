@@ -228,13 +228,13 @@
   function highlight_credit() {
     const page = document.body.innerHTML;
     document.body.innerHTML = page.replace(new RegExp("CREDIT", "g"), (match) =>
-      `<mark style="background-color: #90EE90">${match}</mark>`);
+      `<mark style="background-color: #abffab">${match}</mark>`);
   }
 
   function highlight_debit() {
     const page = document.body.innerHTML;
     document.body.innerHTML = page.replace(new RegExp("DEBIT", "g"), (match) =>
-      `<mark style="background-color: #FF7F7F">${match}</mark>`);
+      `<mark style="background-color: #ffabab">${match}</mark>`);
   }
 
   highlight_credit();

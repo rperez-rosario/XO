@@ -205,6 +205,133 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveTrackingNumbers(long OrderId, ShipOutViewModel Model)
+    {
+      ProductOrder order = null;
+      List<ProductOrderLineItem> lineItem = null;
+      OrderBillTo billing = null;
+      OrderShipTo shipping = null;
+      ShipOutViewModel checkout = null;
+      String geoLocationUrl = null;
+      String geoLocationJson = null;
+
+      shipping = _context.OrderShipTos.Where(x => x.Order == OrderId).FirstOrDefault();
+      shipping.TrackingNumber = Model.TrackingNumber;
+      _context.OrderShipTos.Update(shipping);
+      await _context.SaveChangesAsync();
+
+      try
+      {
+        order = _context.ProductOrders.Where(x => x.Id == OrderId).FirstOrDefault();
+        lineItem = _context.ProductOrderLineItems.Where(x => x.ProductOrder == OrderId).ToList<ProductOrderLineItem>();
+        billing = _context.OrderBillTos.Where(x => x.Order == OrderId).FirstOrDefault();
+
+        checkout = new ShipOutViewModel()
+        {
+          BilledOn = billing.BillingDate == null ? new DateTime(1754, 1, 1) : billing.BillingDate.Value,
+          BillingAddress1 = billing.AddressLine1,
+          BillingAddress2 = billing.AddressLine2,
+          BillingCity = billing.CityName,
+          BillingCountry = billing.CountryName,
+          BillingName = billing.NameOnCreditCard,
+          BillingPostalCode = billing.PostalCode,
+          BillingState = billing.StateName,
+          CodeDiscount = order.CodeDiscount,
+          CouponDiscount = order.CouponDiscount,
+          ExpectedToShipOn = shipping.ShipDate == null ? new DateTime(1754, 1, 1) : shipping.ShipDate.Value,
+          ShippingName = shipping.RecipientName,
+          ShippingCountry = shipping.CountryName,
+          ShippingAddress1 = shipping.AddressLine1,
+          ShippingAddress2 = shipping.AddressLine2,
+          ShippingAddressSame = ShippingAddressSame(billing, shipping),
+          ExpectedToArrive = shipping.Arrives == null ? new DateTime(1754, 1, 1) : shipping.Arrives.Value,
+          IsGift = (bool)order.GiftOrder,
+          OrderId = OrderId,
+          CarrierName = shipping.CarrierName,
+          ShippingCharges = order.ShippingCost,
+          ShippingCity = shipping.CityName,
+          ShippingPostalCode = shipping.PostalCode,
+          ShippingState = shipping.StateName,
+          ShopifyId = order.ShopifyId == null ? long.MinValue : order.ShopifyId.Value,
+          SubTotal = order.Subtotal,
+          Taxes = order.ApplicableTaxes,
+          Total = order.Total,
+          TrackingNumber = shipping.TrackingNumber,
+          ShipEngineLabelUrl = shipping.ShippingLabelUrl,
+          ShipmentStatus = billing.Refunded != null ? (bool)billing.Refunded ? "REFUNDED" :
+            (order.Cancelled == null ? (shipping.Shipped == true ? "SHIPPED" : "PENDING") :
+            (bool)order.Cancelled ? "CANCELLED" : (shipping.Shipped == true ? "SHIPPED" : "PENDING")) :
+            (order.Cancelled == null ? (shipping.Shipped == true ? "SHIPPED" : "PENDING") :
+            (bool)order.Cancelled ? "CANCELLED" : (shipping.Shipped == true ? "SHIPPED" : "PENDING")),
+          ShippedOn = shipping.ActualShipDate,
+          ShippedBy = _context.AspNetUsers.Where(
+            x => x.Id.Equals(shipping.ShippedBy)).Select(x => x.Email).FirstOrDefault()
+        };
+
+        checkout.LineItem = new List<ShippingLineItemViewModel>();
+
+        foreach (ProductOrderLineItem li in lineItem)
+        {
+          checkout.LineItem.Add(new ShippingLineItemViewModel()
+          {
+            Id = li.Id,
+            ImageSource = li.ImageSource,
+            ProductDescription = _context.Products.Where(x => x.Id == li.Product).Select(x => x.Description).FirstOrDefault(),
+            ProductId = li.Product,
+            ProductName = _context.Products.Where(x => x.Id == li.Product).Select(x => x.Name).FirstOrDefault(),
+            Quantity = li.Quantity,
+            Total = li.Total
+          });
+        }
+      }
+      catch (Exception ex)
+      {
+        throw new Exception("An error was encountered while retrieving order details.", ex);
+      }
+
+      try
+      {
+        geoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
+        .Replace("{adminDistrict}", checkout.ShippingState)
+        .Replace("{postalCode}", checkout.ShippingPostalCode.Trim())
+        .Replace("{locality}", checkout.ShippingCity.Trim())
+        .Replace("{addressLine}", (checkout.ShippingAddress1.Trim() + (checkout.ShippingAddress2 == null ||
+          (checkout.ShippingAddress2 != null && checkout.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
+          " " + checkout.ShippingAddress2.Trim())))
+        .Replace("{includeNeighborhood}", "0")
+        .Replace("{includeValue}", String.Empty)
+        .Replace("{maxResults}", "1")
+        .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
+
+        geoLocationUrl = HttpUtility.UrlPathEncode(geoLocationUrl);
+        geoLocationJson = (geoLocationUrl).GetJsonFromUrl();
+
+        using (JsonDocument document = JsonDocument.Parse(geoLocationJson))
+        {
+          JsonElement root = document.RootElement;
+          JsonElement resourceSetElement = root.GetProperty("resourceSets");
+          JsonElement resource = resourceSetElement[0].GetProperty("resources")[0];
+          JsonElement resourcePoint = resource.GetProperty("point");
+          JsonElement resourcePointCoordinates = resourcePoint.GetProperty("coordinates");
+          checkout.ShippingLatitude = Decimal.Parse(resourcePointCoordinates[0].ToString());
+          checkout.ShippingLongitude = Decimal.Parse(resourcePointCoordinates[1].ToString());
+        }
+      }
+      catch
+      {
+        // Address was not found. Fail silently and continue. Geolocation will not be displayed for this address.
+      }
+
+      checkout.GoogleMapsUrl = _option.Value.GoogleMapsUrl;
+
+      ViewData.Add("OrderDetails.WelcomeText", _context.LocalizedTexts.Where(
+        x => x.PlacementPointCode.Equals("OrderDetails.WelcomeText")).Select(x => x.Text).FirstOrDefault());
+
+      return View("Edit", checkout);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     // POST: ShipmentController/Edit/5
     public async Task<IActionResult> Edit(long OrderId, ShipOutViewModel Model)
     {
