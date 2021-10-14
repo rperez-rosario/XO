@@ -1631,5 +1631,7 @@ namespace XOSkinWebApp.ORM
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
         public DbSet<XOSkinWebApp.Areas.Administration.Models.LedgerViewModel> LedgerViewModel { get; set; }
+
+        public DbSet<XOSkinWebApp.Areas.Administration.Models.InventoryViewModel> InventoryViewModel { get; set; }
     }
 }

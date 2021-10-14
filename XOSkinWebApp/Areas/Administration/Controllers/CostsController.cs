@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XOSkinWebApp.Areas.Administration.Models;
@@ -10,6 +11,7 @@ using XOSkinWebApp.ORM;
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
   [Area("Administration")]
+  [Authorize(Roles = "Administrator")]
   public class CostsController : Controller
   {
     private readonly XOSkinContext _context;

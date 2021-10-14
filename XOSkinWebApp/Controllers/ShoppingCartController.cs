@@ -49,8 +49,6 @@ namespace XOSkinWebApp.Controllers
         });
       }
 
-
-
       ViewData.Add("ShoppingCart.WelcomeText", _context.LocalizedTexts.Where(
         x => x.PlacementPointCode.Equals("ShoppingCart.WelcomeText"))
         .Select(x => x.Text).FirstOrDefault());

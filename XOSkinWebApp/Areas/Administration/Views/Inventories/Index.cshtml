@@ -1,0 +1,77 @@
+﻿@model IEnumerable<XOSkinWebApp.Areas.Administration.Models.InventoryViewModel>
+
+@{
+    ViewData["Title"] = "Inventory Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Inventory Management</h1>
+
+<table class="table" id="inventory">
+  <thead>
+      <tr>
+          <th>
+              @Html.Raw("Product Name")
+          </th>
+          <th>
+            @Html.Raw("SKU")
+          </th>
+          <th>
+              @Html.Raw("Current Stock Level")
+          </th>
+          <th>
+              @Html.Raw("New Stock Level")
+          </th>        
+      </tr>
+  </thead>
+  <tbody>
+  @foreach (var item in Model) {
+    <tr>
+      <td>
+        @Html.DisplayFor(modelItem => item.ProductName)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.Sku)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.CurrentStock)
+      </td>
+      <td style="width: 170px">
+        <form action="Inventories/UpdateInventory" method="post">
+          <div style="display: inline; float: left">
+            <input type="hidden" name="ProductId" value="@item.ProductId" />
+            <input name="Quantity" class="form-control" size="6" maxlength="6" type="text" value="@item.CurrentStock"
+              onkeypress="return restrictAlphabets(event)" readonly="@item.IsKit" />
+          </div>
+          <div style="display: inline; float: left">&nbsp;</div>
+          <div style="display: inline; float: left">
+            <input type="submit" value="Update" class="btn-outline-dark btn" disabled="@item.IsKit" />
+          </div>
+        </form>
+      </td>
+    </tr>
+  }
+  </tbody>
+</table>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#inventory').DataTable({
+      paging: true,
+      searching: true,
+      sort: true,
+      bInfo: true
+    });
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+
+  function restrictAlphabets(e) {
+    var x = e.which || e.keycode;
+    if ((x >= 48 && x <= 57))
+      return true;
+    else
+      return false;
+  }
+</script>

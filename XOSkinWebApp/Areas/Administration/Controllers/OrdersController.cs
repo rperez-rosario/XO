@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,7 @@ using XOSkinWebApp.ORM;
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
   [Area("Administration")]
+  [Authorize(Roles = "Administrator")]
   public class OrdersController : Controller
   {
     private readonly XOSkinContext _context;
@@ -78,8 +80,6 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       OrderBillTo billing = null;
       OrderShipTo shipping = null;
       CheckoutViewModel checkout = null;
-      String geoLocationUrl = null;
-      String geoLocationJson = null;
 
       try
       {

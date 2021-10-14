@@ -17,7 +17,7 @@ using XOSkinWebApp.ORM;
 namespace XOSkinWebApp.Areas.Administration.Controllers
 {
   [Area("Administration")]
-  [Authorize]
+  [Authorize(Roles = "Administrator")]
   public class ShipmentController : Controller
   {
     private readonly XOSkinContext _context;
