@@ -71,29 +71,34 @@
           </div>
           <div class="form-group form-check">
             <label class="form-check-label">
-              <input class="form-check-input" id="kit" asp-for="Kit" /> <span class="font-weight-bolder">Is This Product a Kit?</span>
+              <input class="form-check-input" id="kit" asp-for="Kit" /> <span class="font-weight-bolder">
+              Is This Product a Kit?</span>
             </label>
           </div>
           <div class="form-group">
             <label asp-for="KitType" class="control-label">Kit Type</label>
-            <select asp-for="KitType" class="form-control" asp-items="ViewBag.KitType" disabled id="kit-type"></select>
+            <select asp-for="KitType" class="form-control" asp-items="ViewBag.KitType" disabled id="kit-type">
+            </select>
             <span asp-validation-for="KitType" class="text-danger"></span>
           </div>
           <div class="form-group">
             <label asp-for="KitProduct" class="control-label font-weight-bolder">Kit Products</label>
-            <select asp-for="KitProduct" class="form-control" asp-items="ViewBag.Product" disabled id="kit-product" size="6"></select>
+            <select asp-for="KitProduct" class="form-control" asp-items="ViewBag.Product" 
+              disabled id="kit-product" size="6"></select>
             <span asp-validation-for="KitProduct" class="text-danger"></span>
           </div>
         </div>
         <div class="col-sm-6" style="padding-left: 10px; padding-right: 10px">
           <div class="form-group">
             <label asp-for="ProductType" class="control-label font-weight-bolder">ProductType</label>
-            <select asp-for="ProductType" class="form-control" asp-items="ViewBag.ProductType" id="product-type"></select>
+            <select asp-for="ProductType" class="form-control" asp-items="ViewBag.ProductType" 
+              id="product-type"></select>
             <span asp-validation-for="ProductType" class="text-danger"></span>
           </div>
           <div class="form-group">
             <label asp-for="Ingredient" class="control-label font-weight-bolder">Ingredients)</label>
-            <select asp-for="Ingredient" class="form-control" asp-items="ViewBag.Ingredient" id="ingredient" size="8"></select>
+            <select asp-for="Ingredient" class="form-control" asp-items="ViewBag.Ingredient" id="ingredient" 
+              size="8"></select>
             <span asp-validation-for="Ingredient" class="text-danger"></span>
           </div>
           <div class="form-group">
@@ -107,7 +112,8 @@
             <span asp-validation-for="Ph" class="text-danger"></span>
           </div>
           <div class="form-group">
-            <label asp-for="ShippingWeightLb" class="control-label font-weight-bolder">Shipping Weight in Pounds (lb)</label>
+            <label asp-for="ShippingWeightLb" class="control-label font-weight-bolder">Shipping Weight in 
+              Pounds (lb)</label>
             <input asp-for="ShippingWeightLb" class="form-control" type="text" id="shipping-weight" />
             <span asp-validation-for="ShippingWeightLb" class="text-danger"></span>
           </div>

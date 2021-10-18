@@ -15,7 +15,8 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
-        public long? Name { get; set; }
+        public bool Active { get; set; }
+        public string Name { get; set; }
         public bool DiscountAsInNproductPercentage { get; set; }
         public decimal? DiscountNproductPercentage { get; set; }
         public bool DiscountAsInNproductDollars { get; set; }

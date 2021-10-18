@@ -54,16 +54,19 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           ShopifyProductId = p.ShopifyProductId,
           Active = p.Active,
           Created = p.Created,
-          CreatedBy = _context.AspNetUsers.Where(x => x.Id.Equals(p.CreatedBy)).Select(x => x.Email).FirstOrDefault(),
+          CreatedBy = _context.AspNetUsers.Where(
+            x => x.Id.Equals(p.CreatedBy)).Select(x => x.Email).FirstOrDefault(),
           CurrentPriceId = p.CurrentPrice,
-          CurrentPrice = _context.Prices.Where(x => x.Id == p.CurrentPrice).Select(x => x.Amount).FirstOrDefault(),
+          CurrentPrice = _context.Prices.Where(
+            x => x.Id == p.CurrentPrice).Select(x => x.Amount).FirstOrDefault(),
           Description = p.Description,
           ImagePathLarge = p.ImagePathLarge,
           ImagePathMedium = p.ImagePathMedium,
           ImagePathSmall = p.ImagePathSmall,
           Ingredient = p.ProductIngredients,
           KitType = p.KitType,
-          KitTypeName = _context.KitTypes.Where(x => x.Id == p.KitType).Select(x => x.Name).FirstOrDefault(),
+          KitTypeName = _context.KitTypes.Where(
+            x => x.Id == p.KitType).Select(x => x.Name).FirstOrDefault(),
           LastUpdated = p.LastUpdated,
           LastUpdatedBy = p.LastUpdatedBy,
           Name = p.Name,
@@ -111,9 +114,10 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-      [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient," +
-      "VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall," +
-      "ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] 
+      [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct," +
+      "Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId," +
+      "CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy," +
+      "Created,LastUpdatedBy,LastUpdated")] 
       ProductViewModel productViewModel,
       IFormFile ImageLarge, long[] KitProduct, long[] Ingredient)
     {
@@ -202,11 +206,13 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           {
             for (i = 0; i < KitProduct.Length; i++)
             {
-              if (_context.Products.Where(x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault() == 0)
+              if (_context.Products.Where(
+                x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault() == 0)
                 emptyStock = true;
               if (_context.Products.Where(x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault()
                 < minStock)
-                minStock = (long)_context.Products.Where(x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault();
+                minStock = (long)_context.Products.Where(
+                  x => x.Id == KitProduct[i]).Select(x => x.Stock).FirstOrDefault();
             }
           }
 
@@ -237,7 +243,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
             LastUpdatedBy = null,
             Name = productViewModel.Name.Trim(),
             ProductType = productViewModel.ProductType,
-            ProductCategory = 6, // General product category, we can write categories, sub-categories and sub-under-categories.
+            ProductCategory = 6, // General product category, we can write categories,
+                                 // sub-categories and sub-under-categories.
             ShopifyProductId = sProduct.Id,
             Sku = productViewModel.Sku.Trim(),
             VolumeInFluidOunces = productViewModel.VolumeInFluidOunces,
@@ -251,7 +258,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         }
         catch (Exception ex)
         {
-          throw new Exception("An error was encountered while writing the product entity to the database.", ex);
+          throw new Exception("An error was encountered while writing the product entity " + 
+            "to the database.", ex);
         }
 
         try
@@ -295,7 +303,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         }
         catch (Exception ex)
         {
-          throw new Exception("An error was encountered while writing the kit products to the database.", ex);
+          throw new Exception("An error was encountered while writing the kit products " + 
+            "to the database.", ex);
         }
 
         try
@@ -312,7 +321,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
                 x => x.Id == KitProduct[i]).Select(x => x.Ph).FirstOrDefault() *
                 (decimal)_context.Products.Where(
                 x => x.Id == KitProduct[i]).Select(x => x.VolumeInFluidOunces).FirstOrDefault();
-              foreach (ProductIngredient pi in _context.ProductIngredients.Where(x => x.Product == KitProduct[i]))
+              foreach (ProductIngredient pi in _context.ProductIngredients.Where(
+                x => x.Product == KitProduct[i]))
               {
                 if (productIngredient.FindAll(x => x.Ingredient == pi.Ingredient).Count == 0)
                 {
@@ -340,7 +350,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         }
         catch (Exception ex)
         {
-          throw new Exception("An error was encountered while calculating kit product data and updating the product.", ex);
+          throw new Exception("An error was encountered while calculating kit product data and updating " + 
+            "the product.", ex);
         }
 
         try
@@ -360,7 +371,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         }
         catch (Exception ex)
         {
-          throw new Exception("An error was encountered while writing the product ingredients to the database.", ex);
+          throw new Exception("An error was encountered while writing the product ingredients " + 
+            "to the database.", ex);
         }
 
         return RedirectToAction(nameof(Index));
@@ -396,7 +408,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         }
 
         ingredientList = new List<Ingredient>();
-        foreach (ProductIngredient ingredient in _context.ProductIngredients.Where(x => x.Product == id).ToList())
+        foreach (ProductIngredient ingredient in _context.ProductIngredients.Where(
+          x => x.Product == id).ToList())
           ingredientList.Add(_context.Ingredients.Where(
             x => x.Id == ingredient.Ingredient).FirstOrDefault());
         ingredientList = ingredientList.OrderBy(x => x.Name).ToList();
@@ -465,10 +478,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
-      long id, [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType,KitProduct,Ingredient," +
-      "VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost,CurrentPriceId,CurrentCostId,ImagePathSmall," +
-      "ImagePathMedium,ImagePathLarge,ImageLarge,Active,Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] 
-      ProductViewModel productViewModel, IFormFile ImageLarge)
+      long id, [Bind("Id,ShopifyProductId,Sku,Name,Description,ProductType,ProductCategory,Kit,KitType," +
+      "KitProduct,Ingredient,VolumeInFluidOunces,Ph,ShippingWeightLb,Stock,CurrentPrice,CurentCost," +
+      "CurrentPriceId,CurrentCostId,ImagePathSmall,ImagePathMedium,ImagePathLarge,ImageLarge,Active," +
+      "Sample,CreatedBy,Created,LastUpdatedBy,LastUpdated")] ProductViewModel productViewModel, 
+      IFormFile ImageLarge)
     {
       ORM.Product product = null;
       String filePathPrefix = "wwwroot/img/product/xo-img-pid-";
@@ -543,7 +557,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           }
           else
           {
-            throw new Exception("An error was encountered while writing the updated product information to the database.", ex);
+            throw new Exception("An error was encountered while writing the updated product information " + 
+              "to the database.", ex);
           }
         }
 
@@ -614,7 +629,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         }
         catch (Exception ex)
         {
-          throw new Exception("An error was encountered while updating shopping cart and order line item totals.", ex);
+          throw new Exception("An error was encountered while updating shopping cart and order line " + 
+            "item totals.", ex);
         }
 
         try
@@ -629,7 +645,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           sProduct = sProductService.GetAsync((long)product.ShopifyProductId).Result;
           
           if (!sProduct.Status.Equals(productViewModel.Active ? "active" : "draft") || 
-            !sProduct.Title.Equals(productViewModel.Name) || !sProduct.BodyHtml.Equals(productViewModel.Description))  
+            !sProduct.Title.Equals(productViewModel.Name) || 
+            !sProduct.BodyHtml.Equals(productViewModel.Description))  
           {
             sProduct.Status = productViewModel.Active ? "active" : "draft";
             sProduct.Title = productViewModel.Name;
@@ -664,7 +681,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         }
         catch (Exception ex)
         {
-          throw new Exception("An error was encountered while writing the updated product information to Shopify.", ex);
+          throw new Exception("An error was encountered while writing the updated product information " + 
+            "to Shopify.", ex);
         }
         return RedirectToAction(nameof(Index));
       }

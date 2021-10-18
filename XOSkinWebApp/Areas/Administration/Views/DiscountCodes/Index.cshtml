@@ -1,0 +1,90 @@
+﻿@model IEnumerable<XOSkinWebApp.Areas.Administration.Models.DiscountCodeViewModel>
+
+@{
+    ViewData["Title"] = "Discount Codes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Discount Codes</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table" id="discount-codes">
+  <thead>
+    <tr>
+      <th>
+        @Html.DisplayNameFor(model => model.Active)
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.Code)
+      </th>
+      <th>
+        @Html.Raw("Valid From")
+      </th>
+      <th>
+        @Html.Raw("Valid To")
+      </th>
+      <th>
+        @Html.Raw("Created By")
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.Created)
+      </th>
+      <th>
+        @Html.Raw("Last Updated By")
+      </th>
+      <th>
+        @Html.Raw("Last Updated")
+      </th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+@foreach (var item in Model) {
+      <tr>
+        <td>
+          @Html.DisplayFor(modelItem => item.Active)
+        </td>
+        <td class="font-weight-bolder">
+          @Html.DisplayFor(modelItem => item.Code)
+        </td>
+        <td class="font-weight-bolder">
+          @Html.Raw(item.ValidFrom.ToShortDateString())
+        </td>
+        <td class="font-weight-bolder">
+          @Html.Raw(item.ValidTo.ToShortDateString())
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.CreatedBy)
+        </td>
+        <td>
+          @Html.Raw(item.Created.ToShortDateString())
+        </td>
+        <td>
+          @Html.DisplayFor(modelItem => item.LastUpdatedBy)
+        </td>
+        <td>
+          @Html.Raw(((DateTime)item.LastUpdated).ToShortDateString())
+        </td>
+        <td>
+          <a asp-action="Edit" asp-route-id="@item.Id">View</a>
+        </td>
+      </tr>
+}
+    </tbody>
+</table>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var table = $('#discount-codes').DataTable({
+      paging: true,
+      searching: true,
+      sort: true,
+      bInfo: true
+    });
+
+    new $.fn.dataTable.Responsive(table, {
+      details: true
+    });
+  });
+</script>

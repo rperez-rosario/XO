@@ -1,0 +1,166 @@
+﻿@model XOSkinWebApp.Areas.Administration.Models.DiscountCouponViewModel
+
+@{
+  ViewData["Title"] = "Create";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>Discount Coupon</h4>
+<hr />
+<form asp-action="Create">
+  <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="form-group form-check">
+        <label class="form-check-label">
+          <input class="form-check-input" asp-for="Active" checked />
+          @Html.DisplayNameFor(model => model.Active)
+        </label>
+      </div>
+      <div class="form-group">
+        <label asp-for="Name" class="control-label font-weight-bolder"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+      </div>
+      <div class="form-group form-check">
+        <label class="form-check-label font-weight-bolder">
+          <input class="form-check-input" asp-for="DiscountAsInNProductPercentage"
+                 id="chk-discount-as-in-n-product-percentage" />
+          @Html.Raw("Discount As In N-Product Percentage")
+        </label>
+      </div>
+      <div class="form-group">
+        <label asp-for="DiscountNProductPercentage" class="control-label">
+          @Html.Raw("Discount As In N-Product Percentage")
+        </label>
+        <input asp-for="DiscountNProductPercentage" class="form-control" disabled id="discount-as-in-n-product-percentage" />
+        <span asp-validation-for="DiscountNProductPercentage" class="text-danger"></span>
+      </div>
+      <div class="form-group form-check">
+        <label class="form-check-label font-weight-bolder">
+          <input class="form-check-input" asp-for="DiscountAsInNProductDollars" id="chk-discount-as-in-n-product-dollars" />
+          @Html.Raw("Discount As In N-Product Dollars")
+        </label>
+      </div>
+      <div class="form-group">
+        <label asp-for="DiscountInNProductDollars" class="control-label">
+          @Html.Raw("Discount As In N-Product Dollars")
+        </label>
+        <input asp-for="DiscountInNProductDollars" class="form-control" disabled id="discount-as-in-n-product-dollars" />
+        <span asp-validation-for="DiscountInNProductDollars" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+        <label asp-for="DiscountProductN" class="control-label">Discount Product N</label>
+        <input asp-for="DiscountProductN" class="form-control" disabled id="discount-product-n" />
+        <span asp-validation-for="DiscountProductN" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+        <label asp-for="Product" class="control-label">N-Products</label>
+        <select asp-for="Product" class="form-control" asp-items="ViewBag.Products" id="n-products" size="6" disabled>
+        </select>
+        <span asp-validation-for="Product" class="text-danger"></span>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group form-check">
+        <label class="form-check-label font-weight-bolder">
+          <input class="form-check-input" asp-for="DiscountAsInGlobalOrderPercentage"
+                 id="chk-discount-as-in-global-order-percentage" />
+          @Html.Raw("Discount As In Global Order Percentage")
+        </label>
+      </div>
+      <div class="form-group">
+        <label asp-for="DiscountGlobalOrderPercentage" class="control-label">
+          @Html.Raw("Discount As In Global Order Percentage")
+        </label>
+        <input asp-for="DiscountGlobalOrderPercentage" class="form-control" disabled
+               id="discount-as-in-global-order-percentage" />
+        <span asp-validation-for="DiscountGlobalOrderPercentage" class="text-danger"></span>
+      </div>
+      <div class="form-group form-check">
+        <label class="form-check-label font-weight-bolder">
+          <input class="form-check-input" asp-for="DiscountAsInGlobalOrderDollars"
+                 id="chk-discount-as-in-global-order-dollars" />
+          @Html.Raw("Discount As In Global Order Dollars")
+        </label>
+      </div>
+      <div class="form-group">
+        <label asp-for="DiscountGlobalOrderDollars" class="control-label">
+          @Html.Raw("Discount As In Global Order Dollars")
+        </label>
+        <input asp-for="DiscountGlobalOrderDollars" class="form-control" disabled
+               id="discount-as-in-global-order-dollars" />
+        <span asp-validation-for="DiscountGlobalOrderDollars" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+        <label asp-for="ValidFrom" class="control-label font-weight-bolder"></label>
+        <input asp-for="ValidFrom" class="form-control" />
+        <span asp-validation-for="ValidFrom" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+        <label asp-for="ValidTo" class="control-label font-weight-bolder"></label>
+        <input asp-for="ValidTo" class="form-control" />
+        <span asp-validation-for="ValidTo" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-danger" />
+      </div>
+    </div>
+  </div>
+</form>
+<div>
+  <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+  @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<script type="text/javascript">
+  $(document).ready(function () {
+    $('#chk-discount-as-in-n-product-percentage').change(function () {
+      if ($('#chk-discount-as-in-n-product-percentage').prop('checked')) {
+        $('#discount-as-in-n-product-percentage').attr('disabled', false);
+        $('#discount-product-n').attr('disabled', false);
+        $('#n-products').attr('disabled', false);
+      } else {
+        $('#discount-as-in-n-product-percentage').attr('disabled', true);
+        if (!$('#chk-discount-as-in-n-product-dollars').prop('checked')) {
+          $('#discount-product-n').attr('disabled', true);
+          $('#n-products').attr('disabled', true);
+        }
+      }
+    });
+
+    $('#chk-discount-as-in-n-product-dollars').change(function () {
+      if ($('#chk-discount-as-in-n-product-dollars').prop('checked')) {
+        $('#discount-as-in-n-product-dollars').attr('disabled', false);
+        $('#discount-product-n').attr('disabled', false);
+        $('#n-products').attr('disabled', false);
+      } else {
+        $('#discount-as-in-n-product-dollars').attr('disabled', true);
+        if (!$('#chk-discount-as-in-n-product-percentage').prop('checked')) {
+          $('#discount-product-n').attr('disabled', true);
+          $('#n-products').attr('disabled', true);
+        }
+      }
+    });
+
+    $('#chk-discount-as-in-global-order-percentage').change(function () {
+      if ($('#chk-discount-as-in-global-order-percentage').prop('checked')) {
+        $('#discount-as-in-global-order-percentage').attr('disabled', false);
+      } else {
+        $('#discount-as-in-global-order-percentage').attr('disabled', true);
+      }
+    });
+
+    $('#chk-discount-as-in-global-order-dollars').change(function () {
+      if ($('#chk-discount-as-in-global-order-dollars').prop('checked')) {
+        $('#discount-as-in-global-order-dollars').attr('disabled', false);
+      } else {
+        $('#discount-as-in-global-order-dollars').attr('disabled', true);
+      }
+    });
+  });
+</script>

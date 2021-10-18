@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using XOSkinWebApp.Areas.Administration.Models;
 
 #nullable disable
 
@@ -366,7 +365,9 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("DiscountCode");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Code)
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Created).HasColumnType("datetime");
 
@@ -456,6 +457,10 @@ namespace XOSkinWebApp.ORM
                 entity.Property(e => e.LastUpdated).HasColumnType("datetime");
 
                 entity.Property(e => e.LastUpdatedBy).HasMaxLength(450);
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(256)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ValidFrom).HasColumnType("datetime");
 
@@ -1629,9 +1634,5 @@ namespace XOSkinWebApp.ORM
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-        public DbSet<XOSkinWebApp.Areas.Administration.Models.LedgerViewModel> LedgerViewModel { get; set; }
-
-        public DbSet<XOSkinWebApp.Areas.Administration.Models.InventoryViewModel> InventoryViewModel { get; set; }
     }
 }

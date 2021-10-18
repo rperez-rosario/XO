@@ -15,7 +15,8 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
-        public long? Code { get; set; }
+        public bool Active { get; set; }
+        public string Code { get; set; }
         public bool DiscountAsInNproductPercentage { get; set; }
         public decimal? DiscountNproductPercentage { get; set; }
         public bool DiscountAsInNproductDollars { get; set; }
@@ -23,7 +24,7 @@ namespace XOSkinWebApp.ORM
         public short? DiscountProductN { get; set; }
         public bool DiscountAsInGlobalOrderPercentage { get; set; }
         public decimal? DiscountGlobalOrderPercentage { get; set; }
-        public bool DiscountAsInOrderDollars { get; set; }
+        public bool DiscountAsInGlobalOrderDollars { get; set; }
         public decimal? DiscountGlobalOrderDollars { get; set; }
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
