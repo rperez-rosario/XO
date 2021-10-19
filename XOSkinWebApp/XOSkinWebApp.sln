@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XOSkinWebApp", "XOSkinWebAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdaptiveProductRecommendationEngine", "..\AdaptiveProductRecommendationEngine\AdaptiveProductRecommendationEngine.csproj", "{1657806F-1752-4435-9C9A-01DDFC220BDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terminal", "..\Terminal\Terminal.csproj", "{DFEB1CB3-9F46-4007-995B-B36487B757C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal", "..\Terminal\Terminal.csproj", "{DFEB1CB3-9F46-4007-995B-B36487B757C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
