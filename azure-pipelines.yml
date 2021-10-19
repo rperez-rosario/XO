@@ -1,8 +1,4 @@
 # ASP.NET Core (.NET Framework)
-- task: cloc@1
-  inputs:
-    clocCliDownloadUrl: 'https://github.com/AlDanial/cloc/releases/download/1.82/cloc-1.82.exe'
-    arguments: 
 # Build and test ASP.NET Core projects targeting the full .NET Framework.
 # Add steps that publish symbols, save build artifacts, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
@@ -24,6 +20,11 @@ steps:
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '$(solution)'
+
+- task: cloc@1
+  inputs:
+    clocCliDownloadUrl: 'https://github.com/AlDanial/cloc/releases/download/1.82/cloc-1.82.exe'
+    arguments: 
 
 - task: VSBuild@1
   inputs:
