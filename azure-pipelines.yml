@@ -6,5 +6,5 @@
 steps:
 - task: cloc@1
   inputs:
-    clocCliDownloadUrl: 'https://github.com/AlDanial/cloc/releases/download/1.82/cloc-1.82.exe'
+    clocCliDownloadUrl: 'https://github.com/AlDanial/cloc/releases/download/v1.90/cloc-1.90.exe'
     arguments: XO/XOSkinWebApp/
