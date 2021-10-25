@@ -10,31 +10,21 @@ namespace XOSkinWebApp.Models
   {
     [Key]
     public long OrderId { get; set; }
-    
     public long ShopifyId { get; set; }
-
     public List<ShoppingCartLineItemViewModel> LineItem { get; set; }
-
     [Required(ErrorMessage = "Name on credit card required.")]
     public String BillingName { get; set; }
-
     [Required(ErrorMessage = "Billing address line 1 required.")]
     public String BillingAddress1 { get; set; }
-
     public String BillingAddress2 { get; set; }
-
     [Required(ErrorMessage = "Billing city required.")]
     public String BillingCity { get; set; }
-
     [Required(ErrorMessage = "Billing state required.")]
     public String BillingState { get; set; }
-
     [Required(ErrorMessage = "Billing country required.")]
     public String BillingCountry { get; set; }
-
     [Required(ErrorMessage = "Billing postal code required.")]
     public String BillingPostalCode { get; set; }
-
     public DateTime BilledOn { get; set; }
     public decimal? SubTotal { get; set; }
     public decimal? ShippingCharges { get; set; }
@@ -67,13 +57,14 @@ namespace XOSkinWebApp.Models
     public String ShipEngineShipmentId { get; set; }
     public String ShipEngineRateId { get; set; }
     public String ShipEngineLabelUrl { get; set; }
-
     public bool CalculatedShippingAndTaxes { get; set; }
     public bool CardDeclined { get; set; }
     public bool ShippingAddressDeclined { get; set; }
+    public bool TaxCalculationServiceOffline { get; set; }
     public String FulfillmentStatus { get; set; }
-
     public String clientIpAddress { get; set; }
+    public String DiscountCode { get; set; }
+    public long? DiscountCouponId { get; set; }
 
     public CheckoutViewModel()
     {

@@ -102,14 +102,14 @@ else
           <div asp-validation-summary="ModelOnly" class="text-danger"></div>
           <div class="form-group">
             <label class="control-label">Credit Card Number</label>
-            <input asp-for="CreditCardNumber" class="form-control" type="password" id="credit-card-number" maxlength="19" 
-              onkeypress="return restrictAlphabets(event)" />
+            <input asp-for="CreditCardNumber" class="form-control" type="password" id="credit-card-number" maxlength="19"
+                   onkeypress="return restrictAlphabets(event)" />
             <span asp-validation-for="CreditCardNumber" class="text-danger" id="val-credit-card-number"></span>
           </div>
           <div class="form-group">
             <label class="control-label">CVC</label>
-            <input asp-for="CreditCardCVC" class="form-control" type="password" id="credit-card-cvc" maxlength="4" 
-              onkeypress="return restrictAlphabets(event)" />
+            <input asp-for="CreditCardCVC" class="form-control" type="password" id="credit-card-cvc" maxlength="4"
+                   onkeypress="return restrictAlphabets(event)" />
             <span asp-validation-for="CreditCardCVC" class="text-danger" id="val-credit-card-cvc"></span>
           </div>
           <div class="form-group">
@@ -118,33 +118,64 @@ else
             <span class="text-danger" id="val-credit-card-expiration"></span>
           </div>
         </div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">
-          Carrier:  @Html.Raw(Model.CarrierName)</span></div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Shipping:</span>
-          @Html.Raw(Model.ShippedOn.ToShortDateString())</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Arrival:</span>
-          @Html.Raw(Model.ExpectedToArrive.ToShortDateString())</div>
+        <div style="font-weight: bold">
+          <label class="control-label">Type-in a Discount Code</label>
+          <input asp-for="DiscountCode" class="form-control" id="discount-code"
+            style="font-weight: bolder; max-width: 305px; text-transform: uppercase" maxlength="256" />
+        </div>
+        <div style="font-weight: bold">
+          <label class="control-label">Or Pick a Discount Coupon</label>
+          <select asp-for="DiscountCouponId" class="form-control" asp-items="ViewBag.DiscountCoupon" 
+            id="discount-coupon-id" style="font-weight: bolder; max-width: 305px"></select>
+        </div>
         <br />
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Sub-Total:</span>
-          $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Taxes:</span>
-          +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">USPS Priority Mail:</span>
-          +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Code Discount:</span>
-          -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))</div>
-        <div style="text-align: right; margin-right: 40px"><span style="font-weight: bold">Coupon Discount:</span>
-          -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))</div>
-        <div style="font-weight: bold; text-align: right; margin-right: 40px">
-          Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))</div>
+        <div style="text-align: right; margin-right: 25px">
+          <span style="font-weight: bold">
+            Carrier:  @Html.Raw(Model.CarrierName)
+          </span>
+        </div>
+        <div style="text-align: right; margin-right: 25px">
+          <span style="font-weight: bold">Shipping:</span>
+          @Html.Raw(Model.ShippedOn.ToShortDateString())
+        </div>
+        <div style="text-align: right; margin-right: 25px">
+          <span style="font-weight: bold">Arrival:</span>
+          @Html.Raw(Model.ExpectedToArrive.ToShortDateString())
+        </div>
         <br />
-        <div style="text-align: right; margin-right: 14px">
-          <input id="calculate-shipping-cost-and-taxes-button" type="submit" formaction=@Url.Action("CalculateShippingCostAndTaxes") 
-            value="Calculate Shipping Cost & Taxes" class="btn-outline-dark btn" hidden="@(Model.CalculatedShippingAndTaxes)" />
-          <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Address" 
-            class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
-          <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order" 
-            class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)">
+        <div style="text-align: right; margin-right: 25px">
+          <span style="font-weight: bold">Sub-Total:</span>
+          $@Html.Raw(String.Format("{0:0.00}", Model.SubTotal))
+        </div>
+        <div style="text-align: right; margin-right: 25px">
+          <span style="font-weight: bold">Taxes:</span>
+          +$@Html.Raw(String.Format("{0:0.00}", Model.Taxes))
+        </div>
+        <div style="text-align: right; margin-right: 25px">
+          <span style="font-weight: bold">USPS Priority Mail:</span>
+          +$@Html.Raw(String.Format("{0:0.00}", Model.ShippingCharges))
+        </div>
+        <div style="text-align: right; margin-right: 25px">
+          <span style="font-weight: bold">Code Discount:</span>
+          -$@Html.Raw(String.Format("{0:0.00}", Model.CodeDiscount))
+        </div>
+        <div style="text-align: right; margin-right: 25px">
+          <span style="font-weight: bold">Coupon Discount:</span>
+          -$@Html.Raw(String.Format("{0:0.00}", Model.CouponDiscount))
+        </div>
+        <div style="font-weight: bold; text-align: right; margin-right: 25px">
+          Total: $@Html.Raw(String.Format("{0:0.00}", Model.Total))
+        </div>
+        <br />
+        <div style="text-align: right; margin-right: ">
+          <input id="calculate-shipping-cost-and-taxes-button" type="submit"
+                 formaction=@Url.Action("CalculateShippingCostAndTaxes")
+                 value="Calculate Shipping, Discounts & Taxes" class="btn-outline-dark btn"
+                 hidden="@(Model.CalculatedShippingAndTaxes)" />
+          <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Address"
+                 class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
+          <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order"
+                 class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)">
           &nbsp;<span class="spinner spinner-border spinner-border-sm" id="spinner" role="status" hidden"></span>
         </div>
       </div>
@@ -188,11 +219,15 @@ else
   <input type="hidden" asp-for="ExpectedToArrive" value="@Model.ExpectedToArrive" />
   <input type="hidden" asp-for="ShippingCarrier" value="@Model.ShippingCarrier" />
   <input type="hidden" asp-for="CarrierName" value="@Model.CarrierName" />
-  <input type="hidden" asp-for="CalculatedShippingAndTaxes" value="@Model.CalculatedShippingAndTaxes" id="calculated-shipping" />
+  <input type="hidden" asp-for="CalculatedShippingAndTaxes" value="@Model.CalculatedShippingAndTaxes" 
+    id="calculated-shipping" />
   <input type="hidden" asp-for="TotalWeightInPounds" value="@Model.TotalWeightInPounds" />
   <input type="hidden" asp-for="ShippedOn" value="@Model.ShippedOn" />
   <input type="hidden" asp-for="CardDeclined" value="@Model.CardDeclined" id="card-declined" />
-  <input type="hidden" asp-for="ShippingAddressDeclined" value="@Model.ShippingAddressDeclined" id="shipping-address-declined" />
+  <input type="hidden" asp-for="ShippingAddressDeclined" value="@Model.ShippingAddressDeclined" 
+    id="shipping-address-declined" />
+  <input type="hidden" asp-for="TaxCalculationServiceOffline" value="@Model.TaxCalculationServiceOffline"
+    id="tax-calculation-service-offline" />
   <input type="hidden" asp-for="ShipEngineShipmentId" value="@Model.ShipEngineShipmentId" />
   <input type="hidden" asp-for="ShipEngineRateId" value="@Model.ShipEngineRateId" />
 </form>
@@ -209,6 +244,26 @@ else
       details: true
     });
 
+    $('#discount-coupon-id').change(function () {
+      if ($('#discount-coupon-id').val() > 0) {
+        $('#discount-code').val('');
+        $('#discount-code').attr('disabled', true);
+      } else {
+        $('#discount-code').attr('disabled', false);
+      }
+    });
+
+    if ($('#tax-calculation-service-offline').val() == 'True') {
+      if ($('#same-address').prop('checked')) {
+        $('#val-billing-address').html('The tax calculation service is temporarily offline. ' +
+          'Please try placing your order again in a few minutes or contact us.');
+      }
+      else {
+        $('#val-shipping-address').html('The tax calculation service is temporarily offline. ' +
+          'Please try placing your order again in a few minutes or contact us.');
+      }
+    }
+    
     if ($('#shipping-address-declined').val() == 'True') {
       if ($('#same-address').prop('checked')) {
         $('#val-billing-address').html('The address provided does not exist in our database. ' +
@@ -240,6 +295,8 @@ else
       $('#shipping-country').attr('disabled', true);
       $('#shipping-postal-code').attr('readonly', true);
       $('#same-address').attr('disabled', true);
+      $('#discount-code').attr('readonly', true);
+      $('#discount-coupon-id').attr('disabled', true);
     }
 
     $('#val-billing-name').html('');
@@ -278,6 +335,9 @@ else
             $('#same-address').attr('disabled', false);
             $('#same-address').attr('readonly', true);
             $('#shipping-address-declined').val(false);
+            $('#tax-calculation-service-offline').val(false);
+            $('#discount-coupon-id').attr('disabled', false);
+            $('#discount-coupon-id').attr('readonly', true);
           } else {
             e.preventDefault();
           }
@@ -290,6 +350,7 @@ else
           $('#val-credit-card-expiration').html('');
           $('#card-declined').val(false);
           $('#shipping-address-declined').val(false);
+          $('#tax-calculation-service-offline').val(false);
           $('#same-address').attr('disabled', false);
           $('#same-address').attr('readonly', true);
           $('#shipping-state').attr('disabled', false);
@@ -301,6 +362,10 @@ else
           $('#billing-country').attr('disabled', false);
           $('#billing-country').attr('readonly', true);
           $('#calculated-shipping').val(false);
+          $('#discount-coupon-id').attr('disabled', false);
+          $('#discount-coupon-id').attr('readonly', true);
+          $('#discount-code').attr('disabled', false);
+          $('#discount-code').attr('readonly', true);
           break;
         case 'place-order-button':
           if (validateShippingAddress(e) == true && validateCreditCardInformation(e) == true) {
@@ -319,9 +384,14 @@ else
             $('#same-address').attr('readonly', true);
             $('#card-declined').val(false);
             $('#shipping-address-declined').val(false);
+            $('#tax-calculation-service-offline').val(false);
             $('#credit-card-number').attr('readonly', true);
             $('#credit-card-cvc').attr('readonly', true);
             $('#credit-card-expiration-date').attr('readonly', true);
+            $('#discount-coupon-id').attr('disabled', false);
+            $('#discount-coupon-id').attr('readonly', true);
+            $('#discount-code').attr('disabled', false);
+            $('#discount-code').attr('readonly', true);
           } else {
             e.preventDefault();
           }

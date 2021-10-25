@@ -9,6 +9,11 @@ namespace XOSkinWebApp.ConfigurationHelper
 	{
 		public const String SectionName = "Settings";
 
+		public bool ShopifyEnabled { get; set; }
+		public bool SendGridEnabled { get; set; }
+		public bool ShipEngineEnabled { get; set; }
+		public bool TaxJarEnabled { get; set; }
+		public bool StripeEnabled { get; set; }
 		public String ShopifyUrl { get; set; }
 		public String ShopifyStoreFrontAccessToken { get; set; }
 		public String ShopifyYourFaceCollectionId { get; set; }
