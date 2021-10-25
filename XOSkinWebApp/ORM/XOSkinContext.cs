@@ -375,6 +375,8 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(450);
 
+                entity.Property(e => e.Description).IsUnicode(false);
+
                 entity.Property(e => e.DiscountAsInNproductDollars).HasColumnName("DiscountAsInNProductDollars");
 
                 entity.Property(e => e.DiscountAsInNproductPercentage).HasColumnName("DiscountAsInNProductPercentage");
@@ -394,6 +396,8 @@ namespace XOSkinWebApp.ORM
                 entity.Property(e => e.LastUpdated).HasColumnType("datetime");
 
                 entity.Property(e => e.LastUpdatedBy).HasMaxLength(450);
+
+                entity.Property(e => e.MinimumPurchase).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.ValidFrom).HasColumnType("datetime");
 
@@ -438,6 +442,8 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(450);
 
+                entity.Property(e => e.Description).IsUnicode(false);
+
                 entity.Property(e => e.DiscountAsInNproductDollars).HasColumnName("DiscountAsInNProductDollars");
 
                 entity.Property(e => e.DiscountAsInNproductPercentage).HasColumnName("DiscountAsInNProductPercentage");
@@ -457,6 +463,8 @@ namespace XOSkinWebApp.ORM
                 entity.Property(e => e.LastUpdated).HasColumnType("datetime");
 
                 entity.Property(e => e.LastUpdatedBy).HasMaxLength(450);
+
+                entity.Property(e => e.MinimumPurchase).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.Name)
                     .HasMaxLength(256)

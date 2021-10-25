@@ -31,7 +31,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         discountCode.Add(new DiscountCodeViewModel()
         {
           Active = dc.Active,
-          Code = dc.Code,
+          Code = dc.Code.ToUpper(),
           Created = dc.Created,
           CreatedBy = (dc.CreatedBy == null || dc.CreatedBy.Length == 0) ?
             String.Empty : _context.AspNetUsers.FindAsync(dc.CreatedBy).Result.Email,
@@ -44,6 +44,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           DiscountInNProductDollars = dc.DiscountInNproductDollars,
           DiscountNProductPercentage = dc.DiscountNproductPercentage,
           DiscountProductN = dc.DiscountProductN,
+          MinimumPurchase = dc.MinimumPurchase,
           Id = dc.Id,
           LastUpdated = dc.LastUpdated,
           LastUpdatedBy = (dc.LastUpdatedBy == null || dc.LastUpdatedBy.Length == 0) ? 
@@ -70,7 +71,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,Active,Code,DiscountAsInNProductPercentage," +
       "DiscountNProductPercentage,DiscountAsInNProductDollars,DiscountInNProductDollars,DiscountProductN," +
-      "DiscountAsInGlobalOrderPercentage,DiscountGlobalOrderPercentage,DiscountAsInOrderDollars," +
+      "MinimumPurchase,DiscountAsInGlobalOrderPercentage,DiscountGlobalOrderPercentage,DiscountAsInOrderDollars," +
       "DiscountGlobalOrderDollars,ValidFrom,ValidTo,Product," +
       "CreatedBy,Created,LastUpdatedBy,LastUpdated")] DiscountCodeViewModel discountCodeViewModel,
       long [] Product)
@@ -83,7 +84,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         discountCode = new DiscountCode()
         {
           Active = discountCodeViewModel.Active,
-          Code = discountCodeViewModel.Code,
+          Code = discountCodeViewModel.Code.ToUpper(),
           Created = DateTime.UtcNow,
           CreatedBy = _context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
@@ -97,6 +98,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           DiscountInNproductDollars = discountCodeViewModel.DiscountInNProductDollars,
           DiscountNproductPercentage = discountCodeViewModel.DiscountNProductPercentage,
           DiscountProductN = discountCodeViewModel.DiscountProductN,
+          MinimumPurchase = discountCodeViewModel.MinimumPurchase,
           LastUpdatedBy = _context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
           ValidFrom = discountCodeViewModel.ValidFrom,
@@ -155,7 +157,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       discountCodeViewModel = new DiscountCodeViewModel()
       {
         Active = discountCode.Active,
-        Code = discountCode.Code,
+        Code = discountCode.Code.ToUpper(),
         Created = discountCode.Created,
         CreatedBy = _context.AspNetUsers.FindAsync(discountCode.CreatedBy).Result.Email,
         DiscountAsInGlobalOrderDollars = discountCode.DiscountAsInGlobalOrderDollars,
@@ -167,6 +169,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         DiscountInNProductDollars = discountCode.DiscountInNproductDollars,
         DiscountNProductPercentage = discountCode.DiscountNproductPercentage,
         DiscountProductN = discountCode.DiscountProductN,
+        MinimumPurchase = discountCode.MinimumPurchase,
         Id = discountCode.Id,
         LastUpdated = discountCode.LastUpdated,
         LastUpdatedBy = _context.AspNetUsers.FindAsync(discountCode.LastUpdatedBy).Result.Email,

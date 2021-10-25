@@ -44,6 +44,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           DiscountInNProductDollars = dc.DiscountInNproductDollars,
           DiscountNProductPercentage = dc.DiscountNproductPercentage,
           DiscountProductN = dc.DiscountProductN,
+          MinimumPurchase = dc.MinimumPurchase,
           Id = dc.Id,
           LastUpdated = dc.LastUpdated,
           LastUpdatedBy = (dc.LastUpdatedBy == null || dc.LastUpdatedBy.Length == 0) ?
@@ -71,7 +72,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     public async Task<IActionResult> Create([Bind("Id,Active,Name,DiscountAsInNProductPercentage," +
       "DiscountNProductPercentage,DiscountAsInNProductDollars,DiscountInNProductDollars,DiscountProductN," +
       "DiscountAsInGlobalOrderPercentage,DiscountGlobalOrderPercentage,DiscountAsInOrderDollars," +
-      "DiscountGlobalOrderDollars,ValidFrom,ValidTo,Product," +
+      "MinimumPurchase,DiscountGlobalOrderDollars,ValidFrom,ValidTo,Product," +
       "CreatedBy,Created,LastUpdatedBy,LastUpdated")] DiscountCouponViewModel discountCouponViewModel,
       long[] Product)
     {
@@ -97,6 +98,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           DiscountInNproductDollars = discountCouponViewModel.DiscountInNProductDollars,
           DiscountNproductPercentage = discountCouponViewModel.DiscountNProductPercentage,
           DiscountProductN = discountCouponViewModel.DiscountProductN,
+          MinimumPurchase = discountCouponViewModel.MinimumPurchase,
           LastUpdatedBy = _context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
           ValidFrom = discountCouponViewModel.ValidFrom,
@@ -168,6 +170,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         DiscountInNProductDollars = discountCoupon.DiscountInNproductDollars,
         DiscountNProductPercentage = discountCoupon.DiscountNproductPercentage,
         DiscountProductN = discountCoupon.DiscountProductN,
+        MinimumPurchase = discountCoupon.MinimumPurchase,
         Id = discountCoupon.Id,
         LastUpdated = discountCoupon.LastUpdated,
         LastUpdatedBy = _context.AspNetUsers.FindAsync(discountCoupon.LastUpdatedBy).Result.Email,

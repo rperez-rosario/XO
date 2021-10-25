@@ -14,20 +14,20 @@
   <div class="row">
     <div class="col-md-4">
       <div class="form-group form-check">
-        <label class="form-check-label">
-          <input class="form-check-input" asp-for="Active" checked />
+        <label class="form-check-label font-weight-bolder">
+          <input class="form-check-input font-weight-bolder" asp-for="Active" checked />
           @Html.DisplayNameFor(model => model.Active)
         </label>
       </div>
       <div class="form-group">
         <label asp-for="Code" class="control-label font-weight-bolder"></label>
-        <input asp-for="Code" class="form-control" />
+        <input asp-for="Code" class="form-control font-weight-bolder" style="text-transform: uppercase" />
         <span asp-validation-for="Code" class="text-danger"></span>
       </div>
       <div class="form-group form-check">
         <label class="form-check-label font-weight-bolder">
-          <input class="form-check-input" asp-for="DiscountAsInNProductPercentage" 
-            id="chk-discount-as-in-n-product-percentage" />
+          <input class="form-check-input" asp-for="DiscountAsInNProductPercentage"
+                 id="chk-discount-as-in-n-product-percentage" />
           @Html.Raw("Discount As In N-Product Percentage")
         </label>
       </div>
@@ -57,7 +57,12 @@
         <span asp-validation-for="DiscountProductN" class="text-danger"></span>
       </div>
       <div class="form-group">
-        <label asp-for="Product" class="control-label">N-Products</label>
+        <label asp-for="MinimumPurchase" class="control-label">Minimum Purchase (USD)</label>
+        <input asp-for="MinimumPurchase" class="form-control" disabled id="minimum-purchase" />
+        <span asp-validation-for="MinimumPurchase" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+        <label asp-for="Product" class="control-label">N-Product</label>
         <select asp-for="Product" class="form-control" asp-items="ViewBag.Products" id="n-products" size="6" disabled>
         </select>
         <span asp-validation-for="Product" class="text-danger"></span>
@@ -124,11 +129,29 @@
         $('#discount-as-in-n-product-percentage').attr('disabled', false);
         $('#discount-product-n').attr('disabled', false);
         $('#n-products').attr('disabled', false);
+        $('#chk-discount-as-in-n-product-dollars').prop('checked', false);
+        $('#chk-discount-as-in-n-product-dollars').attr('disabled', true);
+        $('#discount-as-in-n-product-dollars').val('');
+        $('#chk-discount-as-in-global-order-percentage').prop('checked', false);
+        $('#chk-discount-as-in-global-order-percentage').attr('disabled', true);
+        $('#discount-as-in-in-global-order-percentage').val('');
+        $('#chk-discount-as-in-global-order-dollars').prop('checked', false);
+        $('#chk-discount-as-in-global-order-dollars').attr('disabled', true);
+        $('#discount-as-in-in-global-order-dollars').val('');
+        $('#minimum-purchase').attr('disabled', false);
       } else {
         $('#discount-as-in-n-product-percentage').attr('disabled', true);
+        $('#discount-as-in-n-product-percentage').val('');
+        $('#chk-discount-as-in-n-product-dollars').attr('disabled', false);
+        $('#chk-discount-as-in-global-order-percentage').attr('disabled', false);
+        $('#chk-discount-as-in-global-order-dollars').attr('disabled', false);
+        $('#minimum-purchase').attr('disabled', true);
+        $('#minimum-purchase').val('');
         if (!$('#chk-discount-as-in-n-product-dollars').prop('checked')) {
           $('#discount-product-n').attr('disabled', true);
+          $('#discount-product-n').val('');
           $('#n-products').attr('disabled', true);
+          $('#n-products').val('');
         }
       }
     });
@@ -138,11 +161,30 @@
         $('#discount-as-in-n-product-dollars').attr('disabled', false);
         $('#discount-product-n').attr('disabled', false);
         $('#n-products').attr('disabled', false);
+        $('#chk-discount-as-in-n-product-percentage').prop('checked', false);
+        $('#chk-discount-as-in-n-product-percentage').attr('disabled', true);
+        $('#discount-as-in-n-product-percentage').val('');
+        $('#chk-discount-as-in-global-order-percentage').prop('checked', false);
+        $('#chk-discount-as-in-global-order-percentage').attr('disabled', true);
+        $('#discount-as-in-in-global-order-percentage').val('');
+        $('#chk-discount-as-in-global-order-dollars').prop('checked', false);
+        $('#chk-discount-as-in-global-order-dollars').attr('disabled', true);
+        $('#discount-as-in-in-global-order-dollars').val('');
+        $('#minimum-purchase').attr('disabled', false);
       } else {
         $('#discount-as-in-n-product-dollars').attr('disabled', true);
+        $('#discount-as-in-n-product-dollars').val('');
+        $('#chk-discount-as-in-n-product-percentage').attr('disabled', false);
+        $('#chk-discount-as-in-n-product-dollars').attr('disabled', false);
+        $('#chk-discount-as-in-global-order-percentage').attr('disabled', false);
+        $('#chk-discount-as-in-global-order-dollars').attr('disabled', false);
+        $('#minimum-purchase').attr('disabled', true);
+        $('#minimum-purchase').val('');
         if (!$('#chk-discount-as-in-n-product-percentage').prop('checked')) {
           $('#discount-product-n').attr('disabled', true);
+          $('#discount-product-n').val('');
           $('#n-products').attr('disabled', true);
+          $('#n-products').val('');
         }
       }
     });
@@ -150,16 +192,54 @@
     $('#chk-discount-as-in-global-order-percentage').change(function () {
       if ($('#chk-discount-as-in-global-order-percentage').prop('checked')) {
         $('#discount-as-in-global-order-percentage').attr('disabled', false);
+        $('#chk-discount-as-in-n-product-dollars').prop('checked', false);
+        $('#chk-discount-as-in-n-product-dollars').attr('disabled', true);
+        $('#discount-as-in-n-product-dollars').val('');
+        $('#chk-discount-as-in-n-product-percentage').prop('checked', false);
+        $('#chk-discount-as-in-n-product-percentage').attr('disabled', true);
+        $('#discount-as-in-n-product-percentage').val('');
+        $('#chk-discount-as-in-global-order-dollars').prop('checked', false);
+        $('#chk-discount-as-in-global-order-dollars').attr('disabled', true);
+        $('#discount-as-in-in-global-order-dollars').val('');
+        $('#discount-product-n').attr('disabled', false);
+        $('#minimum-purchase').attr('disabled', false);
       } else {
         $('#discount-as-in-global-order-percentage').attr('disabled', true);
+        $('#discount-as-in-global-order-percentage').val('');
+        $('#chk-discount-as-in-n-product-dollars').attr('disabled', false);
+        $('#chk-discount-as-in-n-product-percentage').attr('disabled', false);
+        $('#chk-discount-as-in-global-order-dollars').attr('disabled', false);
+        $('#discount-product-n').attr('disabled', true);
+        $('#discount-product-n').val('');
+        $('#minimum-purchase').attr('disabled', true);
+        $('#minimum-purchase').val('');
       }
     });
 
     $('#chk-discount-as-in-global-order-dollars').change(function () {
       if ($('#chk-discount-as-in-global-order-dollars').prop('checked')) {
         $('#discount-as-in-global-order-dollars').attr('disabled', false);
+        $('#chk-discount-as-in-n-product-dollars').prop('checked', false);
+        $('#chk-discount-as-in-n-product-dollars').attr('disabled', true);
+        $('#discount-as-in-n-product-dollars').val('');
+        $('#chk-discount-as-in-n-product-percentage').prop('checked', false);
+        $('#chk-discount-as-in-n-product-percentage').attr('disabled', true);
+        $('#discount-as-in-n-product-percentage').val('');
+        $('#chk-discount-as-in-global-order-percentage').prop('checked', false);
+        $('#chk-discount-as-in-global-order-percentage').attr('disabled', true);
+        $('#discount-as-in-in-global-order-percentage').val('');
+        $('#discount-product-n').attr('disabled', false);
+        $('#minimum-purchase').attr('disabled', false);
       } else {
         $('#discount-as-in-global-order-dollars').attr('disabled', true);
+        $('#discount-as-in-global-order-dollars').val('');
+        $('#chk-discount-as-in-n-product-dollars').attr('disabled', false);
+        $('#chk-discount-as-in-n-product-percentage').attr('disabled', false);
+        $('#chk-discount-as-in-global-order-percentage').attr('disabled', false);
+        $('#discount-product-n').attr('disabled', true);
+        $('#discount-product-n').val('');
+        $('#minimum-purchase').attr('disabled', true);
+        $('#minimum-purchase').val('');
       }
     });
   });

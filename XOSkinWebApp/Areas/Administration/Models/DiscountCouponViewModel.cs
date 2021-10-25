@@ -19,6 +19,7 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public bool DiscountAsInNProductDollars { get; set; }
     public decimal? DiscountInNProductDollars { get; set; }
     public short? DiscountProductN { get; set; }
+    public decimal? MinimumPurchase { get; set; }
     public bool DiscountAsInGlobalOrderPercentage { get; set; }
     public decimal? DiscountGlobalOrderPercentage { get; set; }
     public bool DiscountAsInGlobalOrderDollars { get; set; }

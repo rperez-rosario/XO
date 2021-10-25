@@ -17,11 +17,13 @@ namespace XOSkinWebApp.ORM
         public long Id { get; set; }
         public bool Active { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public bool DiscountAsInNproductPercentage { get; set; }
         public decimal? DiscountNproductPercentage { get; set; }
         public bool DiscountAsInNproductDollars { get; set; }
         public decimal? DiscountInNproductDollars { get; set; }
         public short? DiscountProductN { get; set; }
+        public decimal? MinimumPurchase { get; set; }
         public bool DiscountAsInGlobalOrderPercentage { get; set; }
         public decimal? DiscountGlobalOrderPercentage { get; set; }
         public bool DiscountAsInGlobalOrderDollars { get; set; }
