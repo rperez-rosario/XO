@@ -70,10 +70,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,Active,Name,DiscountAsInNProductPercentage," +
-      "DiscountNProductPercentage,DiscountAsInNProductDollars,DiscountInNProductDollars,DiscountProductN," +
+      "DiscountNProductPercentage,DiscountAsInNProductDollars,DiscountAsInNProductDollars,DiscountProductN," +
       "DiscountAsInGlobalOrderPercentage,DiscountGlobalOrderPercentage,DiscountAsInOrderDollars," +
       "MinimumPurchase,DiscountGlobalOrderDollars,ValidFrom,ValidTo,Product," +
-      "CreatedBy,Created,LastUpdatedBy,LastUpdated")] DiscountCouponViewModel discountCouponViewModel,
+      "CreatedBy,Created,LastUpdatedBy,LastUpdated," +
+      "DiscountAsInGlobalOrderDollars")] DiscountCouponViewModel discountCouponViewModel,
       long[] Product)
     {
       DiscountCoupon discountCoupon = null;

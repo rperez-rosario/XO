@@ -60,6 +60,11 @@
         <span asp-validation-for="DiscountProductN" class="text-danger"></span>
       </div>
       <div class="form-group">
+        <label asp-for="MinimumPurchase" class="control-label">Minimum Purchase (USD)</label>
+        <input asp-for="MinimumPurchase" class="form-control" disabled id="minimum-purchase" />
+        <span asp-validation-for="MinimumPurchase" class="text-danger"></span>
+      </div>
+      <div class="form-group">
         <label asp-for="Product" class="control-label">N-Products</label>
         <select asp-for="Product" class="form-control" asp-items="ViewBag.Products" id="n-products" 
           size="6" disabled>
@@ -99,12 +104,12 @@
         <span asp-validation-for="DiscountGlobalOrderDollars" class="text-danger"></span>
       </div>
       <div class="form-group">
-        <label asp-for="ValidFrom" class="control-label font-weight-bolder"></label>
+        <label asp-for="ValidFrom" class="control-label font-weight-bolder">Valid From</label>
         <input asp-for="ValidFrom" class="form-control" disabled />
         <span asp-validation-for="ValidFrom" class="text-danger"></span>
       </div>
       <div class="form-group">
-        <label asp-for="ValidTo" class="control-label font-weight-bolder"></label>
+        <label asp-for="ValidTo" class="control-label font-weight-bolder">Valid To</label>
         <input asp-for="ValidTo" class="form-control" disabled />
         <span asp-validation-for="ValidTo" class="text-danger"></span>
       </div>

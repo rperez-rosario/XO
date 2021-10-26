@@ -490,8 +490,6 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("DiscountCouponProduct");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.HasOne(d => d.CouponNavigation)
                     .WithMany(p => p.DiscountCouponProducts)
                     .HasForeignKey(d => d.Coupon)

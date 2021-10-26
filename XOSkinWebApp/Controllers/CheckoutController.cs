@@ -32,7 +32,7 @@ namespace XOSkinWebApp.Controllers
       _option = option;
     }
 
-    public IActionResult Index(CheckoutViewModel Model = null)
+    public async Task<IActionResult> Index(CheckoutViewModel Model = null)
     {
       CheckoutViewModel checkoutViewModel = new CheckoutViewModel();
       List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
@@ -44,6 +44,13 @@ namespace XOSkinWebApp.Controllers
       ORM.Address shippingAddress = null;
       decimal totalOrderShippingWeightInPounds = 0.0M;
       List<SelectListItem> discountCoupon = null;
+      List<SelectListItem> discountCouponToRemove = null;
+      DiscountCoupon coupon = null;
+      List<DiscountCouponProduct> couponProduct = null;
+      decimal percentage = decimal.MinValue;
+      short minimumNumberOfProducts = short.MinValue;
+      decimal minimumPurchase = decimal.MinValue;
+      decimal selectedProductSubTotal = 0.0M;
 
       checkoutViewModel.SubTotal = 0.0M;
       totalOrderShippingWeightInPounds = 0.0M;
@@ -76,20 +83,77 @@ namespace XOSkinWebApp.Controllers
           x => x.Id == li.Product).Select(x => x.ShippingWeightLb).FirstOrDefault() * li.Quantity);
       }
 
+      discountCoupon = new SelectList(_context.DiscountCoupons.Where(
+        x => x.Active).Where(
+        x => x.ValidFrom <= DateTime.UtcNow).Where(
+        x => x.ValidTo >= DateTime.UtcNow), "Id", "Name").ToList();
+
+      discountCouponToRemove = new List<SelectListItem>();
+
+      foreach (SelectListItem item in discountCoupon)
+      {
+        coupon = await _context.DiscountCoupons.FindAsync(long.Parse(item.Value));
+        couponProduct = _context.DiscountCouponProducts.Where(x => x.Coupon == coupon.Id).ToList();
+        
+        percentage = coupon.DiscountNproductPercentage == null ? 0.0M : (decimal)coupon.DiscountNproductPercentage;
+        minimumNumberOfProducts = coupon.DiscountProductN == null ? (short)0 : (short)coupon.DiscountProductN;
+        minimumPurchase = coupon.MinimumPurchase == null ? 0.0M : (decimal)coupon.MinimumPurchase;
+        if (checkoutViewModel.SubTotal < minimumPurchase)
+        {
+          discountCouponToRemove.Add(item);
+        }
+        else
+        {
+          if (couponProduct != null && couponProduct.Count > 0)
+          {
+            foreach (DiscountCouponProduct product in couponProduct)
+            {
+              if (!lineItem.Any(x => x.Product == product.Product))
+              {
+                discountCouponToRemove.Add(item);
+                break;
+              }
+              else if (lineItem.Where(
+                x => x.Product == product.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
+              {
+                discountCouponToRemove.Add(item);
+                break;
+              }
+            }
+          }
+          if (coupon.DiscountAsInNproductPercentage || coupon.DiscountAsInNproductDollars)
+          {
+            selectedProductSubTotal = 0.0M;
+            foreach (DiscountCouponProduct product in couponProduct)
+            {
+              selectedProductSubTotal += lineItem.Find(x => x.Product == product.Product) == null ? 
+                0.0M : (decimal)lineItem.Find(x => x.Product == product.Product).Total;
+            }
+            if (selectedProductSubTotal < minimumPurchase)
+            {
+              discountCouponToRemove.Add(item);
+            }
+          }
+        }
+      }
+
+      foreach (SelectListItem remove in discountCouponToRemove)
+      {
+        discountCoupon.Remove(remove);
+      }
+
+      discountCoupon.Insert(0, new SelectListItem()
+      {
+        Text = "--- Please Select a Coupon ---",
+        Value = long.MinValue.ToString()
+      });
+      ViewData["DiscountCoupon"] = discountCoupon;
+
       checkoutViewModel.LineItem = lineItemViewModel;
       checkoutViewModel.CreditCardExpirationDate = DateTime.Now;
       checkoutViewModel.TotalWeightInPounds = totalOrderShippingWeightInPounds;
       ViewData["Country"] = new SelectList(new List<String> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
-
-      discountCoupon = new SelectList(_context.DiscountCoupons.Where(x => x.Active), "Id", "Name").ToList();
-      discountCoupon.Insert(0, new SelectListItem()
-      {
-        Text = "--- Please Select a Coupon ---",
-        Value = long.MinValue.ToString(),
-        Selected = true
-      });
-      ViewData["DiscountCoupon"] = discountCoupon;
 
       checkoutViewModel.Taxes = 0.0M;
       checkoutViewModel.CodeDiscount = 0.0M; // TODO: CALCULATE.
@@ -191,7 +255,7 @@ namespace XOSkinWebApp.Controllers
       return View(checkoutViewModel);
     }
 
-    public IActionResult CalculateShippingCostAndTaxes(CheckoutViewModel Model)
+    public async Task<IActionResult> CalculateShippingCostAndTaxes(CheckoutViewModel Model)
     {
       String seShipmentDetailsJson = null;
       String seShipmentCostJson = null;
@@ -206,17 +270,19 @@ namespace XOSkinWebApp.Controllers
       TaxResponseAttributes tjTaxRate = null;
       int i = 0;
       List<SelectListItem> discountCoupon = null;
+      List<SelectListItem> discountCouponToRemove = null;
+      DiscountCoupon coupon = null;
+      List<DiscountCouponProduct> couponProduct = null;
+      decimal percentage = decimal.MinValue;
+      short minimumNumberOfProducts = short.MinValue;
+      decimal minimumPurchase = decimal.MinValue;
+      decimal selectedProductSubTotal = 0.0M;
+      bool invalid = false;
+      ORM.DiscountCode code = null;
+      List<DiscountCodeProduct> codeProduct = null;
 
       ViewData["Country"] = new SelectList(new List<String> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
-
-      discountCoupon = new SelectList(_context.DiscountCoupons.Where(x => x.Active), "Id", "Name").ToList();
-      discountCoupon.Insert(0, new SelectListItem()
-      {
-        Text = "--- Please Select a Coupon ---",
-        Value = long.MinValue.ToString()
-      });
-      ViewData["DiscountCoupon"] = discountCoupon;
 
       Model.SubTotal = 0.0M;
       totalOrderShippingWeightInPounds = 0.0M;
@@ -265,6 +331,201 @@ namespace XOSkinWebApp.Controllers
       }
 
       Model.LineItem = lineItemViewModel;
+
+      discountCoupon = new SelectList(_context.DiscountCoupons.Where(
+        x => x.Active).Where(
+        x => x.ValidFrom <= DateTime.UtcNow).Where(
+        x => x.ValidTo >= DateTime.UtcNow), "Id", "Name").ToList();
+
+      discountCouponToRemove = new List<SelectListItem>();
+
+      foreach (SelectListItem item in discountCoupon)
+      {
+        coupon = await _context.DiscountCoupons.FindAsync(long.Parse(item.Value));
+        couponProduct = _context.DiscountCouponProducts.Where(x => x.Coupon == coupon.Id).ToList();
+
+        percentage = coupon.DiscountNproductPercentage == null ? 0.0M : (decimal)coupon.DiscountNproductPercentage;
+        minimumNumberOfProducts = coupon.DiscountProductN == null ? (short)0 : (short)coupon.DiscountProductN;
+        minimumPurchase = coupon.MinimumPurchase == null ? 0.0M : (decimal)coupon.MinimumPurchase;
+        if (Model.SubTotal < minimumPurchase)
+        {
+          discountCouponToRemove.Add(item);
+        }
+        else
+        {
+          if (couponProduct != null && couponProduct.Count > 0)
+          {
+            foreach (DiscountCouponProduct product in couponProduct)
+            {
+              if (!lineItem.Any(x => x.Product == product.Product))
+              {
+                discountCouponToRemove.Add(item);
+                break;
+              }
+              else if (lineItem.Where(
+                x => x.Product == product.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
+              {
+                discountCouponToRemove.Add(item);
+                break;
+              }
+            }
+          }
+          if (coupon.DiscountAsInNproductPercentage || coupon.DiscountAsInNproductDollars)
+          {
+            selectedProductSubTotal = 0.0M;
+            foreach (DiscountCouponProduct product in couponProduct)
+            {
+              selectedProductSubTotal += lineItem.Find(x => x.Product == product.Product) == null ?
+                0.0M : (decimal)lineItem.Find(x => x.Product == product.Product).Total;
+            }
+            if (selectedProductSubTotal < minimumPurchase)
+            {
+              discountCouponToRemove.Add(item);
+            }
+          }
+        }
+      }
+
+      foreach (SelectListItem remove in discountCouponToRemove)
+      {
+        discountCoupon.Remove(remove);
+      }
+
+      discountCoupon.Insert(0, new SelectListItem()
+      {
+        Text = "--- Please Select a Coupon ---",
+        Value = long.MinValue.ToString()
+      });
+      ViewData["DiscountCoupon"] = discountCoupon;
+
+      if (Model.DiscountCouponId != null && Model.DiscountCouponId > 0)
+      {
+        if (discountCoupon.Any(x => long.Parse(x.Value) == Model.DiscountCouponId))
+        {
+          coupon = await _context.DiscountCoupons.FindAsync(Model.DiscountCouponId);
+          couponProduct = _context.DiscountCouponProducts.Where(x => x.Coupon == coupon.Id).ToList();
+
+          percentage = coupon.DiscountNproductPercentage == null ? 0.0M : (decimal)coupon.DiscountNproductPercentage;
+          minimumNumberOfProducts = coupon.DiscountProductN == null ? (short)0 : (short)coupon.DiscountProductN;
+          minimumPurchase = coupon.MinimumPurchase == null ? 0.0M : (decimal)coupon.MinimumPurchase;
+
+          if (Model.SubTotal >= minimumPurchase)
+          {
+            if (couponProduct != null && couponProduct.Count > 0)
+            {
+              foreach (DiscountCouponProduct product in couponProduct)
+              {
+                if (!lineItem.Any(x => x.Product == product.Product) || lineItem.Where(
+                  x => x.Product == product.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
+                {
+                  invalid = true;
+                  break;
+                }
+              }
+            }
+            if (!invalid)
+            {
+              if (coupon.DiscountAsInNproductPercentage || coupon.DiscountAsInNproductDollars)
+              {
+                selectedProductSubTotal = 0.0M;
+                foreach (DiscountCouponProduct product in couponProduct)
+                {
+                  selectedProductSubTotal += lineItem.Find(x => x.Product == product.Product) == null ?
+                    0.0M : (decimal)lineItem.Find(x => x.Product == product.Product).Total;
+                }
+              }
+              if (selectedProductSubTotal >= minimumPurchase)
+              {
+                if (coupon.DiscountAsInNproductPercentage)
+                {
+                  Model.CouponDiscount = _context.Prices.Where(
+                    x => x.Id == (_context.Products.FindAsync(
+                    couponProduct.Last().Product).Result.CurrentPrice)).Select(x => x.Amount).FirstOrDefault() * 
+                    (coupon.DiscountNproductPercentage / 100);
+                }
+                else if (coupon.DiscountAsInNproductDollars)
+                {
+                  Model.CouponDiscount = coupon.DiscountInNproductDollars;
+                }
+                else if (coupon.DiscountAsInGlobalOrderPercentage)
+                {
+                  Model.CouponDiscount = (Model.SubTotal * (coupon.DiscountGlobalOrderPercentage / 100));
+                }
+                else if (coupon.DiscountAsInGlobalOrderDollars)
+                {
+                  Model.CouponDiscount = coupon.DiscountGlobalOrderDollars;
+                }
+              }
+            }
+          }
+        }
+      }
+      else if (Model.DiscountCode != null && Model.DiscountCode.Trim().Length > 0)
+      {
+        code = _context.DiscountCodes.Where(
+          x => x.Code.Equals(Model.DiscountCode.Trim().ToUpper())).FirstOrDefault();
+        codeProduct = _context.DiscountCodeProducts.Where(x => x.Code == code.Id).ToList();
+
+        percentage = code.DiscountNproductPercentage == null ? 0.0M : (decimal)code.DiscountNproductPercentage;
+        minimumNumberOfProducts = code.DiscountProductN == null ? (short)0 : (short)code.DiscountProductN;
+        minimumPurchase = code.MinimumPurchase == null ? 0.0M : (decimal)code.MinimumPurchase;
+        invalid = false;
+
+        if (Model.SubTotal >= minimumPurchase)
+        {
+          if (codeProduct != null && codeProduct.Count > 0)
+          {
+            foreach (DiscountCodeProduct product in codeProduct)
+            {
+              if (!lineItem.Any(x => x.Product == product.Product) || lineItem.Where(
+                x => x.Product == product.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
+              {
+                invalid = true;
+                Model.DiscountCodeInvalid = true;
+                break;
+              }
+            }
+          }
+          if (!invalid)
+          {
+            if (code.DiscountAsInNproductPercentage || code.DiscountAsInNproductDollars)
+            {
+              selectedProductSubTotal = 0.0M;
+              foreach (DiscountCodeProduct product in codeProduct)
+              {
+                selectedProductSubTotal += lineItem.Find(x => x.Product == product.Product) == null ?
+                  0.0M : (decimal)lineItem.Find(x => x.Product == product.Product).Total;
+              }
+            }
+            if (selectedProductSubTotal >= minimumPurchase)
+            {
+              if (code.DiscountAsInNproductPercentage)
+              {
+                Model.CodeDiscount = _context.Prices.Where(
+                  x => x.Id == (_context.Products.FindAsync(
+                  codeProduct.Last().Product).Result.CurrentPrice)).Select(x => x.Amount).FirstOrDefault() *
+                  (code.DiscountNproductPercentage / 100);
+              }
+              else if (code.DiscountAsInNproductDollars)
+              {
+                Model.CodeDiscount = code.DiscountInNproductDollars;
+              }
+              else if (code.DiscountAsInGlobalOrderPercentage)
+              {
+                Model.CodeDiscount = (Model.SubTotal * (code.DiscountGlobalOrderPercentage / 100));
+              }
+              else if (code.DiscountAsInGlobalOrderDollars)
+              {
+                Model.CodeDiscount = code.DiscountGlobalOrderDollars;
+              }
+            }
+            else
+            {
+              Model.DiscountCodeInvalid = true;
+            }
+          }
+        }
+      }
       
       ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
        x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))

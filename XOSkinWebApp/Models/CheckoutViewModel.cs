@@ -61,6 +61,7 @@ namespace XOSkinWebApp.Models
     public bool CardDeclined { get; set; }
     public bool ShippingAddressDeclined { get; set; }
     public bool TaxCalculationServiceOffline { get; set; }
+    public bool DiscountCodeInvalid { get; set; }
     public String FulfillmentStatus { get; set; }
     public String clientIpAddress { get; set; }
     public String DiscountCode { get; set; }

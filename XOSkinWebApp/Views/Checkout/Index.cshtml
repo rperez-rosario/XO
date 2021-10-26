@@ -99,7 +99,7 @@ else
       <div class="col-sm-4">
         <div hidden="@(!Model.CalculatedShippingAndTaxes)">
           <h4>Credit Card</h4>
-          <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+          <div asp-validation-summary="ModelOnly" class="text-danger" id="val-third-column"></div>
           <div class="form-group">
             <label class="control-label">Credit Card Number</label>
             <input asp-for="CreditCardNumber" class="form-control" type="password" id="credit-card-number" maxlength="19"
@@ -172,7 +172,7 @@ else
                  formaction=@Url.Action("CalculateShippingCostAndTaxes")
                  value="Calculate Shipping, Discounts & Taxes" class="btn-outline-dark btn"
                  hidden="@(Model.CalculatedShippingAndTaxes)" />
-          <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Address"
+          <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Order"
                  class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
           <input id="place-order-button" type="submit" formaction=@Url.Action("PlaceOrder") value="Place Order"
                  class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)">
@@ -230,6 +230,8 @@ else
     id="tax-calculation-service-offline" />
   <input type="hidden" asp-for="ShipEngineShipmentId" value="@Model.ShipEngineShipmentId" />
   <input type="hidden" asp-for="ShipEngineRateId" value="@Model.ShipEngineRateId" />
+  <input type="hidden" asp-for="DiscountCodeInvalid" value="@Model.DiscountCodeInvalid" 
+    id="discount-code-invalid" />
 </form>
 <script type="text/javascript">
   $(document).ready(function () {
@@ -262,6 +264,11 @@ else
         $('#val-shipping-address').html('The tax calculation service is temporarily offline. ' +
           'Please try placing your order again in a few minutes or contact us.');
       }
+    }
+
+    if ($('#discount-code-invalid').val() == 'True') {
+      $('#val-third-column').html('The discount code you provided is either invalid or does not apply to your current ' + 
+        'shopping cart content.');
     }
     
     if ($('#shipping-address-declined').val() == 'True') {
