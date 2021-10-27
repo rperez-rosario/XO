@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -73,12 +75,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       "DiscountNProductPercentage,DiscountAsInNProductDollars,DiscountAsInNProductDollars,DiscountProductN," +
       "DiscountAsInGlobalOrderPercentage,DiscountGlobalOrderPercentage,DiscountAsInOrderDollars," +
       "MinimumPurchase,DiscountGlobalOrderDollars,ValidFrom,ValidTo,Product," +
-      "CreatedBy,Created,LastUpdatedBy,LastUpdated," +
-      "DiscountAsInGlobalOrderDollars")] DiscountCouponViewModel discountCouponViewModel,
-      long[] Product)
+      "CreatedBy,Created,LastUpdatedBy,LastUpdated,ImageLarge" +
+      "DiscountAsInGlobalOrderDollars,ImagePathLarge")] DiscountCouponViewModel discountCouponViewModel,
+      long[] Product, IFormFile ImageLarge)
     {
       DiscountCoupon discountCoupon = null;
       int i = 0;
+      String filePathPrefix = "wwwroot/img/coupon/xo-coup-img-pid-";
+      String srcPathPrefix = "/img/coupon/xo-coup-img-pid-";
+      FileStream stream = null;
 
       if (ModelState.IsValid)
       {
@@ -107,6 +112,28 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         };
         _context.DiscountCoupons.Add(discountCoupon);
         await _context.SaveChangesAsync();
+
+        try
+        {
+          if (ImageLarge != null && ImageLarge.Length > 0)
+          {
+            if (ImageLarge.FileName.LastIndexOf(".jpg") + 4 == ImageLarge.FileName.Length
+              || ImageLarge.FileName.LastIndexOf(".jpeg") + 5 == ImageLarge.FileName.Length)
+            {
+              using (stream = System.IO.File.Create(filePathPrefix + discountCoupon.Id.ToString() + ".jpg"))
+              {
+                await ImageLarge.CopyToAsync(stream);
+              }
+              discountCoupon.ImagePathLarge = srcPathPrefix + discountCoupon.Id.ToString() + ".jpg";
+              _context.Update(discountCoupon);
+              await _context.SaveChangesAsync();
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          throw new Exception("An error was encountered while saving the attached image.", ex);
+        }
 
         for (; i < Product.Length; i++)
         {
@@ -177,7 +204,8 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
         LastUpdatedBy = _context.AspNetUsers.FindAsync(discountCoupon.LastUpdatedBy).Result.Email,
         Product = products,
         ValidFrom = discountCoupon.ValidFrom,
-        ValidTo = discountCoupon.ValidTo
+        ValidTo = discountCoupon.ValidTo,
+        ImagePathLarge = discountCoupon.ImagePathLarge
       };
 
       return View(discountCouponViewModel);
@@ -189,9 +217,12 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(long id,
-      [Bind("Id,Active")] DiscountCouponViewModel discountCouponViewModel)
+      [Bind("Id,Active,ImagePathLarge,ImageLarge")] DiscountCouponViewModel discountCouponViewModel, IFormFile ImageLarge)
     {
       DiscountCoupon discountCoupon = null;
+      String filePathPrefix = "wwwroot/img/coupon/xo-coup-img-pid-";
+      String srcPathPrefix = "/img/coupon/xo-coup-img-pid-";
+      FileStream stream = null;
 
       if (id != discountCouponViewModel.Id)
       {
@@ -205,6 +236,19 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
 
         _context.DiscountCoupons.Update(discountCoupon);
         await _context.SaveChangesAsync();
+
+        if (ImageLarge != null && ImageLarge.Length > 0)
+        {
+          if (ImageLarge.FileName.LastIndexOf(".jpg") + 4 == ImageLarge.FileName.Length
+            || ImageLarge.FileName.LastIndexOf(".jpeg") + 5 == ImageLarge.FileName.Length)
+          {
+            using (stream = System.IO.File.Create(filePathPrefix + discountCoupon.Id.ToString() + ".jpg"))
+            {
+              await ImageLarge.CopyToAsync(stream);
+            }
+            discountCoupon.ImagePathLarge = srcPathPrefix + discountCoupon.Id.ToString() + ".jpg";
+          }
+        }
       }
       catch (DbUpdateConcurrencyException)
       {

@@ -51,6 +51,7 @@
 
   <ItemGroup>
     <Folder Include="ORM\" />
+    <Folder Include="wwwroot\img\coupon\" />
   </ItemGroup>
 
   <ItemGroup>

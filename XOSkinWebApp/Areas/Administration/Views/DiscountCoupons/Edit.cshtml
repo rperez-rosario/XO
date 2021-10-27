@@ -20,6 +20,15 @@
         </label>
       </div>
       <div class="form-group">
+        <label asp-for="ImageLarge" class="control-label font-weight-bolder">Coupon Image</label>
+        <img style="width: 180px;" src="@Model.ImagePathLarge" />
+      </div>
+      <div class="form-group">
+        <label asp-for="ImageLarge" class="control-label font-weight-bolder" id="image-large">Discount Coupon Image File (Only .jpg or .jpeg files admitted.)<br />Works best with square (1:1) aspect ratio images.<br /> Preferred Image Size is 300px by 300px.</label>
+        <input asp-for="ImageLarge" class="btn btn-outline-dark" type="file" /><br />
+        <span asp-validation-for="ImageLarge" class="text-danger"></span>
+      </div>
+      <div class="form-group">
         <label asp-for="Name" class="control-label font-weight-bolder"></label>
         <input asp-for="Name" class="form-control font-weight-bolder" readonly />
         <span asp-validation-for="Name" class="text-danger"></span>

@@ -1,8 +1,23 @@
-﻿@{
-    ViewData["Title"] = "Gifts and Savings";
+﻿@model List<XOSkinWebApp.Areas.Administration.Models.DiscountCouponViewModel>
+
+@{
+  ViewData["Title"] = "Gifts and Savings";
 }
 
 <div class="text-center">
   <h1 class="display-4">Gifts and <br />Savings</h1>
   @Html.Raw(ViewData["GiftsAndSavings.WelcomeText"])
 </div>
+
+<div class="row">
+  @foreach (XOSkinWebApp.Areas.Administration.Models.DiscountCouponViewModel coupon in Model)
+  {
+    <div id="couponItem" class="col-md-4" style="padding: 10px">
+      <a href="/ShoppingCart">
+        <img src="@coupon.ImagePathLarge" /><br />
+        <b>@coupon.Name</b>
+      </a>
+    </div>
+  }
+</div>
+

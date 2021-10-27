@@ -460,6 +460,8 @@ namespace XOSkinWebApp.ORM
                     .HasColumnType("decimal(18, 2)")
                     .HasColumnName("DiscountNProductPercentage");
 
+                entity.Property(e => e.ImagePathLarge).IsUnicode(false);
+
                 entity.Property(e => e.LastUpdated).HasColumnType("datetime");
 
                 entity.Property(e => e.LastUpdatedBy).HasMaxLength(450);

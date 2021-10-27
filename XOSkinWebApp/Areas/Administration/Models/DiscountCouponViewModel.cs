@@ -33,5 +33,7 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public String LastUpdatedBy { get; set; }
     public DateTime? LastUpdated { get; set; }
     public long[] Product { get; set; }
+    public byte[] ImageLarge { get; set; }
+    public String ImagePathLarge { get; set; }
   }
 }

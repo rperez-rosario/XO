@@ -16,6 +16,7 @@ namespace XOSkinWebApp.ORM
 
         public long Id { get; set; }
         public bool Active { get; set; }
+        public string ImagePathLarge { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public bool DiscountAsInNproductPercentage { get; set; }
