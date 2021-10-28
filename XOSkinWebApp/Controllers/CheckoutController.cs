@@ -803,6 +803,16 @@ namespace XOSkinWebApp.Controllers
       String clientIpAddress = null;
       String seShippingLabelRequestJson = null;
       String seShippingLabelResponseJson = null;
+      DiscountCoupon coupon = null;
+      List<DiscountCouponProduct> couponProduct = null;
+      decimal percentage = decimal.MinValue;
+      short minimumNumberOfProducts = short.MinValue;
+      decimal minimumPurchase = decimal.MinValue;
+      decimal selectedProductSubTotal = 0.0M;
+      bool minimumNumberOfSelectedProductsMet = true;
+      ORM.DiscountCode code = null;
+      List<DiscountCodeProduct> codeProduct = null;
+      long totalNumberOfProducts = 0L;
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -1185,10 +1195,87 @@ namespace XOSkinWebApp.Controllers
             
             Model.Taxes = applicableTaxes;
 
-            codeDiscount = 0.0M; // TODO: CALCULATE.
-            couponDiscount = 0.0M; // TODO : CALCULATE.
+            Model.CouponDiscount = 0.0M;
+            Model.CodeDiscount = 0.0M;
 
-            total = subTotal + shippingCost - codeDiscount - couponDiscount + applicableTaxes;
+            coupon = await _context.DiscountCoupons.FindAsync(Model.DiscountCouponId);
+
+            couponProduct = _context.DiscountCouponProducts.Where(x => x.Coupon == coupon.Id).ToList();
+            percentage = coupon.DiscountAsInNproductPercentage ?
+              coupon.DiscountNproductPercentage == null ?
+              0.0M : (decimal)coupon.DiscountNproductPercentage : coupon.DiscountAsInGlobalOrderPercentage ?
+              coupon.DiscountGlobalOrderPercentage == null ? 0.0M : (decimal)coupon.DiscountGlobalOrderPercentage :
+              0.0M;
+            minimumNumberOfProducts = coupon.DiscountProductN == null ? (short)0 : (short)coupon.DiscountProductN;
+            minimumPurchase = coupon.MinimumPurchase == null ? 0.0M : (decimal)coupon.MinimumPurchase;
+            selectedProductSubTotal = 0.0M;
+            minimumNumberOfSelectedProductsMet = true;
+            totalNumberOfProducts = 0L;
+
+            if (coupon.DiscountAsInGlobalOrderPercentage || coupon.DiscountAsInGlobalOrderDollars)
+            {
+              foreach (ShoppingCartLineItemViewModel item in Model.LineItem)
+              {
+                totalNumberOfProducts += item.Quantity;
+              }
+
+              if (totalNumberOfProducts >= minimumNumberOfProducts &&
+                Model.SubTotal >= minimumPurchase)
+              {
+                if (coupon.DiscountAsInGlobalOrderPercentage)
+                {
+                  Model.CouponDiscount = (Model.SubTotal * (coupon.DiscountGlobalOrderPercentage / 100));
+                }
+                else if (coupon.DiscountAsInGlobalOrderDollars)
+                {
+                  Model.CouponDiscount = coupon.DiscountGlobalOrderDollars;
+                }
+              }
+            }
+            else if (coupon.DiscountAsInNproductPercentage || coupon.DiscountAsInNproductDollars)
+            {
+              if (couponProduct != null && couponProduct.Count > 0)
+              {
+                if (minimumPurchase > 0)
+                {
+                  foreach (DiscountCouponProduct p in couponProduct)
+                  {
+                    selectedProductSubTotal += lineItem.Find(x => x.Product == p.Product) == null ?
+                      0.0M : (decimal)lineItem.Find(x => x.Product == p.Product).Total;
+                  }
+                }
+
+                foreach (DiscountCouponProduct p in couponProduct)
+                {
+                  if (!lineItem.Any(x => x.Product == p.Product) || lineItem.Where(
+                    x => x.Product == p.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
+                  {
+                    minimumNumberOfSelectedProductsMet = false;
+                    break;
+                  }
+                }
+
+                if (minimumNumberOfSelectedProductsMet && selectedProductSubTotal >= minimumPurchase)
+                {
+                  if (coupon.DiscountAsInNproductPercentage)
+                  {
+                    Model.CouponDiscount = _context.Prices.Where(
+                      x => x.Id == (_context.Products.FindAsync(
+                      couponProduct.Last().Product).Result.CurrentPrice)).Select(x => x.Amount).FirstOrDefault() *
+                      (coupon.DiscountNproductPercentage / 100);
+                  }
+                  else if (coupon.DiscountAsInNproductDollars)
+                  {
+                    Model.CouponDiscount = coupon.DiscountInNproductDollars;
+                  }
+                }
+              }
+            }
+
+            codeDiscount = Model.CodeDiscount == null ? 0.0M : (decimal)Model.CodeDiscount;
+            couponDiscount = Model.CouponDiscount == null ? 0.0M : (decimal)Model.CouponDiscount;
+
+            total = subTotal - codeDiscount - couponDiscount + shippingCost + applicableTaxes;
 
             stCreditTransactionMetaValue = new Dictionary<string, string>();
             stCreditTransactionMetaValue.Add("ProductOrderId", order.Id.ToString());
