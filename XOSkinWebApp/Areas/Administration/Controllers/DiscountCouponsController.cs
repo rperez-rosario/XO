@@ -75,7 +75,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       "DiscountNProductPercentage,DiscountAsInNProductDollars,DiscountAsInNProductDollars,DiscountProductN," +
       "DiscountAsInGlobalOrderPercentage,DiscountGlobalOrderPercentage,DiscountAsInOrderDollars," +
       "MinimumPurchase,DiscountGlobalOrderDollars,ValidFrom,ValidTo,Product," +
-      "CreatedBy,Created,LastUpdatedBy,LastUpdated,ImageLarge" +
+      "CreatedBy,Created,LastUpdatedBy,LastUpdated,ImageLarge," +
       "DiscountAsInGlobalOrderDollars,ImagePathLarge")] DiscountCouponViewModel discountCouponViewModel,
       long[] Product, IFormFile ImageLarge)
     {

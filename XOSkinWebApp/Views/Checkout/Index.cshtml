@@ -103,7 +103,7 @@ else
           <div class="form-group">
             <label class="control-label">Credit Card Number</label>
             <input asp-for="CreditCardNumber" class="form-control" type="password" id="credit-card-number" maxlength="19"
-                   onkeypress="return restrictAlphabets(event)" />
+              onkeypress="return restrictAlphabets(event)" />
             <span asp-validation-for="CreditCardNumber" class="text-danger" id="val-credit-card-number"></span>
           </div>
           <div class="form-group">
@@ -244,6 +244,14 @@ else
 
     new $.fn.dataTable.Responsive(table, {
       details: true
+    });
+
+    $('#discount-code').change(function () {
+      if ($('#discount-code').val() == '') {
+        $('#discount-coupon-id').attr('disabled', false)
+      } else {
+        $('#discount-coupon-id').attr('disabled', true);
+      }
     });
 
     $('#discount-coupon-id').change(function () {
