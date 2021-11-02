@@ -824,6 +824,7 @@ namespace XOSkinWebApp.Controllers
       ORM.DiscountCode code = null;
       List<DiscountCodeProduct> codeProduct = null;
       long totalNumberOfProducts = 0L;
+      List<ShopifySharp.DiscountCode> discountCode = null;
 
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
@@ -959,7 +960,7 @@ namespace XOSkinWebApp.Controllers
             }
           };
 
-          seShipmentRateJson = (_option.Value.ShipEngineGetShipmentCostFromIdPrefixUrl + 
+          seShipmentRateJson = (_option.Value.ShipEngineGetShipmentCostFromIdPrefixUrl +
             Model.ShipEngineShipmentId + _option.Value.ShipEngineGetShipmentCostFromIdPostfixUrl).GetJsonFromUrl(
             requestFilter: webReq =>
             {
@@ -995,33 +996,33 @@ namespace XOSkinWebApp.Controllers
               x => x.Email.Equals(User.Identity.Name)).Select(
               x => x.StripeCustomerId).FirstOrDefault() == null &&
               previousOrderBillTo != null) &&
-              ((previousOrderBillTo.NameOnCreditCard == null ? (Model.BillingName == null || 
-              Model.BillingName.Trim().Equals(String.Empty)) : 
-              !previousOrderBillTo.NameOnCreditCard.Equals(Model.BillingName == null ? 
+              ((previousOrderBillTo.NameOnCreditCard == null ? (Model.BillingName == null ||
+              Model.BillingName.Trim().Equals(String.Empty)) :
+              !previousOrderBillTo.NameOnCreditCard.Equals(Model.BillingName == null ?
                 String.Empty : Model.BillingName.Trim())) ||
               (previousOrderBillTo.AddressLine1 == null ? (Model.BillingAddress1 == null ||
               Model.BillingAddress1.Trim().Equals(String.Empty)) :
-              !previousOrderBillTo.AddressLine1.Equals(Model.BillingAddress1 == null ? 
+              !previousOrderBillTo.AddressLine1.Equals(Model.BillingAddress1 == null ?
                 String.Empty : Model.BillingAddress1.Trim())) ||
               (previousOrderBillTo.AddressLine2 == null ? (Model.BillingAddress2 == null ||
               Model.BillingAddress2.Trim().Equals(String.Empty)) :
-              !previousOrderBillTo.AddressLine2.Equals(Model.BillingAddress2 == null ? 
+              !previousOrderBillTo.AddressLine2.Equals(Model.BillingAddress2 == null ?
                 String.Empty : Model.BillingAddress2.Trim())) ||
               (previousOrderBillTo.CityName == null ? (Model.BillingCity == null ||
               Model.BillingCity.Trim().Equals(String.Empty)) :
-              !previousOrderBillTo.CityName.Equals(Model.BillingCity == null ? 
+              !previousOrderBillTo.CityName.Equals(Model.BillingCity == null ?
                 String.Empty : Model.BillingCity.Trim())) ||
               (previousOrderBillTo.StateName == null ? (Model.BillingState == null ||
               Model.BillingState.Trim().Equals(String.Empty)) :
-              !previousOrderBillTo.StateName.Equals(Model.BillingState == null ? 
+              !previousOrderBillTo.StateName.Equals(Model.BillingState == null ?
                 String.Empty : Model.BillingState.Trim())) ||
               (previousOrderBillTo.CountryName == null ? (Model.BillingCountry == null ||
               Model.BillingCountry.Trim().Equals(String.Empty)) :
-              !previousOrderBillTo.CountryName.Equals(Model.BillingCountry == null ? 
+              !previousOrderBillTo.CountryName.Equals(Model.BillingCountry == null ?
                 String.Empty : Model.BillingCountry.Trim())) ||
               (previousOrderBillTo.PostalCode == null ? (Model.BillingPostalCode == null ||
               Model.BillingPostalCode.Trim().Equals(String.Empty)) :
-              !previousOrderBillTo.PostalCode.Equals(Model.BillingPostalCode == null ? 
+              !previousOrderBillTo.PostalCode.Equals(Model.BillingPostalCode == null ?
               String.Empty : Model.BillingPostalCode.Trim()))))
             {
               try
@@ -1045,7 +1046,7 @@ namespace XOSkinWebApp.Controllers
                 stCustomerCreateOptions.Email = User.Identity.Name;
                 stCustomerCreateOptions.Source = stCardCreateNestedOptions;
                 stCustomerCreateOptions.Description = "XO Skin Customer.";
-                
+
                 stCustomerService = new Stripe.CustomerService();
                 stCustomer = stCustomerService.Create(stCustomerCreateOptions);
 
@@ -1053,7 +1054,7 @@ namespace XOSkinWebApp.Controllers
                 Model.CreditCardNumber = null;
                 Model.CreditCardCVC = null;
                 Model.CreditCardExpirationDate = DateTime.MinValue;
-                
+
                 user = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
                 user.StripeCustomerId = stCustomer.Id;
                 _context.AspNetUsers.Update(user);
@@ -1093,12 +1094,12 @@ namespace XOSkinWebApp.Controllers
 
               stTokenService = new TokenService();
               stToken = stTokenService.Create(stTokenCreateOptions);
-              
+
               stTokenCreateOptions = null;
               Model.CreditCardNumber = null;
               Model.CreditCardCVC = null;
               Model.CreditCardExpirationDate = DateTime.MinValue;
-              
+
               stSourceCreateOptions = new SourceCreateOptions()
               {
                 Token = stToken.Id,
@@ -1106,7 +1107,7 @@ namespace XOSkinWebApp.Controllers
               };
 
               stToken = null;
-              
+
               stSourceService = new SourceService();
               stSource = await stSourceService.CreateAsync(stSourceCreateOptions);
 
@@ -1143,11 +1144,11 @@ namespace XOSkinWebApp.Controllers
                 to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
                 to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
                 to_street = Model.ShippingAddressSame ?
-                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || 
-                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : 
+                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
+                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty :
                   " " + Model.BillingAddress2.Trim())) :
-                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || 
-                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : 
+                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ||
+                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
                   " " + Model.ShippingAddress2.Trim())),
                 to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
                 nexus_addresses = new[]
@@ -1173,11 +1174,11 @@ namespace XOSkinWebApp.Controllers
                 to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
                 to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
                 to_street = Model.ShippingAddressSame ?
-                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null || 
-                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty : 
+                  (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
+                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty :
                   " " + Model.BillingAddress2.Trim())) :
-                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null || 
-                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty : 
+                  (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ||
+                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
                   " " + Model.ShippingAddress2.Trim())),
                 amount = subTotal,
                 lineItems = tjLineItem,
@@ -1203,7 +1204,7 @@ namespace XOSkinWebApp.Controllers
             {
               applicableTaxes = 0.0M;
             }
-            
+
             Model.Taxes = applicableTaxes;
 
             Model.CouponDiscount = 0.0M;
@@ -1401,7 +1402,7 @@ namespace XOSkinWebApp.Controllers
               Model.CalculatedShippingAndTaxes = true;
               return RedirectToAction("CalculateShippingCostAndTaxes", Model);
             }
-            
+
             stCustomer = stCustomerService.Get(_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.StripeCustomerId).FirstOrDefault());
 
@@ -1541,6 +1542,57 @@ namespace XOSkinWebApp.Controllers
               CurrencyCode = stCharge.Currency
             }
           };
+
+          if (Model.CouponDiscount != null && Model.CouponDiscount > 0)
+          {
+            discountCode = new List<ShopifySharp.DiscountCode>();
+            discountCode.Add(new ShopifySharp.DiscountCode()
+            {
+              Amount = ((decimal)Model.CouponDiscount).ToString(),
+              Code = Model.DiscountCouponId.ToString(),
+              Type = "Discount Coupon Id"
+            });
+            shOrder.DiscountCodes = discountCode;
+            shOrder.TotalDiscounts = Model.CouponDiscount;
+            shOrder.TotalDiscountsSet = new PriceSet()
+            {
+              PresentmentMoney = new ShopifySharp.Price()
+              {
+                Amount = Model.CouponDiscount,
+                CurrencyCode = stCharge.Currency
+              },
+              ShopMoney = new ShopifySharp.Price()
+              {
+                Amount = Model.CouponDiscount,
+                CurrencyCode = stCharge.Currency
+              }
+            };
+          } 
+          else if (Model.CodeDiscount != null && Model.CodeDiscount > 0)
+          {
+            discountCode = new List<ShopifySharp.DiscountCode>();
+            discountCode.Add(new ShopifySharp.DiscountCode()
+            {
+              Amount = ((decimal)Model.CodeDiscount).ToString(),
+              Code = Model.DiscountCode,
+              Type = "Discount Code"
+            });
+            shOrder.DiscountCodes = discountCode;
+            shOrder.TotalDiscounts = Model.CodeDiscount;
+            shOrder.TotalDiscountsSet = new PriceSet()
+            {
+              PresentmentMoney = new ShopifySharp.Price()
+              {
+                Amount = Model.CodeDiscount,
+                CurrencyCode = stCharge.Currency
+              },
+              ShopMoney = new ShopifySharp.Price()
+              {
+                Amount = Model.CodeDiscount,
+                CurrencyCode = stCharge.Currency
+              }
+            };
+          }
 
           shOrder.PresentmentCurrency = stCharge.Currency.ToUpper();
           shOrder.Currency = stCharge.Currency.ToUpper();

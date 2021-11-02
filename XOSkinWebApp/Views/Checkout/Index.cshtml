@@ -170,7 +170,7 @@ else
         <div style="text-align: right; margin-right: ">
           <input id="calculate-shipping-cost-and-taxes-button" type="submit"
                  formaction=@Url.Action("CalculateShippingCostAndTaxes")
-                 value="Calculate Shipping, Discounts & Taxes" class="btn-outline-dark btn"
+                 value="Calculate Total" class="btn-outline-dark btn"
                  hidden="@(Model.CalculatedShippingAndTaxes)" />
           <input id="change-address-button" type="submit" formaction=@Url.Action("Index") value="Change Order"
                  class="btn-outline-dark btn" hidden="@(!Model.CalculatedShippingAndTaxes)" />
