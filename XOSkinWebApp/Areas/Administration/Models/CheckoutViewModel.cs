@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using XOSkinWebApp.Areas.Administration.Models;
 
 namespace XOSkinWebApp.Areas.Administration.Models
 {
@@ -11,31 +8,21 @@ namespace XOSkinWebApp.Areas.Administration.Models
   {
     [Key]
     public long OrderId { get; set; }
-    
     public long ShopifyId { get; set; }
-
     public List<ShoppingCartLineItemViewModel> LineItem { get; set; }
-
     [Required(ErrorMessage = "Name on credit card required.")]
     public String BillingName { get; set; }
-
     [Required(ErrorMessage = "Billing address line 1 required.")]
     public String BillingAddress1 { get; set; }
-
     public String BillingAddress2 { get; set; }
-
     [Required(ErrorMessage = "Billing city required.")]
     public String BillingCity { get; set; }
-
     [Required(ErrorMessage = "Billing state required.")]
     public String BillingState { get; set; }
-
     [Required(ErrorMessage = "Billing country required.")]
     public String BillingCountry { get; set; }
-
     [Required(ErrorMessage = "Billing postal code required.")]
     public String BillingPostalCode { get; set; }
-
     public DateTime BilledOn { get; set; }
     public decimal? SubTotal { get; set; }
     public decimal? ShippingCharges { get; set; }
