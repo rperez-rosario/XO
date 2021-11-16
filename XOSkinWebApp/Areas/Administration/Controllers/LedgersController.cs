@@ -31,6 +31,7 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
       decimal ch1productShipping = 0.0M;
       decimal ch1salesTaxes = 0.0M;
       decimal ch1productRefunds = 0.0M;
+      decimal ch1productDiscounts = 0.0M;
       String ch2series = String.Empty;
       String ch2data = String.Empty;
       List<DateTime> series = new List<DateTime>();
@@ -70,12 +71,15 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           case "TAXATION":
             ch1salesTaxes += ledger.Last().Amount;
             break;
+          case "DISCOUNT":
+            ch1productDiscounts += ledger.Last().Amount;
+            break;
           default:
             break;
         }
 
         if (ledger.Last().TransactionConcept.Equals("PRODUCT") && 
-          ledger.Last().CreatedOn.Date > currentSeries.Date)
+          ledger.Last().CreatedOn.Date >= currentSeries.Date)
         {
           series.Add(currentSeries);
           data.Add(currentData);
@@ -100,8 +104,11 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           stringBuilder.Append("'" + t.Date.ToShortDateString() + "', ");
         }
 
-        ch2series = stringBuilder.ToString();
-        ch2series = ch2series.Remove(ch2series.Length - 2, 2);
+        if (ch2series.Length - 2 >= 0)
+        {
+          ch2series = stringBuilder.ToString();
+          ch2series = ch2series.Remove(ch2series.Length - 2, 2);
+        }
       }
 
       stringBuilder = new StringBuilder();
@@ -115,14 +122,18 @@ namespace XOSkinWebApp.Areas.Administration.Controllers
           stringBuilder.Append(a.ToString() + ", ");
         }
 
-        ch2data = stringBuilder.ToString();
-        ch2data = ch2data.Remove(ch2data.Length - 3, 3);
+        if (ch2data.Length - 3 >= 0)
+        {
+          ch2data = stringBuilder.ToString();
+          ch2data = ch2data.Remove(ch2data.Length - 3, 3);
+        }
       }
       
       ViewData["ProductSales"] = ch1productSales;
       ViewData["ProductShipping"] = ch1productShipping;
       ViewData["SalesTaxes"] = ch1salesTaxes;
       ViewData["ProductRefunds"] = ch1productRefunds;
+      ViewData["ProductDiscounts"] = ch1productDiscounts;
       ViewData["Series"] = ch2series;
       ViewData["Data"] = ch2data;
 

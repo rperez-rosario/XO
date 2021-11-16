@@ -51,6 +51,7 @@ namespace XOSkinWebApp.Controllers
       short minimumNumberOfProducts = short.MinValue;
       decimal minimumPurchase = decimal.MinValue;
       decimal selectedProductSubTotal = 0.0M;
+      int totalNumberOfProducts = 0;
 
       checkoutViewModel.SubTotal = 0.0M;
       totalOrderShippingWeightInPounds = 0.0M;
@@ -81,6 +82,7 @@ namespace XOSkinWebApp.Controllers
           x => x.Amount).FirstOrDefault() * li.Quantity;
         totalOrderShippingWeightInPounds += (decimal)(_context.Products.Where(
           x => x.Id == li.Product).Select(x => x.ShippingWeightLb).FirstOrDefault() * li.Quantity);
+        totalNumberOfProducts += li.Quantity;
       }
 
       discountCoupon = new SelectList(_context.DiscountCoupons.Where(
@@ -130,6 +132,13 @@ namespace XOSkinWebApp.Controllers
                 0.0M : (decimal)lineItem.Find(x => x.Product == product.Product).Total;
             }
             if (selectedProductSubTotal < minimumPurchase)
+            {
+              discountCouponToRemove.Add(item);
+            }
+          }
+          if (coupon.DiscountProductN != null && coupon.DiscountProductN > 0)
+          {
+            if (totalNumberOfProducts < coupon.DiscountProductN)
             {
               discountCouponToRemove.Add(item);
             }
@@ -516,7 +525,7 @@ namespace XOSkinWebApp.Controllers
           minimumNumberOfSelectedProductsMet = true;
           totalNumberOfProducts = 0L;
 
-          if (code.DiscountAsInGlobalOrderPercentage || code.DiscountAsInGlobalOrderPercentage)
+          if (code.DiscountAsInGlobalOrderPercentage || code.DiscountAsInGlobalOrderDollars)
           {
             foreach (ShoppingCartLineItemViewModel item in Model.LineItem)
             {
@@ -1228,7 +1237,7 @@ namespace XOSkinWebApp.Controllers
 
               if (coupon.DiscountAsInGlobalOrderPercentage || coupon.DiscountAsInGlobalOrderDollars)
               {
-                foreach (ShoppingCartLineItemViewModel item in Model.LineItem)
+                foreach (ShoppingCartLineItem item in lineItem)
                 {
                   totalNumberOfProducts += item.Quantity;
                 }
@@ -1285,6 +1294,9 @@ namespace XOSkinWebApp.Controllers
                   }
                 }
               }
+              else if (coupon.DiscountProductN != null && coupon.DiscountProductN > 0)
+              {
+              }
             }
             else if (Model.DiscountCode != null && Model.DiscountCode.Trim().Length > 0)
             {
@@ -1305,9 +1317,9 @@ namespace XOSkinWebApp.Controllers
                 minimumNumberOfSelectedProductsMet = true;
                 totalNumberOfProducts = 0L;
 
-                if (code.DiscountAsInGlobalOrderPercentage || code.DiscountAsInGlobalOrderPercentage)
+                if (code.DiscountAsInGlobalOrderPercentage || code.DiscountAsInGlobalOrderDollars)
                 {
-                  foreach (ShoppingCartLineItemViewModel item in Model.LineItem)
+                  foreach (ShoppingCartLineItem item in lineItem)
                   {
                     totalNumberOfProducts += item.Quantity;
                   }
@@ -2001,9 +2013,28 @@ namespace XOSkinWebApp.Controllers
           Created = DateTime.UtcNow
         });
 
-        _context.SaveChanges();
-
         balanceBeforeTransaction -= subTotal;
+
+        if (couponDiscount + codeDiscount > 0)
+        {
+          _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+          {
+            User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+            ProductOrder = order.Id,
+            TransactionType = 1, // Credit.
+            Description = "Order #" + order.Id + ". Discount.",
+            Concept = 6, // Discount.
+            Amount = couponDiscount + codeDiscount,
+            BalanceBeforeTransaction = balanceBeforeTransaction,
+            BalanceAfterTransaction = balanceBeforeTransaction + couponDiscount + codeDiscount,
+            CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+            Created = DateTime.UtcNow
+          });
+
+          _context.SaveChanges();
+
+          balanceBeforeTransaction += couponDiscount + codeDiscount;
+        }
 
         _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
         {
