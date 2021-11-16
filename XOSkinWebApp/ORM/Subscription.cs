@@ -9,20 +9,19 @@ namespace XOSkinWebApp.ORM
     {
         public Subscription()
         {
+            SubscriptionCustomers = new HashSet<SubscriptionCustomer>();
             SubscriptionProducts = new HashSet<SubscriptionProduct>();
         }
 
         public long Id { get; set; }
-        public string Customer { get; set; }
+        public long Subscription1 { get; set; }
         public short Type { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public bool IsActive { get; set; }
         public int ShipmentFrequencyInDays { get; set; }
-        public long Price { get; set; }
 
+        public virtual Product Subscription1Navigation { get; set; }
         public virtual SubscriptionType TypeNavigation { get; set; }
         public virtual SubscriptionShipmentSchedule SubscriptionShipmentSchedule { get; set; }
+        public virtual ICollection<SubscriptionCustomer> SubscriptionCustomers { get; set; }
         public virtual ICollection<SubscriptionProduct> SubscriptionProducts { get; set; }
     }
 }

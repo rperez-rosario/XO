@@ -71,6 +71,7 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<ShoppingCartLineItem> ShoppingCartLineItems { get; set; }
         public virtual DbSet<StateU> StateUs { get; set; }
         public virtual DbSet<Subscription> Subscriptions { get; set; }
+        public virtual DbSet<SubscriptionCustomer> SubscriptionCustomers { get; set; }
         public virtual DbSet<SubscriptionProduct> SubscriptionProducts { get; set; }
         public virtual DbSet<SubscriptionShipmentSchedule> SubscriptionShipmentSchedules { get; set; }
         public virtual DbSet<SubscriptionType> SubscriptionTypes { get; set; }
@@ -1038,6 +1039,11 @@ namespace XOSkinWebApp.ORM
                     .HasForeignKey(d => d.ProductType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Product_ProductType");
+
+                entity.HasOne(d => d.SubscriptionTypeNavigation)
+                    .WithMany(p => p.Products)
+                    .HasForeignKey(d => d.SubscriptionType)
+                    .HasConstraintName("FK_Product_SubscriptionType");
             });
 
             modelBuilder.Entity<ProductCategory>(entity =>
@@ -1392,6 +1398,25 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("Subscription");
 
+                entity.Property(e => e.Subscription1).HasColumnName("Subscription");
+
+                entity.HasOne(d => d.Subscription1Navigation)
+                    .WithMany(p => p.Subscriptions)
+                    .HasForeignKey(d => d.Subscription1)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Subscription_Product");
+
+                entity.HasOne(d => d.TypeNavigation)
+                    .WithMany(p => p.Subscriptions)
+                    .HasForeignKey(d => d.Type)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Subscription_SubscriptionType");
+            });
+
+            modelBuilder.Entity<SubscriptionCustomer>(entity =>
+            {
+                entity.ToTable("SubscriptionCustomer");
+
                 entity.Property(e => e.Customer)
                     .IsRequired()
                     .HasMaxLength(450);
@@ -1400,11 +1425,17 @@ namespace XOSkinWebApp.ORM
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.TypeNavigation)
-                    .WithMany(p => p.Subscriptions)
-                    .HasForeignKey(d => d.Type)
+                entity.HasOne(d => d.CustomerNavigation)
+                    .WithMany(p => p.SubscriptionCustomers)
+                    .HasForeignKey(d => d.Customer)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Subscription_SubscriptionType");
+                    .HasConstraintName("FK_SubscriptionCustomer_AspNetUsers");
+
+                entity.HasOne(d => d.SubscriptionNavigation)
+                    .WithMany(p => p.SubscriptionCustomers)
+                    .HasForeignKey(d => d.Subscription)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_SubscriptionCustomer_Subscription");
             });
 
             modelBuilder.Entity<SubscriptionProduct>(entity =>

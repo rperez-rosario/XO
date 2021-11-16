@@ -35,6 +35,7 @@ namespace XOSkinWebApp.ORM
             ProductOrders = new HashSet<ProductOrder>();
             Questionnaires = new HashSet<Questionnaire>();
             ShoppingCarts = new HashSet<ShoppingCart>();
+            SubscriptionCustomers = new HashSet<SubscriptionCustomer>();
             UserAnswers = new HashSet<UserAnswer>();
             UserCommonAllergens = new HashSet<UserCommonAllergen>();
             UserLedgerTransactionCreatedByNavigations = new HashSet<UserLedgerTransaction>();
@@ -92,6 +93,7 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
         public virtual ICollection<Questionnaire> Questionnaires { get; set; }
         public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
+        public virtual ICollection<SubscriptionCustomer> SubscriptionCustomers { get; set; }
         public virtual ICollection<UserAnswer> UserAnswers { get; set; }
         public virtual ICollection<UserCommonAllergen> UserCommonAllergens { get; set; }
         public virtual ICollection<UserLedgerTransaction> UserLedgerTransactionCreatedByNavigations { get; set; }

@@ -18,6 +18,7 @@ namespace XOSkinWebApp.ORM
             ShoppingCartHistories = new HashSet<ShoppingCartHistory>();
             ShoppingCartLineItems = new HashSet<ShoppingCartLineItem>();
             SubscriptionProducts = new HashSet<SubscriptionProduct>();
+            Subscriptions = new HashSet<Subscription>();
             UserProductListProducts = new HashSet<UserProductListProduct>();
         }
 
@@ -29,6 +30,7 @@ namespace XOSkinWebApp.ORM
         public short ProductType { get; set; }
         public short ProductCategory { get; set; }
         public short? KitType { get; set; }
+        public short? SubscriptionType { get; set; }
         public decimal? VolumeInFluidOunces { get; set; }
         public decimal? Ph { get; set; }
         public decimal? ShippingWeightLb { get; set; }
@@ -52,6 +54,7 @@ namespace XOSkinWebApp.ORM
         public virtual AspNetUser LastUpdatedByNavigation { get; set; }
         public virtual ProductCategory ProductCategoryNavigation { get; set; }
         public virtual ProductType ProductTypeNavigation { get; set; }
+        public virtual SubscriptionType SubscriptionTypeNavigation { get; set; }
         public virtual ICollection<DiscountCodeProduct> DiscountCodeProducts { get; set; }
         public virtual ICollection<DiscountCouponProduct> DiscountCouponProducts { get; set; }
         public virtual ICollection<KitProduct> KitProductKitNavigations { get; set; }
@@ -61,6 +64,7 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<ShoppingCartHistory> ShoppingCartHistories { get; set; }
         public virtual ICollection<ShoppingCartLineItem> ShoppingCartLineItems { get; set; }
         public virtual ICollection<SubscriptionProduct> SubscriptionProducts { get; set; }
+        public virtual ICollection<Subscription> Subscriptions { get; set; }
         public virtual ICollection<UserProductListProduct> UserProductListProducts { get; set; }
     }
 }

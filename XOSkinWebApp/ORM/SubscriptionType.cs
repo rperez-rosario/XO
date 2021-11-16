@@ -9,6 +9,7 @@ namespace XOSkinWebApp.ORM
     {
         public SubscriptionType()
         {
+            Products = new HashSet<Product>();
             Subscriptions = new HashSet<Subscription>();
         }
 
@@ -16,6 +17,7 @@ namespace XOSkinWebApp.ORM
         public string Name { get; set; }
         public string Description { get; set; }
 
+        public virtual ICollection<Product> Products { get; set; }
         public virtual ICollection<Subscription> Subscriptions { get; set; }
     }
 }
