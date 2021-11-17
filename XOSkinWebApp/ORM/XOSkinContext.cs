@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using XOSkinWebApp.Areas.Administration.Models;
 
 #nullable disable
 
@@ -1398,6 +1399,8 @@ namespace XOSkinWebApp.ORM
             {
                 entity.ToTable("Subscription");
 
+                entity.Property(e => e.ImagePathLarge).IsUnicode(false);
+
                 entity.Property(e => e.Subscription1).HasColumnName("Subscription");
 
                 entity.HasOne(d => d.Subscription1Navigation)
@@ -1673,5 +1676,7 @@ namespace XOSkinWebApp.ORM
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+        public DbSet<XOSkinWebApp.Areas.Administration.Models.SubscriptionViewModel> SubscriptionViewModel { get; set; }
     }
 }

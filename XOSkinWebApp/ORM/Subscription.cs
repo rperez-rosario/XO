@@ -14,6 +14,7 @@ namespace XOSkinWebApp.ORM
         }
 
         public long Id { get; set; }
+        public string ImagePathLarge { get; set; }
         public long Subscription1 { get; set; }
         public short Type { get; set; }
         public int ShipmentFrequencyInDays { get; set; }

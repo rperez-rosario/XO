@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace XOSkinWebApp.Areas.Administration.Models
 {
   public class SubscriptionCustomerViewModel
   {
-    [Key]
     public long Id { get; set; }
     public long Subscription { get; set; }
     public short Type { get; set; }
@@ -15,6 +13,6 @@ namespace XOSkinWebApp.Areas.Administration.Models
     public DateTime StartDate { get; set; }
     public DateTime FrequencyEndDate { get; set; }
     public DateTime EndDate { get; set; }
-    public List<ProductViewModel> Product { get; set; }
+    public List<Areas.Administration.Models.ProductViewModel> Product { get; set; }
   }
 }
