@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace XOSkinWebApp.ORM
 {
     public partial class AspNetUser
@@ -12,7 +10,6 @@ namespace XOSkinWebApp.ORM
             Addresses = new HashSet<Address>();
             AspNetUserClaims = new HashSet<AspNetUserClaim>();
             AspNetUserLogins = new HashSet<AspNetUserLogin>();
-            AspNetUserRoles = new HashSet<AspNetUserRole>();
             AspNetUserTokens = new HashSet<AspNetUserToken>();
             Costs = new HashSet<Cost>();
             DiscountCodeCreatedByNavigations = new HashSet<DiscountCode>();
@@ -41,6 +38,7 @@ namespace XOSkinWebApp.ORM
             UserLedgerTransactionCreatedByNavigations = new HashSet<UserLedgerTransaction>();
             UserLedgerTransactionUserNavigations = new HashSet<UserLedgerTransaction>();
             UserProductLists = new HashSet<UserProductList>();
+            Roles = new HashSet<AspNetRole>();
         }
 
         public string Id { get; set; }
@@ -70,7 +68,6 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<Address> Addresses { get; set; }
         public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; }
         public virtual ICollection<AspNetUserLogin> AspNetUserLogins { get; set; }
-        public virtual ICollection<AspNetUserRole> AspNetUserRoles { get; set; }
         public virtual ICollection<AspNetUserToken> AspNetUserTokens { get; set; }
         public virtual ICollection<Cost> Costs { get; set; }
         public virtual ICollection<DiscountCode> DiscountCodeCreatedByNavigations { get; set; }
@@ -99,5 +96,7 @@ namespace XOSkinWebApp.ORM
         public virtual ICollection<UserLedgerTransaction> UserLedgerTransactionCreatedByNavigations { get; set; }
         public virtual ICollection<UserLedgerTransaction> UserLedgerTransactionUserNavigations { get; set; }
         public virtual ICollection<UserProductList> UserProductLists { get; set; }
+
+        public virtual ICollection<AspNetRole> Roles { get; set; }
     }
 }

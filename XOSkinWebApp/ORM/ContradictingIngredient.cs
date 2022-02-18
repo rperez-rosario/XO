@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace XOSkinWebApp.ORM
 {
     public partial class ContradictingIngredient

@@ -1,9 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using XOSkinWebApp.Areas.Administration.Models;
-
-#nullable disable
 
 namespace XOSkinWebApp.ORM
 {
@@ -26,7 +24,6 @@ namespace XOSkinWebApp.ORM
         public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
         public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; }
         public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; }
-        public virtual DbSet<AspNetUserRole> AspNetUserRoles { get; set; }
         public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; }
         public virtual DbSet<CityPr> CityPrs { get; set; }
         public virtual DbSet<CityStateCountryWorld> CityStateCountryWorlds { get; set; }
@@ -87,12 +84,13 @@ namespace XOSkinWebApp.ORM
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (!optionsBuilder.IsConfigured)
+            {
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
-
             modelBuilder.Entity<Address>(entity =>
             {
                 entity.ToTable("Address");
@@ -207,6 +205,21 @@ namespace XOSkinWebApp.ORM
                     .IsUnicode(false);
 
                 entity.Property(e => e.UserName).HasMaxLength(256);
+
+                entity.HasMany(d => d.Roles)
+                    .WithMany(p => p.Users)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "AspNetUserRole",
+                        l => l.HasOne<AspNetRole>().WithMany().HasForeignKey("RoleId"),
+                        r => r.HasOne<AspNetUser>().WithMany().HasForeignKey("UserId"),
+                        j =>
+                        {
+                            j.HasKey("UserId", "RoleId");
+
+                            j.ToTable("AspNetUserRoles");
+
+                            j.HasIndex(new[] { "RoleId" }, "IX_AspNetUserRoles_RoleId");
+                        });
             });
 
             modelBuilder.Entity<AspNetUserClaim>(entity =>
@@ -234,21 +247,6 @@ namespace XOSkinWebApp.ORM
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.AspNetUserLogins)
-                    .HasForeignKey(d => d.UserId);
-            });
-
-            modelBuilder.Entity<AspNetUserRole>(entity =>
-            {
-                entity.HasKey(e => new { e.UserId, e.RoleId });
-
-                entity.HasIndex(e => e.RoleId, "IX_AspNetUserRoles_RoleId");
-
-                entity.HasOne(d => d.Role)
-                    .WithMany(p => p.AspNetUserRoles)
-                    .HasForeignKey(d => d.RoleId);
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.AspNetUserRoles)
                     .HasForeignKey(d => d.UserId);
             });
 
@@ -1388,7 +1386,7 @@ namespace XOSkinWebApp.ORM
                     .IsRequired()
                     .HasMaxLength(2)
                     .IsUnicode(false)
-                    .IsFixedLength(true);
+                    .IsFixedLength();
 
                 entity.Property(e => e.StateName)
                     .IsRequired()
@@ -1676,7 +1674,5 @@ namespace XOSkinWebApp.ORM
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-        public DbSet<XOSkinWebApp.Areas.Administration.Models.SubscriptionViewModel> SubscriptionViewModel { get; set; }
     }
 }

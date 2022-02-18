@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace XOSkinWebApp.ORM
 {
     public partial class AspNetRole
@@ -10,7 +8,7 @@ namespace XOSkinWebApp.ORM
         public AspNetRole()
         {
             AspNetRoleClaims = new HashSet<AspNetRoleClaim>();
-            AspNetUserRoles = new HashSet<AspNetUserRole>();
+            Users = new HashSet<AspNetUser>();
         }
 
         public string Id { get; set; }
@@ -19,6 +17,7 @@ namespace XOSkinWebApp.ORM
         public string ConcurrencyStamp { get; set; }
 
         public virtual ICollection<AspNetRoleClaim> AspNetRoleClaims { get; set; }
-        public virtual ICollection<AspNetUserRole> AspNetUserRoles { get; set; }
+
+        public virtual ICollection<AspNetUser> Users { get; set; }
     }
 }
