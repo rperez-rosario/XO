@@ -835,6 +835,7 @@ namespace XOSkinWebApp.Controllers
       long totalNumberOfProducts = 0L;
       List<ShopifySharp.DiscountCode> discountCode = null;
 
+      // Shopping cart empty?
       if (_context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
           x => x.User.Equals(_context.AspNetUsers.Where(
@@ -844,9 +845,11 @@ namespace XOSkinWebApp.Controllers
         return RedirectToAction("Index", "Home");
       }
 
+      // Capture client IP address for this order.
       clientIpAddress = HttpContext.Connection.RemoteIpAddress == null ?
         String.Empty : HttpContext.Connection.RemoteIpAddress.ToString();
 
+      // Initialize Shopify services.
       try
       {
         shProductService = new ShopifySharp.ProductService(_option.Value.ShopifyUrl,
@@ -871,11 +874,13 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encountered while initializing Shopify services.", ex);
       }
 
+      // Order has not been initialized? Initialize order.
       if (Model.OrderId == 0)
       {
         order = new ProductOrder()
         {
-          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(
+            x => x.Id).FirstOrDefault(),
           DatePlaced = DateTime.MaxValue,
           Subtotal = 0.0M,
           CouponDiscount = 0.0M,
@@ -886,6 +891,7 @@ namespace XOSkinWebApp.Controllers
           ClientIpAddress = clientIpAddress
         };
 
+        // Save order to database.
         _context.ProductOrders.Add(order);
         _context.SaveChanges();
 
@@ -893,39 +899,49 @@ namespace XOSkinWebApp.Controllers
       }
       else
       {
+        // Retrieve order based on given id.
         order = _context.ProductOrders.Where(x => x.Id == Model.OrderId).FirstOrDefault();
       }
 
+      // Retrieve line items for order.
       lineItem = _context.ShoppingCartLineItems.Where(
           x => x.ShoppingCart == _context.ShoppingCarts.Where(
           x => x.User.Equals(_context.AspNetUsers.Where(
           x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Select(
             x => x.Id).FirstOrDefault()).ToList();
 
+      // Initialize TaxJar line item object array.
       tjLineItem = new object[lineItem.Count];
 
       try
       {
+        // Create Shopify line item list.
         shLineItemList = new List<ShopifySharp.LineItem>();
 
+        // Iterate over line items in order.
         foreach (ShoppingCartLineItem cli in lineItem)
         {
+          // Update subtotal calculation based on current line item.
           subTotal += _context.Prices.Where(
             x => x.Id == _context.Products.Where(
               x => x.Id == cli.Product).Select(
               x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault() *
               cli.Quantity;
           
+          // Add line item to Shopify line item list.
           shLineItemList.Add(new ShopifySharp.LineItem()
           {
-            ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault(),
+            ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(
+              x => x.ShopifyProductId).FirstOrDefault(),
             VariantId = shProductService.GetAsync((long)_context.Products.Where(
-              x => x.Id == cli.Product).Select(x => x.ShopifyProductId).FirstOrDefault()).Result.Variants.First().Id,
+              x => x.Id == cli.Product).Select(
+              x => x.ShopifyProductId).FirstOrDefault()).Result.Variants.First().Id,
             Quantity = cli.Quantity,
             Taxable = true,
             RequiresShipping = true
           });
 
+          // Add line item to TaxJar line item array.
           tjLineItem[i] = new
           {
             quantity = cli.Quantity,
@@ -936,11 +952,13 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == _context.Products.Where(
               x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault()
           };
+          // Increment TaxJar line item array index.
           i++;
         }
 
         try
         {
+          // Create Shopify order.
           shOrder = new ShopifySharp.Order()
           {
             BillingAddress = new ShopifySharp.Address()
@@ -969,13 +987,18 @@ namespace XOSkinWebApp.Controllers
             }
           };
 
+          // Get ShipEngine shipment rate Json document using ShipEngine shipment id obtained 
+          // from CalculateShippingCostAndTaxes previously.
           seShipmentRateJson = (_option.Value.ShipEngineGetShipmentCostFromIdPrefixUrl +
-            Model.ShipEngineShipmentId + _option.Value.ShipEngineGetShipmentCostFromIdPostfixUrl).GetJsonFromUrl(
+            Model.ShipEngineShipmentId + 
+            _option.Value.ShipEngineGetShipmentCostFromIdPostfixUrl).GetJsonFromUrl(
             requestFilter: webReq =>
             {
               webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
             }, responseFilter: null);
 
+          // Parse the Json document to obtain shipping cost using configured defaults for carrier,
+          // rate type, package type and service code.
           using (JsonDocument document = JsonDocument.Parse(seShipmentRateJson))
           {
             JsonElement root = document.RootElement;
@@ -993,14 +1016,17 @@ namespace XOSkinWebApp.Controllers
             }
           }
 
+          // Assign shipping carrier and shipping charges to model.
           Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrierName;
           Model.ShippingCharges = shippingCost;
-
+        
           try
           {
+            // Initialize Stripe api key.
             Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
             previousOrderBillTo = _context.OrderBillTos.OrderByDescending(x => x.Order).FirstOrDefault();
 
+            // Grab bill-to address from address used by customer in previous order, if any.
             if ((_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(
               x => x.StripeCustomerId).FirstOrDefault() == null &&
@@ -1036,6 +1062,7 @@ namespace XOSkinWebApp.Controllers
             {
               try
               {
+                // Create and initialize Stripe nested options object using Model data.
                 stCardCreateNestedOptions = new CardCreateNestedOptions()
                 {
                   AddressCity = Model.BillingCity,
@@ -1051,11 +1078,13 @@ namespace XOSkinWebApp.Controllers
                   Number = Model.CreditCardNumber
                 };
 
+                // Create and initialize Stripe customer create options object.
                 stCustomerCreateOptions = new Stripe.CustomerCreateOptions();
                 stCustomerCreateOptions.Email = User.Identity.Name;
                 stCustomerCreateOptions.Source = stCardCreateNestedOptions;
                 stCustomerCreateOptions.Description = "XO Skin Customer.";
 
+                // TODO: Continue documentation.
                 stCustomerService = new Stripe.CustomerService();
                 stCustomer = stCustomerService.Create(stCustomerCreateOptions);
 
