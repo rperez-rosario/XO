@@ -947,10 +947,12 @@ namespace XOSkinWebApp.Controllers
             quantity = cli.Quantity,
             product_identifier = _context.Products.Where(
               x => x.Id == cli.Product).Select(x => x.Id).FirstOrDefault().ToString(),
-            description = _context.Products.Where(x => x.Id == cli.Product).Select(x => x.Name).FirstOrDefault(),
+            description = _context.Products.Where(
+              x => x.Id == cli.Product).Select(x => x.Name).FirstOrDefault(),
             unit_price = _context.Prices.Where(
               x => x.Id == _context.Products.Where(
-              x => x.Id == cli.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault()
+              x => x.Id == cli.Product).Select(
+                x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault()
           };
           // Increment TaxJar line item array index.
           i++;
@@ -1010,7 +1012,8 @@ namespace XOSkinWebApp.Controllers
                 rate.GetProperty("package_type").ValueEquals(_option.Value.ShipEngineDefaultPackageType) &&
                 rate.GetProperty("service_code").ValueEquals(_option.Value.ShipEngineDefaultServiceCode))
               {
-                shippingCost = decimal.Parse(rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
+                shippingCost = decimal.Parse(
+                  rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
                 break;
               }
             }
@@ -1026,7 +1029,7 @@ namespace XOSkinWebApp.Controllers
             Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
             previousOrderBillTo = _context.OrderBillTos.OrderByDescending(x => x.Order).FirstOrDefault();
 
-            // Grab bill-to address from address used by customer in previous order, if any.
+            // If we need to create a Stripe user for the order's customer.
             if ((_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(
               x => x.StripeCustomerId).FirstOrDefault() == null &&
@@ -1084,33 +1087,43 @@ namespace XOSkinWebApp.Controllers
                 stCustomerCreateOptions.Source = stCardCreateNestedOptions;
                 stCustomerCreateOptions.Description = "XO Skin Customer.";
 
-                // TODO: Continue documentation.
+                // Instantiate a Stripe customer service object.
                 stCustomerService = new Stripe.CustomerService();
+                // Create a Stripe customer.
                 stCustomer = stCustomerService.Create(stCustomerCreateOptions);
 
+                // Null credit card information.
                 stCustomerCreateOptions = null;
                 Model.CreditCardNumber = null;
                 Model.CreditCardCVC = null;
                 Model.CreditCardExpirationDate = DateTime.MinValue;
 
-                user = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
+                // Save Stripe customer id to user in database.
+                user = _context.AspNetUsers.Where(
+                  x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
                 user.StripeCustomerId = stCustomer.Id;
                 _context.AspNetUsers.Update(user);
                 _context.SaveChanges();
               }
               catch
               {
+                // In case of error, pass a CardDeclined flag to the ui.
                 Model.CardDeclined = true;
                 Model.CalculatedShippingAndTaxes = true;
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
               }
             }
+            // If the order's customer already has a Stripe customer id.
             else
             {
+              // Instantiate a Stripe customer service object.
               stCustomerService = new Stripe.CustomerService();
+              // Retrieve Stripe customer using id from database.
               stCustomer = stCustomerService.Get(_context.AspNetUsers.Where(
-                x => x.Email.Equals(User.Identity.Name)).Select(x => x.StripeCustomerId).FirstOrDefault());
+                x => x.Email.Equals(User.Identity.Name)).Select(
+                x => x.StripeCustomerId).FirstOrDefault());
 
+              // Create Stripe token card options object using data from the model
               stTokenCardOptions = new TokenCardOptions()
               {
                 AddressCity = Model.BillingCity,
@@ -1125,30 +1138,40 @@ namespace XOSkinWebApp.Controllers
                 Name = Model.BillingName,
                 Number = Model.CreditCardNumber
               };
+              // Create Stripe token create options object using token card options.
               stTokenCreateOptions = new TokenCreateOptions()
               {
                 Card = stTokenCardOptions
               };
 
+              // Instantiate Stripe token service.
               stTokenService = new TokenService();
+              // Create Stripe token using token create options.
               stToken = stTokenService.Create(stTokenCreateOptions);
 
+              // Null credit card information.
               stTokenCreateOptions = null;
               Model.CreditCardNumber = null;
               Model.CreditCardCVC = null;
               Model.CreditCardExpirationDate = DateTime.MinValue;
 
+              // Instantiate a Stripe source create options object.
               stSourceCreateOptions = new SourceCreateOptions()
               {
                 Token = stToken.Id,
                 Type = SourceType.Card
               };
 
+              // Once we instantiate the source create options object using the token id,
+              // we null the token.
               stToken = null;
 
+              // Instantiate Stripe source service client.
               stSourceService = new SourceService();
+              // Instantiate Stripe source object using Stripe source create options.
               stSource = await stSourceService.CreateAsync(stSourceCreateOptions);
 
+              // We attempt to attach our source service client to Stripe.
               try
               {
                 stSourceService.Attach(stCustomer.Id, new SourceAttachOptions()
@@ -1158,6 +1181,7 @@ namespace XOSkinWebApp.Controllers
               }
               catch
               {
+                // In case of error, pass a CardDeclined flag to the ui.
                 Model.CardDeclined = true;
                 Model.CalculatedShippingAndTaxes = true;
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
@@ -1166,6 +1190,7 @@ namespace XOSkinWebApp.Controllers
 
             try
             {
+              // TODO: Continue here.
               tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
 
               tjTaxRate = tjService.TaxForOrder(new
@@ -1421,7 +1446,8 @@ namespace XOSkinWebApp.Controllers
             {
               Amount = (long?)total * 100,
               Currency = "usd",
-              Description = "Total charges for an XO Skin customer order #XO" + (order.Id + 10000).ToString() +
+              Description = "Total charges for an XO Skin customer order #XO" + 
+                (order.Id + 10000).ToString() +
                 ". Customer: " + User.Identity.Name + ".",
               Metadata = stCreditTransactionMetaValue,
               ReceiptEmail = User.Identity.Name,
@@ -1694,7 +1720,8 @@ namespace XOSkinWebApp.Controllers
             Country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
             Name = Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName,
             Phone = _context.AspNetUsers.Where(
-              x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault() == null ? 
+              x => x.Email.Equals(
+                User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault() == null ? 
               String.Empty : _context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
             Province = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
