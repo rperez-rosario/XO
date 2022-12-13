@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		XOSWS Dependency Diagram.dgml = XOSWS Dependency Diagram.dgml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XOSkinWebAPI", "..\XOSkinWebAPI\XOSkinWebAPI.csproj", "{A3407551-BB8B-4060-8DD0-00D40D2F57E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{DFEB1CB3-9F46-4007-995B-B36487B757C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFEB1CB3-9F46-4007-995B-B36487B757C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFEB1CB3-9F46-4007-995B-B36487B757C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3407551-BB8B-4060-8DD0-00D40D2F57E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3407551-BB8B-4060-8DD0-00D40D2F57E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3407551-BB8B-4060-8DD0-00D40D2F57E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3407551-BB8B-4060-8DD0-00D40D2F57E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

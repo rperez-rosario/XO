@@ -1190,11 +1190,12 @@ namespace XOSkinWebApp.Controllers
 
             try
             {
-              // TODO: Continue here.
+              // Instantiate TaxJar (web api used to calculate taxes applicable to the sale) using key in the options configuration.
               tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
-
+              // Call TaxJar service to get tax rate information using our order's information.
               tjTaxRate = tjService.TaxForOrder(new
               {
+                // This is self-explanatory.
                 amount = (decimal)Model.SubTotal,
                 from_city = _option.Value.ShipFromCity,
                 from_country = _option.Value.ShipFromCountryCode,
@@ -1206,6 +1207,7 @@ namespace XOSkinWebApp.Controllers
                 to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
                 to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
                 to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+                // There is some boolean logic applied to calculating the right street address.
                 to_street = Model.ShippingAddressSame ?
                   (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
                   (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty :
@@ -1214,6 +1216,7 @@ namespace XOSkinWebApp.Controllers
                   (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
                   " " + Model.ShippingAddress2.Trim())),
                 to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+                // Handles the concept of nexus address(es). See https://quickbooks.intuit.com/r/taxes/nexus-guide/ (Retrieved 12/13/2022.)
                 nexus_addresses = new[]
                 {
                 new
@@ -1227,7 +1230,7 @@ namespace XOSkinWebApp.Controllers
                 }
               }
               });
-
+              // We create a TaxJar order object including information obtained from the previous service call and the actual line items.
               tjOrder = tjService.CreateOrder(new
               {
                 transaction_id = Model.OrderId.ToString(),
@@ -1236,6 +1239,7 @@ namespace XOSkinWebApp.Controllers
                 to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
                 to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
                 to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
+                // Same concept applied to the street address calculation for the order.
                 to_street = Model.ShippingAddressSame ?
                   (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
                   (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty :
@@ -1245,34 +1249,44 @@ namespace XOSkinWebApp.Controllers
                   " " + Model.ShippingAddress2.Trim())),
                 amount = subTotal,
                 lineItems = tjLineItem,
+                // This is the only item we grab from the previous service call.
                 sales_tax = tjTaxRate.AmountToCollect,
                 shipping = shippingCost
               });
             }
             catch
             {
+              // If the TaxJar-enabling switch on?
               if (_option.Value.TaxJarEnabled)
               {
+                // Send a flag to the UI using the view model to indicate that the tax calculation service in unavailable.
+                // A message will be displayed prompting the user to try again in a few minutes or to contact us.
                 Model.TaxCalculationServiceOffline = true;
                 Model.CalculatedShippingAndTaxes = true;
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
               }
             }
-
+            
+            // If the service is enabled in the configuration file.
+            // This flag is normally set to true, allows us to switch it off from the configuration file in order to 
+            // bypass the service for any given reason.
             if (_option.Value.TaxJarEnabled)
             {
               applicableTaxes = tjOrder.SalesTax;
             }
             else
             {
-              applicableTaxes = 0.0M;
+              // Sets the tax to a bogus value to remind us that the service is disabled.
+              applicableTaxes = 0.00M;
             }
 
+            // Pass the applicable taxes to the UI model.
             Model.Taxes = applicableTaxes;
 
             Model.CouponDiscount = 0.0M;
             Model.CodeDiscount = 0.0M;
 
+            // TODO: Continue.
             coupon = await _context.DiscountCoupons.FindAsync(Model.DiscountCouponId);
 
             if (coupon != null)
