@@ -963,6 +963,7 @@ namespace XOSkinWebApp.Controllers
           // Create Shopify order.
           shOrder = new ShopifySharp.Order()
           {
+            // Add billing address.
             BillingAddress = new ShopifySharp.Address()
             {
               Address1 = Model.BillingAddress1,
@@ -975,6 +976,7 @@ namespace XOSkinWebApp.Controllers
               Name = Model.BillingName,
               Country = Model.BillingCountry
             },
+            // Add shipping address.
             ShippingAddress = new ShopifySharp.Address()
             {
               Address1 = Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1,
@@ -1029,7 +1031,7 @@ namespace XOSkinWebApp.Controllers
             Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
             previousOrderBillTo = _context.OrderBillTos.OrderByDescending(x => x.Order).FirstOrDefault();
 
-            // If we need to create a Stripe user for the order's customer.
+            // If we need to create a Stripe user for the order's customer, create it.
             if ((_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(
               x => x.StripeCustomerId).FirstOrDefault() == null &&
@@ -1286,11 +1288,12 @@ namespace XOSkinWebApp.Controllers
             Model.CouponDiscount = 0.0M;
             Model.CodeDiscount = 0.0M;
 
-            // TODO: Continue.
+            // Try to load any specified coupons.
             coupon = await _context.DiscountCoupons.FindAsync(Model.DiscountCouponId);
-
+            // If there is a coupon.
             if (coupon != null)
             {
+              // Process coupon data according to rules set on the database.
               couponProduct = _context.DiscountCouponProducts.Where(x => x.Coupon == coupon.Id).ToList();
               percentage = coupon.DiscountAsInNproductPercentage ?
                 coupon.DiscountNproductPercentage == null ?
@@ -1303,16 +1306,19 @@ namespace XOSkinWebApp.Controllers
               minimumNumberOfSelectedProductsMet = true;
               totalNumberOfProducts = 0L;
 
+              // If it's a global order percentage or global order in dollars coupon.
               if (coupon.DiscountAsInGlobalOrderPercentage || coupon.DiscountAsInGlobalOrderDollars)
               {
+                // Calculate the total number of products.
                 foreach (ShoppingCartLineItem item in lineItem)
                 {
                   totalNumberOfProducts += item.Quantity;
                 }
-
+                // If coupon rules are met.
                 if (totalNumberOfProducts >= minimumNumberOfProducts &&
                   Model.SubTotal >= minimumPurchase)
                 {
+                  // Apply dollar or percentage discount.
                   if (coupon.DiscountAsInGlobalOrderPercentage)
                   {
                     Model.CouponDiscount = (Model.SubTotal * (coupon.DiscountGlobalOrderPercentage / 100));
@@ -1323,45 +1329,57 @@ namespace XOSkinWebApp.Controllers
                   }
                 }
               }
+              // If it's a discount as in N product percentage or dollars coupon.
               else if (coupon.DiscountAsInNproductPercentage || coupon.DiscountAsInNproductDollars)
               {
+                // If a coupon product exists and its count is larger than zero.
                 if (couponProduct != null && couponProduct.Count > 0)
                 {
+                  // If there's a minimum purchase required.
                   if (minimumPurchase > 0)
                   {
                     foreach (DiscountCouponProduct p in couponProduct)
                     {
+                      // Calculate the subtotal for the selected product.
                       selectedProductSubTotal += lineItem.Find(x => x.Product == p.Product) == null ?
                         0.0M : (decimal)lineItem.Find(x => x.Product == p.Product).Total;
                     }
                   }
-
+                  // For each product related to a coupon.
                   foreach (DiscountCouponProduct p in couponProduct)
                   {
+                    // Determine whether the product quantity is below the minimum number of products for the coupon.
                     if (!lineItem.Any(x => x.Product == p.Product) || lineItem.Where(
                       x => x.Product == p.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
                     {
+                      // If so, set a flag and exit foreach.
                       minimumNumberOfSelectedProductsMet = false;
                       break;
                     }
                   }
-
+                  // If the minimum number of selected products is met and the selected product subtotal is more or
+                  // equal to the minimum purchase specified by the coupon rules.
                   if (minimumNumberOfSelectedProductsMet && selectedProductSubTotal >= minimumPurchase)
                   {
+                    // If it's a N product percentage discount.
                     if (coupon.DiscountAsInNproductPercentage)
                     {
+                      // Apply discount.
                       Model.CouponDiscount = _context.Prices.Where(
                         x => x.Id == (_context.Products.FindAsync(
                         couponProduct.Last().Product).Result.CurrentPrice)).Select(x => x.Amount).FirstOrDefault() *
                         (coupon.DiscountNproductPercentage / 100);
                     }
+                    // N product dollars discount.
                     else if (coupon.DiscountAsInNproductDollars)
                     {
+                      // Apply coupon discount.
                       Model.CouponDiscount = coupon.DiscountInNproductDollars;
                     }
                   }
                 }
               }
+              // TODO: Continue here.
               else if (coupon.DiscountProductN != null && coupon.DiscountProductN > 0)
               {
               }
