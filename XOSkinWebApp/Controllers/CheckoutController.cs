@@ -1329,7 +1329,7 @@ namespace XOSkinWebApp.Controllers
                   }
                 }
               }
-              // If it's a discount as in N product percentage or dollars coupon.
+              // If it's a discount as in n product percentage or dollars coupon.
               else if (coupon.DiscountAsInNproductPercentage || coupon.DiscountAsInNproductDollars)
               {
                 // If a coupon product exists and its count is larger than zero.
@@ -1379,18 +1379,17 @@ namespace XOSkinWebApp.Controllers
                   }
                 }
               }
-              // TODO: Continue here.
-              else if (coupon.DiscountProductN != null && coupon.DiscountProductN > 0)
-              {
-              }
             }
+            // If there is a discount code.
             else if (Model.DiscountCode != null && Model.DiscountCode.Trim().Length > 0)
             {
+              // Fetch the discount code information from the database.
               code = _context.DiscountCodes.Where(
                 x => x.Code.Trim().ToUpper().Equals(Model.DiscountCode.Trim().ToUpper())).FirstOrDefault();
-
+              // If there is discount code information on the database.
               if (code != null)
               {
+                // Initialize discount calculation variables.
                 codeProduct = _context.DiscountCodeProducts.Where(x => x.Code == code.Id).ToList();
                 percentage = code.DiscountAsInNproductPercentage ?
                   code.DiscountNproductPercentage == null ?
@@ -1403,16 +1402,21 @@ namespace XOSkinWebApp.Controllers
                 minimumNumberOfSelectedProductsMet = true;
                 totalNumberOfProducts = 0L;
 
+                // If the discount code is for a global order discount.
                 if (code.DiscountAsInGlobalOrderPercentage || code.DiscountAsInGlobalOrderDollars)
                 {
+                  // Add the items and quantities to obtain the total number of products in the order.
                   foreach (ShoppingCartLineItem item in lineItem)
                   {
                     totalNumberOfProducts += item.Quantity;
                   }
 
+                  // If the total number of products exceeds the minimum set by the discount code, and the 
+                  // order subtotal is greater or equal than the minimum purchase set by the same code.
                   if (totalNumberOfProducts >= minimumNumberOfProducts &&
                     Model.SubTotal >= minimumPurchase)
                   {
+                    // Calculate discounts for globals, percentage or dollars.
                     if (code.DiscountAsInGlobalOrderPercentage)
                     {
                       Model.CodeDiscount = (Model.SubTotal * (code.DiscountGlobalOrderPercentage / 100));
@@ -1423,10 +1427,13 @@ namespace XOSkinWebApp.Controllers
                     }
                   }
                 }
+                // If the discount code is a n product type.
                 else if (code.DiscountAsInNproductPercentage || code.DiscountAsInNproductDollars)
                 {
+                  // Determine whether the discount applies, and if so, then apply it.
                   if (codeProduct != null && codeProduct.Count > 0)
                   {
+                    // TODO: Continue here.
                     if (minimumPurchase > 0)
                     {
                       foreach (DiscountCodeProduct p in codeProduct)
