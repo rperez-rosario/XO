@@ -1433,28 +1433,34 @@ namespace XOSkinWebApp.Controllers
                   // Determine whether the discount applies, and if so, then apply it.
                   if (codeProduct != null && codeProduct.Count > 0)
                   {
-                    // TODO: Continue here.
+                    // If the minimum purchase for this discount code is higher than zero.
                     if (minimumPurchase > 0)
                     {
+                      // Add the selected product sub total.
                       foreach (DiscountCodeProduct p in codeProduct)
                       {
                         selectedProductSubTotal += lineItem.Find(x => x.Product == p.Product) == null ?
                           0.0M : (decimal)lineItem.Find(x => x.Product == p.Product).Total;
                       }
                     }
-
+                    // Check if the cart has the product featured in the discount code and
+                    // if the minumum number of products is met.
                     foreach (DiscountCodeProduct p in codeProduct)
                     {
                       if (!lineItem.Any(x => x.Product == p.Product) || lineItem.Where(
                         x => x.Product == p.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
                       {
+                        // If not, set a flag.
                         minimumNumberOfSelectedProductsMet = false;
                         break;
                       }
                     }
-
-                    if (minimumNumberOfSelectedProductsMet && selectedProductSubTotal > minimumPurchase)
+                    // If the correct flags have been set and the subtotal of selected products is 
+                    // above the minimum purchase.
+                    if (minimumNumberOfSelectedProductsMet && selectedProductSubTotal >= minimumPurchase)
                     {
+                      // Apply the correct discount according to code discount rules in the db.
+                      // Product percentage discount.
                       if (code.DiscountAsInNproductPercentage)
                       {
                         Model.CodeDiscount = _context.Prices.Where(
@@ -1462,6 +1468,7 @@ namespace XOSkinWebApp.Controllers
                           codeProduct.Last().Product).Result.CurrentPrice)).Select(x => x.Amount).FirstOrDefault() *
                           (code.DiscountNproductPercentage / 100);
                       }
+                      // Dollar discount.
                       else if (code.DiscountAsInNproductDollars)
                       {
                         Model.CodeDiscount = code.DiscountInNproductDollars;
@@ -1472,18 +1479,19 @@ namespace XOSkinWebApp.Controllers
               }
             }
 
+            // Set discount(s).
             codeDiscount = Model.CodeDiscount == null ? 0.0M : (decimal)Model.CodeDiscount;
             couponDiscount = Model.CouponDiscount == null ? 0.0M : (decimal)Model.CouponDiscount;
-
+            // Apply to total.
             total = subTotal - codeDiscount - couponDiscount + shippingCost + applicableTaxes;
-
+            // Set meta data for Stripe transaction.
             stCreditTransactionMetaValue = new Dictionary<string, string>();
             stCreditTransactionMetaValue.Add("ProductOrderId", order.Id.ToString());
             stCreditTransactionMetaValue.Add("UserIdentityName", User.Identity.Name);
-
+            // Create and initialize a Stripe charge creation options object.
             stChargeCreateOptions = new ChargeCreateOptions()
             {
-              Amount = (long?)total * 100,
+              Amount = (long?)total * 100, // Stripe encodes dollar amounts as a nullable long.
               Currency = "usd",
               Description = "Total charges for an XO Skin customer order #XO" + 
                 (order.Id + 10000).ToString() +
@@ -1492,42 +1500,53 @@ namespace XOSkinWebApp.Controllers
               ReceiptEmail = User.Identity.Name,
               Customer = stCustomer.Id
             };
-
+            // Create and initialize Stripe charge service.
             stChargeService = new Stripe.ChargeService();
             stCharge = stChargeService.Create(stChargeCreateOptions);
-
+            // If charge to cc succeeded.
             if (stCharge.Status.Equals("succeeded"))
             {
+              // Set values to persist to db.
               order.StripeChargeId = stCharge.Id;
               order.StripeChargeStatus = stCharge.Status;
               Model.BilledOn = stCharge.Created;
             }
             else
             {
+              // Pass the appropriate flags to the UI.
               Model.CardDeclined = true;
               Model.CalculatedShippingAndTaxes = true;
               return RedirectToAction("CalculateShippingCostAndTaxes", Model);
             }
 
+            // Populate Stripe customer object using data stored in the db.
             stCustomer = stCustomerService.Get(_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.StripeCustomerId).FirstOrDefault());
-
+            // If the object has been correctly initialized.
             if (stCustomer.Sources != null)
             {
+              // Create and initiaze Stripe "source" (financial instrument) service.
               stSourceService = new SourceService();
               foreach (Source s in stCustomer.Sources)
               {
+                // Done with all sources so we detach them.
                 stSourceService.Detach(stCustomer.Id, s.Id);
               }
             }
           }
           catch
           {
+            // Any errors related to the transaction return the following flags to the UI.
             Model.CardDeclined = true;
             Model.CalculatedShippingAndTaxes = true;
             return RedirectToAction("CalculateShippingCostAndTaxes", Model);
           }
 
+          // At this point the order has been charged to the specified instrument.
+          // we now proceed to record all the information related to the transaction
+          // to both our db and Shopify.
+
+          // TODO: Continue here.
           shOrder.ShippingLines = new List<ShippingLine>()
           {
             new ShippingLine()
