@@ -1542,11 +1542,11 @@ namespace XOSkinWebApp.Controllers
             return RedirectToAction("CalculateShippingCostAndTaxes", Model);
           }
 
-          // At this point the order has been charged to the specified instrument.
+          // At this point the order has been charged to the customer-specified instrument.
           // we now proceed to record all the information related to the transaction
           // to both our db and Shopify.
 
-          // TODO: Continue here.
+          // Create and add shipping line (shipping data) to Shopify order object.
           shOrder.ShippingLines = new List<ShippingLine>()
           {
             new ShippingLine()
@@ -1570,6 +1570,7 @@ namespace XOSkinWebApp.Controllers
               Price = shippingCost
             }
           };
+          // Set tax information to the Shopify object.
           shOrder.EstimatedTaxes = false;
           shOrder.TotalTax = applicableTaxes;
           shOrder.TotalTaxSet = new PriceSet()
@@ -1585,6 +1586,7 @@ namespace XOSkinWebApp.Controllers
               CurrencyCode = stCharge.Currency
             }
           };
+          // Create and add tax line (shipping data) to Shopify order object.
           shOrder.TaxLines = new List<TaxLine>()
           {
             new TaxLine()
@@ -1607,6 +1609,7 @@ namespace XOSkinWebApp.Controllers
               Title = "Sales tax calculation performed by Taxjar."
             }
           };
+          // Add payment processor information to Shopify order object.
           shOrder.PaymentGatewayNames = new List<String>()
           {
             "Stripe"
@@ -1626,6 +1629,7 @@ namespace XOSkinWebApp.Controllers
               CurrencyCode = stCharge.Currency
             }
           };
+          // Add line item totals to Shopify order object.
           shOrder.TotalLineItemsPrice = subTotal;
           shOrder.TotalLineItemsPriceSet = new PriceSet()
           {
@@ -1640,6 +1644,7 @@ namespace XOSkinWebApp.Controllers
               CurrencyCode = stCharge.Currency
             }
           };
+          // Do the same for total price.
           shOrder.TotalPrice = total;
           shOrder.TotalPriceSet = new PriceSet()
           {
@@ -1654,6 +1659,7 @@ namespace XOSkinWebApp.Controllers
               CurrencyCode = stCharge.Currency
             }
           };
+          // And shipping price.
           shOrder.TotalShippingPriceSet = new PriceSet()
           {
             PresentmentMoney = new ShopifySharp.Price
@@ -1668,6 +1674,7 @@ namespace XOSkinWebApp.Controllers
             }
           };
 
+          // Add coupon discount information to Shopify order object.
           if (Model.CouponDiscount != null && Model.CouponDiscount > 0)
           {
             discountCode = new List<ShopifySharp.DiscountCode>();
@@ -1692,7 +1699,8 @@ namespace XOSkinWebApp.Controllers
                 CurrencyCode = stCharge.Currency
               }
             };
-          } 
+          }
+          // Add code discount information to Shopify order object.
           else if (Model.CodeDiscount != null && Model.CodeDiscount > 0)
           {
             discountCode = new List<ShopifySharp.DiscountCode>();
@@ -1719,6 +1727,8 @@ namespace XOSkinWebApp.Controllers
             };
           }
 
+          // Set remaining properties of the Shopify order object prior to submitting data to 
+          // Shopify.
           shOrder.PresentmentCurrency = stCharge.Currency.ToUpper();
           shOrder.Currency = stCharge.Currency.ToUpper();
           shOrder.Name = "#XO" + (order.Id + 10000).ToString();
@@ -1749,9 +1759,9 @@ namespace XOSkinWebApp.Controllers
               Authorization = stCharge.AuthorizationCode
             }
           };
-
+          // Store the customer's ip address for future reference.
           shOrder.BrowserIp = clientIpAddress;
-
+          // Set Shopify order billing address for the order.
           shOrder.BillingAddress = new ShopifySharp.Address()
           {
             Address1 = stCharge.BillingDetails.Address.Line1 == null ? String.Empty : 
@@ -1769,7 +1779,7 @@ namespace XOSkinWebApp.Controllers
             Zip = stCharge.BillingDetails.Address.PostalCode == null ? String.Empty : 
               stCharge.BillingDetails.Address.PostalCode
           };
-
+          // Set Shopify order shipping address for the order.
           shOrder.ShippingAddress = new ShopifySharp.Address()
           {
             Address1 = Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1,
@@ -1785,11 +1795,11 @@ namespace XOSkinWebApp.Controllers
             Province = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
             Zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode
           };
-
+          // Submit order to Shopify.
           shOrder = await shOrderService.CreateAsync(shOrder);
 
+          // TODO: Continue here.
           order.ShopifyId = shOrder.Id;
-
           shOrderTransactions = shTransactionService.ListAsync((long)shOrder.Id).Result.ToList();
 
           shTransaction = new Transaction()
