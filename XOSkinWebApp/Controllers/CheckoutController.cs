@@ -1798,10 +1798,12 @@ namespace XOSkinWebApp.Controllers
           // Submit order to Shopify.
           shOrder = await shOrderService.CreateAsync(shOrder);
 
-          // TODO: Continue here.
+          // Get the Shopify order id from the Shopify order object and save it to persist it to the db.
           order.ShopifyId = shOrder.Id;
+          // Get the Shopify order transactions from the Shopify transaction service.
           shOrderTransactions = shTransactionService.ListAsync((long)shOrder.Id).Result.ToList();
-
+          // Create a new Shopify transaction object using information from the Shopify order transaction object,
+          // and other Shopify objects.
           shTransaction = new Transaction()
           {
             Kind = "capture",
@@ -1819,14 +1821,15 @@ namespace XOSkinWebApp.Controllers
             OrderId = shOrder.Id,
             Source = shOrderTransactions.FirstOrDefault().Source,
           };
-
+          // Populate Shopify transaction object with data obtained from the Shopify transaction service.
           shTransaction = await shTransactionService.CreateAsync((long)shOrder.Id, shTransaction);
         }
         catch (Exception ex)
         {
+          // This will be caught by the parent catch.
           throw new Exception("An error was encountered while writing order to Shopify.", ex);
         }
-
+        // Populated order db object fields.
         order.DatePlaced = DateTime.UtcNow;
         order.Subtotal = subTotal;
         order.ApplicableTaxes = applicableTaxes;
@@ -1836,20 +1839,25 @@ namespace XOSkinWebApp.Controllers
         order.ShippingCost = shippingCost;
         order.Total = total;
         order.Completed = true;
-
+        // Flag order data to be written the db.
         _context.ProductOrders.Update(order);
-
+        // Write flagged order data to the db.
         _context.SaveChanges();
       }
       catch (Exception ex)
       {
+        // At this point we already charged the customer so it's a matter of entering
+        // the report data to Shopify manually.
         throw new Exception("An error was encontered while initializing the product order.", ex);
       }
 
+      // Populate the ui model with obtained data. 
       Model.OrderId = order.Id;
       Model.ShopifyId = (long)shOrder.Id;
+      // Initialize ui model line items.
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();
 
+      // TODO: Continue here.
       try
       {
         foreach (ShoppingCartLineItem item in _context.ShoppingCartLineItems.Where(
