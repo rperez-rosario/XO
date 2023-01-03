@@ -1851,13 +1851,14 @@ namespace XOSkinWebApp.Controllers
         throw new Exception("An error was encontered while initializing the product order.", ex);
       }
 
-      // Populate the ui model with obtained data. 
+      // Populate the ui model with data obtained from Shopify. 
       Model.OrderId = order.Id;
       Model.ShopifyId = (long)shOrder.Id;
       // Initialize ui model line items.
       Model.LineItem = new List<ShoppingCartLineItemViewModel>();
 
-      // TODO: Continue here.
+      // Add product order line items to the database by iterating over 
+      // the shopping cart line items.
       try
       {
         foreach (ShoppingCartLineItem item in _context.ShoppingCartLineItems.Where(
@@ -1868,6 +1869,7 @@ namespace XOSkinWebApp.Controllers
         {
           _context.ProductOrderLineItems.Add(new ProductOrderLineItem()
           {
+            // Data to be saved to database product order line items table.
             ImageSource = _context.Products.Where(
               x => x.Id.Equals(item.Product)).Select(x => x.ImagePathLarge).FirstOrDefault(),
             Product = item.Product,
@@ -1891,11 +1893,13 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
               x => x.Amount).FirstOrDefault() * item.Quantity
           });
-
+          // Persist data to db.
           _context.SaveChanges();
-
+          // Update the local db and Shopify inventory.
+          // Start with regular products (non-kit-related.)
           if (_context.Products.Where(x => x.Id == item.Product).Select(x => x.KitType).FirstOrDefault() == null)
           {
+            // Update local db with new inventory information.
             product = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
             originalProductStock = (long)product.Stock;
             product.Stock -= item.Quantity;
@@ -1904,11 +1908,12 @@ namespace XOSkinWebApp.Controllers
 
             try
             {
+              // Update Shopify with new inventory information.
               shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
               shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
               shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
               shLocation = (List<Location>)await shLocationService.ListAsync();
-              
+              // Call inventory levels service to make the inventory adjustment.
               await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
               {
                 AvailableAdjustment = (int?)(-1 * item.Quantity),
@@ -1923,6 +1928,7 @@ namespace XOSkinWebApp.Controllers
 
             updatedKit = new List<long>();
 
+            // Update local db for kit products.
             foreach (KitProduct kp in _context.KitProducts.ToList())
             {
               if (kp.Product == product.Id)
@@ -1946,17 +1952,18 @@ namespace XOSkinWebApp.Controllers
 
                   originalKitStock = (long)kit.Stock;
                   kit.Stock = stock;
-
+                  // Update kit stock in local db.
                   _context.Products.Update(kit);
                   _context.SaveChanges();
 
                   try
                   {
+                    // Update kit stock in Shopify.
                     shProduct = await shProductService.GetAsync((long)kit.ShopifyProductId);
                     shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
                     shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
                     shLocation = (List<Location>)await shLocationService.ListAsync();
-
+                    // Call inventory levels service and make the actual adjustment.
                     await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
                     {
                       AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
@@ -1974,25 +1981,28 @@ namespace XOSkinWebApp.Controllers
               }
             }
           }
+          // It's a kit product, process accordingly.
           else
           {
             kit = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
             kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
-
+            // Iterate over products in kit.
             foreach (KitProduct kp in kitProduct)
             {
               product = _context.Products.Where(x => x.Id == kp.Product).FirstOrDefault();
               product.Stock -= 1 * item.Quantity;
+              // Save updated inventory levels to db.
               _context.Products.Update(product);
               _context.SaveChanges();
 
               try
               {
+                // Save updated inventory levels to Shopify.
                 shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
                 shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
                 shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
                 shLocation = (List<Location>)await shLocationService.ListAsync();
-                
+                // Call inventory levels service to make all necessary adjustments.
                 await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
                 {
                   AvailableAdjustment = -1 * item.Quantity,
@@ -2007,7 +2017,8 @@ namespace XOSkinWebApp.Controllers
             }
 
             updatedKit = new List<long>();
-
+            
+            // Update kit stock.
             foreach (KitProduct kp in kitProduct)
             {
               foreach (KitProduct kpB in _context.KitProducts.ToList())
@@ -2036,11 +2047,12 @@ namespace XOSkinWebApp.Controllers
 
                     try
                     {
+                      // Update Shopify with appropriate kit inventory adjustment.
                       shProduct = await shProductService.GetAsync((long)kit.ShopifyProductId);
                       shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
                       shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
                       shLocation = (List<Location>)await shLocationService.ListAsync();
-
+                      // Call inventory levels service to make the adjustment.
                       await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
                       {
                         AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
@@ -2054,7 +2066,7 @@ namespace XOSkinWebApp.Controllers
                     }
 
                     updatedKit.Add(kit.Id);
-
+                    // Save updated kit information to the local database.
                     _context.Products.Update(kit);
                     _context.SaveChanges();
                   }
@@ -2062,9 +2074,9 @@ namespace XOSkinWebApp.Controllers
               }
             }
           }
-
+          // Save any pending changes to the local db.
           _context.SaveChanges();
-
+          // TODO: Continue here.
           Model.LineItem.Add(new ShoppingCartLineItemViewModel()
           {
             Id = item.Id,
