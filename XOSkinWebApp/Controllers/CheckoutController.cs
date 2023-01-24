@@ -2018,7 +2018,7 @@ namespace XOSkinWebApp.Controllers
 
             updatedKit = new List<long>();
             
-            // Update kit stock.
+            // Update kit stock in local database.
             foreach (KitProduct kp in kitProduct)
             {
               foreach (KitProduct kpB in _context.KitProducts.ToList())
@@ -2076,7 +2076,7 @@ namespace XOSkinWebApp.Controllers
           }
           // Save any pending changes to the local db.
           _context.SaveChanges();
-          // TODO: Continue here.
+          // Add current item to the UI's model for line items.
           Model.LineItem.Add(new ShoppingCartLineItemViewModel()
           {
             Id = item.Id,
@@ -2095,18 +2095,22 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
               x => x.Amount).FirstOrDefault() * item.Quantity
           });
-
+          // Remove item from current shopping cart as it's been processed already.
           _context.ShoppingCartLineItems.Remove(item);
+          // Save this change to the database.
           _context.SaveChanges();
         }
 
+        // Commence ledger maintenance code.
+        // If the user has an existing ledger associated with it, grab the current balance
         if (_context.UserLedgerTransactions.Where(
           x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault() != null)
         {
+          // and assign it to our running balance variable.
           balanceBeforeTransaction = _context.UserLedgerTransactions.Where(
             x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault().BalanceAfterTransaction;
         }
-        
+        // Add a new transaction representing the current purchase, this time for taxation.
         _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
         {
           User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
@@ -2120,11 +2124,11 @@ namespace XOSkinWebApp.Controllers
           CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
           Created = DateTime.UtcNow
         });
-
+        // Save new transaction to database.
         _context.SaveChanges();
-
+        // Affect balance negatively using previously calculated applicable taxes.
         balanceBeforeTransaction -= applicableTaxes;
-
+        // Add another transaction to the ledger, this time covering shipping.
         _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
         {
           User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
@@ -2138,11 +2142,11 @@ namespace XOSkinWebApp.Controllers
           CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
           Created = DateTime.UtcNow
         });
-
+        // Save new transaction to database.
         _context.SaveChanges();
-
+        // Deduct shipping costs from balance.
         balanceBeforeTransaction -= shippingCost;
-
+        // Add a new ledger transaction for the product subtotal.
         _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
         {
           User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
@@ -2156,11 +2160,12 @@ namespace XOSkinWebApp.Controllers
           CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
           Created = DateTime.UtcNow
         });
-
+        // Deduct product subtotal from balance.
         balanceBeforeTransaction -= subTotal;
-
+        // If there's either a coupon or code discount.
         if (couponDiscount + codeDiscount > 0)
         {
+          // Create a new ledger transaction recording the discount as such.
           _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
           {
             User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
@@ -2174,12 +2179,12 @@ namespace XOSkinWebApp.Controllers
             CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
             Created = DateTime.UtcNow
           });
-
+          // Save ledger transaction to database.
           _context.SaveChanges();
-
+          // Add discount to balance.
           balanceBeforeTransaction += couponDiscount + codeDiscount;
         }
-
+        // Add a new ledger transaction for the total amount credited to this account.
         _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
         {
           User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
@@ -2193,24 +2198,27 @@ namespace XOSkinWebApp.Controllers
           CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
           Created = DateTime.UtcNow
         });
-
+        // Save this final transaction to finalize the ledger entries for this order.
         _context.SaveChanges();
       }
       catch (Exception ex)
       {
-        throw new Exception("An error was encountered while saving the order's line items.", ex);
+        throw new Exception("An error was encountered while saving the order's ledger.", ex);
       }
 
+      // Commence shipping label related code.
       try
       {
+        // Initialize a JSON writer optiong object and configure it.
         var options = new JsonWriterOptions
         {
           Indented = true
         };
-
+        // Initialize a memory buffer.
         using var stream = new MemoryStream();
+        // Initialize a JSON writer object (UTF8) with said resources and configuration.
         using var writer = new Utf8JsonWriter(stream, options);
-
+        // Write mailing label related information to a JSON memory stream.
         writer.WriteStartObject();
         writer.WritePropertyName("label_format");
         writer.WriteStringValue("pdf");
@@ -2221,9 +2229,11 @@ namespace XOSkinWebApp.Controllers
         writer.WriteEndObject();
 
         writer.Flush();
-
+        // Assign the resulting stream to a String variable now containing the 
+        // fully-formed JSON object.
         seShippingLabelRequestJson = Encoding.UTF8.GetString(stream.ToArray());
-
+        // Assign the result of a http request to the ShipEngine API with the
+        // shipping label parameters to a String variable.
         seShippingLabelResponseJson =
           (_option.Value.ShipEngineGetLabelUrlFromIdUrl + Model.ShipEngineRateId).PostJsonToUrlAsync(
             seShippingLabelRequestJson,
@@ -2231,10 +2241,13 @@ namespace XOSkinWebApp.Controllers
           {
             webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
           }).Result;
-
+        // Using a JsonDocument object which we obtain by parsing the previous request response.
         using (JsonDocument document = JsonDocument.Parse(seShippingLabelResponseJson))
         {
+          // Grab the root element.
           JsonElement root = document.RootElement;
+          // Transverse the tree to obtain the the tracking number and url 
+          // for the pdf generated by ShipEngine for us to pick up later.
           Model.TrackingNumber = root.GetProperty("tracking_number").ToString();
           Model.ShipEngineLabelUrl = root.GetProperty("label_download").GetProperty("pdf").ToString();
         }
@@ -2243,12 +2256,13 @@ namespace XOSkinWebApp.Controllers
       {
         // Continue processing order, shipping label will be created manually.
       }
-
+      // If we weren't able to retrieve the tracking number, assign a text
+      // explaining it will be assigned soon, for UI consumption.
       if (Model.TrackingNumber == null || Model.TrackingNumber.Trim().Count() == 0)
       {
         Model.TrackingNumber = "Will be Assigned Soon.";
       }
-
+      // Adding bill-to address to order in database.
       try
       {
         _context.OrderBillTos.Add(new OrderBillTo()
@@ -2263,21 +2277,24 @@ namespace XOSkinWebApp.Controllers
           BillingDate = Model.BilledOn,
           Order = order.Id
         });
-
+        // Save information to database.
         _context.SaveChanges();
-
+        // If there's a previous billing address on the customer's address book
         if (_context.Addresses.Where(
           x => x.User.Equals(_context.AspNetUsers.Where(
           x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
           x => x.AddressType == 1).FirstOrDefault() != null)
         {
+          // remove it.
           _context.Addresses.Remove(_context.Addresses.Where(
             x => x.User.Equals(_context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
             x => x.AddressType == 1).FirstOrDefault());
+          // Persist this change to database.
           _context.SaveChanges();
         }
-
+        // Add billing address used in this purchase as the latest
+        // (to be suggested on next purchase.)
         _context.Addresses.Add(new ORM.Address()
         {
           Name = Model.BillingName,
@@ -2291,11 +2308,13 @@ namespace XOSkinWebApp.Controllers
           User = _context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
         });
-
+        // Save latest billing address.
         _context.SaveChanges();
-
+        // If the shipping address is the same as the billing address.
         if (Model.ShippingAddressSame)
         {
+          // Add the database's order shipping address
+          // using the supplied billing address.
           _context.OrderShipTos.Add(new OrderShipTo()
           {
             RecipientName = Model.BillingName,
@@ -2314,21 +2333,24 @@ namespace XOSkinWebApp.Controllers
             ShipEngineRateId = Model.ShipEngineRateId,
             ShippingLabelUrl = Model.ShipEngineLabelUrl
           });
-
+          // Save this information to the database.
           _context.SaveChanges();
-
+          // If there's a shipping address saved for this customer.
           if (_context.Addresses.Where(
             x => x.User.Equals(_context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
             x => x.AddressType == 2).FirstOrDefault() != null)
           {
+            // Remove it to make way for the new default shipping address.
             _context.Addresses.Remove(_context.Addresses.Where(
               x => x.User.Equals(_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
               x => x.AddressType == 2).FirstOrDefault());
+            // Persist change to database.
             _context.SaveChanges();
           }
-
+          // Add latest bill to address as latest ship to address to be suggested in next
+          // purchase.
           _context.Addresses.Add(new ORM.Address()
           {
             Name = Model.BillingName,
@@ -2342,11 +2364,13 @@ namespace XOSkinWebApp.Controllers
             User = _context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
           });
-
+          // Save new ship address to database.
           _context.SaveChanges();
         }
+        // Else means the billing and shipping addresses are different.
         else
         {
+          // Add ship to address to be attached to order.
           _context.OrderShipTos.Add(new OrderShipTo()
           {
             RecipientName = Model.ShippingName,
@@ -2365,21 +2389,23 @@ namespace XOSkinWebApp.Controllers
             ShipEngineRateId = Model.ShipEngineRateId,
             ShippingLabelUrl = Model.ShipEngineLabelUrl
           });
-
+          // Save it to the databse.
           _context.SaveChanges();
-
+          // If there's a previous ship to address for this customer
           if (_context.Addresses.Where(
             x => x.User.Equals(_context.AspNetUsers.Where(
             x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
             x => x.AddressType == 2).FirstOrDefault() != null)
           {
+            // Remove it.
             _context.Addresses.Remove(_context.Addresses.Where(
               x => x.User.Equals(_context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
               x => x.AddressType == 2).FirstOrDefault());
+            // Persist change to database.
             _context.SaveChanges();
           }
-
+          // Add new shipping address to customer in database.
           _context.Addresses.Add(new ORM.Address()
           {
             Name = Model.ShippingName,
@@ -2393,7 +2419,7 @@ namespace XOSkinWebApp.Controllers
             User = _context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
           });
-
+          // Save changes to database.
           _context.SaveChanges();
         }
       }
