@@ -17,6 +17,7 @@ using ServiceStack;
 using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
+using EllipticCurve.Utils;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -161,7 +162,7 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.LineItem = lineItemViewModel;
       checkoutViewModel.CreditCardExpirationDate = DateTime.Now;
       checkoutViewModel.TotalWeightInPounds = totalOrderShippingWeightInPounds;
-      ViewData["Country"] = new SelectList(new List<String> { "US" });
+      ViewData["Country"] = new SelectList(new List<string> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
 
       checkoutViewModel.Taxes = 0.0M;
@@ -266,8 +267,8 @@ namespace XOSkinWebApp.Controllers
 
     public async Task<IActionResult> CalculateShippingCostAndTaxes(CheckoutViewModel Model)
     {
-      String seShipmentDetailsJson = null;
-      String seShipmentCostJson = null;
+      string seShipmentDetailsJson = null;
+      string seShipmentCostJson = null;
       List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
       List<ShoppingCartLineItem> lineItem = _context.ShoppingCartLineItems.Where(
         x => x.ShoppingCart == _context.ShoppingCarts.Where(x => x.User.Equals(_context.AspNetUsers.Where(
@@ -291,7 +292,7 @@ namespace XOSkinWebApp.Controllers
       List<DiscountCodeProduct> codeProduct = null;
       long totalNumberOfProducts = 0L;
 
-      ViewData["Country"] = new SelectList(new List<String> { "US" });
+      ViewData["Country"] = new SelectList(new List<string> { "US" });
       ViewData["State"] = new SelectList(_context.StateUs.ToList(), "StateAbbreviation", "StateName");
 
       Model.SubTotal = 0.0M;
@@ -711,10 +712,10 @@ namespace XOSkinWebApp.Controllers
               to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
               to_street = Model.ShippingAddressSame ?
                 (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
-                (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty :
+                (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == string.Empty) ? string.Empty :
                 " " + Model.BillingAddress2.Trim())) :
                 (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ||
-                (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
+                (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == string.Empty) ? string.Empty :
                 " " + Model.ShippingAddress2.Trim())),
               to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
               nexus_addresses = new[]
@@ -798,9 +799,9 @@ namespace XOSkinWebApp.Controllers
       List<long> updatedKit = null;
       ShopifySharp.Order shOrder = null;
       List<ShopifySharp.LineItem> shLineItemList = null;
-      String seShipmentRateJson = null;
+      string seShipmentRateJson = null;
       ChargeCreateOptions stChargeCreateOptions = null;
-      Dictionary<String, String> stCreditTransactionMetaValue = null;
+      Dictionary<string, string> stCreditTransactionMetaValue = null;
       Stripe.CustomerCreateOptions stCustomerCreateOptions = null;
       Stripe.Customer stCustomer = null;
       CardCreateNestedOptions stCardCreateNestedOptions = null;
@@ -812,17 +813,17 @@ namespace XOSkinWebApp.Controllers
       AspNetUser user = null;
       OrderBillTo previousOrderBillTo = null;
       Stripe.Charge stCharge = null;
-      String geoLocationUrl = null;
-      String geoLocationJson = null;
+      string geoLocationUrl = null;
+      string geoLocationJson = null;
       TaxResponseAttributes tjTaxRate = null;
       OrderResponseAttributes tjOrder = null;
       object[] tjLineItem = null;
       List<ShoppingCartLineItem> lineItem = null;
       int i = 0;
       List<Transaction> shOrderTransactions = null;
-      String clientIpAddress = null;
-      String seShippingLabelRequestJson = null;
-      String seShippingLabelResponseJson = null;
+      string clientIpAddress = null;
+      string seShippingLabelRequestJson = null;
+      string seShippingLabelResponseJson = null;
       DiscountCoupon coupon = null;
       List<DiscountCouponProduct> couponProduct = null;
       decimal percentage = decimal.MinValue;
@@ -847,7 +848,7 @@ namespace XOSkinWebApp.Controllers
 
       // Capture client IP address for this order.
       clientIpAddress = HttpContext.Connection.RemoteIpAddress == null ?
-        String.Empty : HttpContext.Connection.RemoteIpAddress.ToString();
+        string.Empty : HttpContext.Connection.RemoteIpAddress.ToString();
 
       // Initialize Shopify services.
       try
@@ -1037,33 +1038,33 @@ namespace XOSkinWebApp.Controllers
               x => x.StripeCustomerId).FirstOrDefault() == null &&
               previousOrderBillTo != null) &&
               ((previousOrderBillTo.NameOnCreditCard == null ? (Model.BillingName == null ||
-              Model.BillingName.Trim().Equals(String.Empty)) :
+              Model.BillingName.Trim().Equals(string.Empty)) :
               !previousOrderBillTo.NameOnCreditCard.Equals(Model.BillingName == null ?
-                String.Empty : Model.BillingName.Trim())) ||
+                string.Empty : Model.BillingName.Trim())) ||
               (previousOrderBillTo.AddressLine1 == null ? (Model.BillingAddress1 == null ||
-              Model.BillingAddress1.Trim().Equals(String.Empty)) :
+              Model.BillingAddress1.Trim().Equals(string.Empty)) :
               !previousOrderBillTo.AddressLine1.Equals(Model.BillingAddress1 == null ?
-                String.Empty : Model.BillingAddress1.Trim())) ||
+                string.Empty : Model.BillingAddress1.Trim())) ||
               (previousOrderBillTo.AddressLine2 == null ? (Model.BillingAddress2 == null ||
-              Model.BillingAddress2.Trim().Equals(String.Empty)) :
+              Model.BillingAddress2.Trim().Equals(string.Empty)) :
               !previousOrderBillTo.AddressLine2.Equals(Model.BillingAddress2 == null ?
-                String.Empty : Model.BillingAddress2.Trim())) ||
+                string.Empty : Model.BillingAddress2.Trim())) ||
               (previousOrderBillTo.CityName == null ? (Model.BillingCity == null ||
-              Model.BillingCity.Trim().Equals(String.Empty)) :
+              Model.BillingCity.Trim().Equals(string.Empty)) :
               !previousOrderBillTo.CityName.Equals(Model.BillingCity == null ?
-                String.Empty : Model.BillingCity.Trim())) ||
+                string.Empty : Model.BillingCity.Trim())) ||
               (previousOrderBillTo.StateName == null ? (Model.BillingState == null ||
-              Model.BillingState.Trim().Equals(String.Empty)) :
+              Model.BillingState.Trim().Equals(string.Empty)) :
               !previousOrderBillTo.StateName.Equals(Model.BillingState == null ?
-                String.Empty : Model.BillingState.Trim())) ||
+                string.Empty : Model.BillingState.Trim())) ||
               (previousOrderBillTo.CountryName == null ? (Model.BillingCountry == null ||
-              Model.BillingCountry.Trim().Equals(String.Empty)) :
+              Model.BillingCountry.Trim().Equals(string.Empty)) :
               !previousOrderBillTo.CountryName.Equals(Model.BillingCountry == null ?
-                String.Empty : Model.BillingCountry.Trim())) ||
+                string.Empty : Model.BillingCountry.Trim())) ||
               (previousOrderBillTo.PostalCode == null ? (Model.BillingPostalCode == null ||
-              Model.BillingPostalCode.Trim().Equals(String.Empty)) :
+              Model.BillingPostalCode.Trim().Equals(string.Empty)) :
               !previousOrderBillTo.PostalCode.Equals(Model.BillingPostalCode == null ?
-              String.Empty : Model.BillingPostalCode.Trim()))))
+              string.Empty : Model.BillingPostalCode.Trim()))))
             {
               try
               {
@@ -1212,10 +1213,10 @@ namespace XOSkinWebApp.Controllers
                 // There is some boolean logic applied to calculating the right street address.
                 to_street = Model.ShippingAddressSame ?
                   (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
-                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty :
+                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == string.Empty) ? string.Empty :
                   " " + Model.BillingAddress2.Trim())) :
                   (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ||
-                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
+                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == string.Empty) ? string.Empty :
                   " " + Model.ShippingAddress2.Trim())),
                 to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
                 // Handles the concept of nexus address(es). See https://quickbooks.intuit.com/r/taxes/nexus-guide/ (Retrieved 12/13/2022.)
@@ -1244,10 +1245,10 @@ namespace XOSkinWebApp.Controllers
                 // Same concept applied to the street address calculation for the order.
                 to_street = Model.ShippingAddressSame ?
                   (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
-                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty :
+                  (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == string.Empty) ? string.Empty :
                   " " + Model.BillingAddress2.Trim())) :
                   (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ||
-                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
+                  (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == string.Empty) ? string.Empty :
                   " " + Model.ShippingAddress2.Trim())),
                 amount = subTotal,
                 lineItems = tjLineItem,
@@ -1610,7 +1611,7 @@ namespace XOSkinWebApp.Controllers
             }
           };
           // Add payment processor information to Shopify order object.
-          shOrder.PaymentGatewayNames = new List<String>()
+          shOrder.PaymentGatewayNames = new List<string>()
           {
             "Stripe"
           };
@@ -1764,19 +1765,19 @@ namespace XOSkinWebApp.Controllers
           // Set Shopify order billing address for the order.
           shOrder.BillingAddress = new ShopifySharp.Address()
           {
-            Address1 = stCharge.BillingDetails.Address.Line1 == null ? String.Empty : 
+            Address1 = stCharge.BillingDetails.Address.Line1 == null ? string.Empty : 
               stCharge.BillingDetails.Address.Line1,
-            Address2 = stCharge.BillingDetails.Address.Line2 == null ? String.Empty : 
+            Address2 = stCharge.BillingDetails.Address.Line2 == null ? string.Empty : 
               stCharge.BillingDetails.Address.Line2,
-            City = stCharge.BillingDetails.Address.City == null ? String.Empty : 
+            City = stCharge.BillingDetails.Address.City == null ? string.Empty : 
               stCharge.BillingDetails.Address.City,
-            Country = stCharge.BillingDetails.Address.Country == null ? String.Empty : 
+            Country = stCharge.BillingDetails.Address.Country == null ? string.Empty : 
               stCharge.BillingDetails.Address.Country,
-            Name = stCharge.BillingDetails.Name == null ? String.Empty : stCharge.BillingDetails.Name,
-            Phone = stCharge.BillingDetails.Phone == null ? String.Empty : stCharge.BillingDetails.Phone,
-            Province = stCharge.BillingDetails.Address.State == null ? String.Empty : 
+            Name = stCharge.BillingDetails.Name == null ? string.Empty : stCharge.BillingDetails.Name,
+            Phone = stCharge.BillingDetails.Phone == null ? string.Empty : stCharge.BillingDetails.Phone,
+            Province = stCharge.BillingDetails.Address.State == null ? string.Empty : 
               stCharge.BillingDetails.Address.State,
-            Zip = stCharge.BillingDetails.Address.PostalCode == null ? String.Empty : 
+            Zip = stCharge.BillingDetails.Address.PostalCode == null ? string.Empty : 
               stCharge.BillingDetails.Address.PostalCode
           };
           // Set Shopify order shipping address for the order.
@@ -1790,7 +1791,7 @@ namespace XOSkinWebApp.Controllers
             Phone = _context.AspNetUsers.Where(
               x => x.Email.Equals(
                 User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault() == null ? 
-              String.Empty : _context.AspNetUsers.Where(
+              string.Empty : _context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
             Province = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
             Zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode
@@ -2209,218 +2210,43 @@ namespace XOSkinWebApp.Controllers
       // Commence shipping label related code.
       try
       {
-        // Initialize a JSON writer optiong object and configure it.
+        // Initialize a JSON writer options object and configure it.
         var options = new JsonWriterOptions
         {
           Indented = true
         };
-        // Initialize a memory buffer.
-        using var stream = new MemoryStream();
-        // Initialize a JSON writer object (UTF8) with said resources and configuration.
-        using var writer = new Utf8JsonWriter(stream, options);
-        // Write mailing label related information to a JSON memory stream.
-        writer.WriteStartObject();
-        writer.WritePropertyName("label_format");
-        writer.WriteStringValue("pdf");
-        writer.WritePropertyName("label_layout");
-        writer.WriteStringValue("4x6");
-        writer.WritePropertyName("label_download_type");
-        writer.WriteStringValue("url");
-        writer.WriteEndObject();
-
-        writer.Flush();
-        // Assign the resulting stream to a String variable now containing the 
+        using var stream = ConstructShippingLabelRequestJson(ref options);
+        // Assign the resulting stream to a string variable now containing the 
         // fully-formed JSON object.
-        seShippingLabelRequestJson = Encoding.UTF8.GetString(stream.ToArray());
-        // Assign the result of a http request to the ShipEngine API with the
-        // shipping label parameters to a String variable.
-        seShippingLabelResponseJson =
-          (_option.Value.ShipEngineGetLabelUrlFromIdUrl + Model.ShipEngineRateId).PostJsonToUrlAsync(
-            seShippingLabelRequestJson,
-          requestFilter: webReq =>
-          {
-            webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
-          }).Result;
+        RequestShippingLabelResponseJson(ref Model, ref seShippingLabelRequestJson, stream, 
+          ref seShippingLabelResponseJson);
         // Using a JsonDocument object which we obtain by parsing the previous request response.
-        using (JsonDocument document = JsonDocument.Parse(seShippingLabelResponseJson))
-        {
-          // Grab the root element.
-          JsonElement root = document.RootElement;
-          // Transverse the tree to obtain the the tracking number and url 
-          // for the pdf generated by ShipEngine for us to pick up later.
-          Model.TrackingNumber = root.GetProperty("tracking_number").ToString();
-          Model.ShipEngineLabelUrl = root.GetProperty("label_download").GetProperty("pdf").ToString();
-        }
+        ParseJsonDocumentAndObtainTrackingNumberAndLabelUrl(ref Model, ref seShippingLabelResponseJson);
       }
       catch
       {
-        // Continue processing order, shipping label will be created manually.
+        // Fail silently and continue processing order. Shipping label will be created manually.
       }
-      // If we weren't able to retrieve the tracking number, assign a text
-      // explaining it will be assigned soon, for UI consumption.
-      if (Model.TrackingNumber == null || Model.TrackingNumber.Trim().Count() == 0)
-      {
-        Model.TrackingNumber = "Will be Assigned Soon.";
-      }
+      IfNoTrackingNumberYetAddMessageToModel(ref Model);
       // Adding bill-to address to order in database.
       try
       {
-        _context.OrderBillTos.Add(new OrderBillTo()
-        {
-          NameOnCreditCard = Model.BillingName,
-          AddressLine1 = Model.BillingAddress1,
-          AddressLine2 = Model.BillingAddress2,
-          CityName = Model.BillingCity,
-          StateName = Model.BillingState,
-          CountryName = Model.BillingCountry,
-          PostalCode = Model.BillingPostalCode,
-          BillingDate = Model.BilledOn,
-          Order = order.Id
-        });
-        // Save information to database.
-        _context.SaveChanges();
-        // If there's a previous billing address on the customer's address book
-        if (_context.Addresses.Where(
-          x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-          x => x.AddressType == 1).FirstOrDefault() != null)
-        {
-          // remove it.
-          _context.Addresses.Remove(_context.Addresses.Where(
-            x => x.User.Equals(_context.AspNetUsers.Where(
-            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-            x => x.AddressType == 1).FirstOrDefault());
-          // Persist this change to database.
-          _context.SaveChanges();
-        }
-        // Add billing address used in this purchase as the latest
-        // (to be suggested on next purchase.)
-        _context.Addresses.Add(new ORM.Address()
-        {
-          Name = Model.BillingName,
-          AddressType = 1, // Billing.
-          CountryName = Model.BillingCountry,
-          Line1 = Model.BillingAddress1,
-          Line2 = Model.BillingAddress2,
-          PostalCode = Model.BillingPostalCode,
-          StateName = Model.BillingState,
-          CityName = Model.BillingCity,
-          User = _context.AspNetUsers.Where(
-            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
-        });
-        // Save latest billing address.
-        _context.SaveChanges();
+        AddBillToAddressToOrder(ref Model, ref order);
+        IfThereIsACustomerBillingAddressRemoveIt();
+        AddOrderBillingAddressToCustomerAsLatest(ref Model);
         // If the shipping address is the same as the billing address.
         if (Model.ShippingAddressSame)
         {
-          // Add the database's order shipping address
-          // using the supplied billing address.
-          _context.OrderShipTos.Add(new OrderShipTo()
-          {
-            RecipientName = Model.BillingName,
-            AddressLine1 = Model.BillingAddress1,
-            AddressLine2 = Model.BillingAddress2,
-            CityName = Model.BillingCity,
-            StateName = Model.BillingState,
-            CountryName = Model.BillingCountry,
-            PostalCode = Model.BillingPostalCode,
-            ShipDate = Model.ShippedOn,
-            CarrierName = Model.CarrierName,
-            TrackingNumber = Model.TrackingNumber,
-            Order = order.Id,
-            Arrives = Model.ExpectedToArrive,
-            ShipEngineId = Model.ShipEngineShipmentId,
-            ShipEngineRateId = Model.ShipEngineRateId,
-            ShippingLabelUrl = Model.ShipEngineLabelUrl
-          });
-          // Save this information to the database.
-          _context.SaveChanges();
-          // If there's a shipping address saved for this customer.
-          if (_context.Addresses.Where(
-            x => x.User.Equals(_context.AspNetUsers.Where(
-            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-            x => x.AddressType == 2).FirstOrDefault() != null)
-          {
-            // Remove it to make way for the new default shipping address.
-            _context.Addresses.Remove(_context.Addresses.Where(
-              x => x.User.Equals(_context.AspNetUsers.Where(
-              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-              x => x.AddressType == 2).FirstOrDefault());
-            // Persist change to database.
-            _context.SaveChanges();
-          }
-          // Add latest bill to address as latest ship to address to be suggested in next
-          // purchase.
-          _context.Addresses.Add(new ORM.Address()
-          {
-            Name = Model.BillingName,
-            AddressType = 2, // Shipping.
-            CountryName = Model.BillingCountry,
-            Line1 = Model.BillingAddress1,
-            Line2 = Model.BillingAddress2,
-            PostalCode = Model.BillingPostalCode,
-            CityName = Model.BillingCity,
-            StateName = Model.BillingState,
-            User = _context.AspNetUsers.Where(
-              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
-          });
-          // Save new ship address to database.
-          _context.SaveChanges();
+          AddOrderShippingAddressUsingBillingAddress(ref Model, ref order);
+          IfCustomerHasShippingAddressRemoveIt();
+          AddLatestBillToAddressAsLatestShipTo(ref Model);
         }
         // Else means the billing and shipping addresses are different.
         else
         {
-          // Add ship to address to be attached to order.
-          _context.OrderShipTos.Add(new OrderShipTo()
-          {
-            RecipientName = Model.ShippingName,
-            AddressLine1 = Model.ShippingAddress1,
-            AddressLine2 = Model.ShippingAddress2,
-            CityName = Model.ShippingCity,
-            StateName = Model.ShippingState,
-            CountryName = Model.ShippingCountry,
-            PostalCode = Model.ShippingPostalCode,
-            ShipDate = Model.ShippedOn,
-            CarrierName = Model.CarrierName,
-            TrackingNumber = Model.TrackingNumber,
-            Order = order.Id,
-            Arrives = Model.ExpectedToArrive,
-            ShipEngineId = Model.ShipEngineShipmentId,
-            ShipEngineRateId = Model.ShipEngineRateId,
-            ShippingLabelUrl = Model.ShipEngineLabelUrl
-          });
-          // Save it to the databse.
-          _context.SaveChanges();
-          // If there's a previous ship to address for this customer
-          if (_context.Addresses.Where(
-            x => x.User.Equals(_context.AspNetUsers.Where(
-            x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-            x => x.AddressType == 2).FirstOrDefault() != null)
-          {
-            // Remove it.
-            _context.Addresses.Remove(_context.Addresses.Where(
-              x => x.User.Equals(_context.AspNetUsers.Where(
-              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
-              x => x.AddressType == 2).FirstOrDefault());
-            // Persist change to database.
-            _context.SaveChanges();
-          }
-          // Add new shipping address to customer in database.
-          _context.Addresses.Add(new ORM.Address()
-          {
-            Name = Model.ShippingName,
-            AddressType = 2, // Shipping.
-            CountryName = Model.ShippingCountry,
-            Line1 = Model.ShippingAddress1,
-            Line2 = Model.ShippingAddress2,
-            PostalCode = Model.ShippingPostalCode,
-            CityName = Model.ShippingCity,
-            StateName = Model.ShippingState,
-            User = _context.AspNetUsers.Where(
-              x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
-          });
-          // Save changes to database.
-          _context.SaveChanges();
+          AddShipToAddressToOrder(ref Model, ref order);
+          IfThereIsAPreviousShipToAddressForCustomerRemoveIt();
+          AddNewShipToAddressToCustomerInDatabase(ref Model);
         }
       }
       catch (Exception ex)
@@ -2431,7 +2257,7 @@ namespace XOSkinWebApp.Controllers
       try
       {
         CreateGeoLocationUrl(ref geoLocationUrl, ref Model);
-        ObtainParseGeoLocationJsonAddToModel(ref geoLocationUrl, ref geoLocationJson, ref Model);
+        ObtainParseGeoLocationJsonAddCoordinatesToModel(ref geoLocationUrl, ref geoLocationJson, ref Model);
       }
       catch
       {
@@ -2445,7 +2271,255 @@ namespace XOSkinWebApp.Controllers
       return View("OrderConfirmation", Model);
     }
 
-    private void ObtainParseGeoLocationJsonAddToModel(ref String GeoLocationUrl, ref String GeoLocationJson, ref CheckoutViewModel Model)
+    private MemoryStream ConstructShippingLabelRequestJson(ref JsonWriterOptions Options)
+    {
+      // Initialize a memory buffer.
+      using var stream = new MemoryStream();
+      // Initialize a JSON writer object (UTF8) with said resources and configuration.
+      using var writer = new Utf8JsonWriter(stream, Options);
+      // Write mailing label related information to a JSON memory stream.
+      writer.WriteStartObject();
+      writer.WritePropertyName("label_format");
+      writer.WriteStringValue("pdf");
+      writer.WritePropertyName("label_layout");
+      writer.WriteStringValue("4x6");
+      writer.WritePropertyName("label_download_type");
+      writer.WriteStringValue("url");
+      writer.WriteEndObject();
+
+      writer.Flush();
+
+      return stream;
+    }
+
+    private void RequestShippingLabelResponseJson(ref CheckoutViewModel Model, ref string SeShippingLabelRequestJson,
+      MemoryStream Stream, ref string SeShippingLabelResponseJson)
+    {
+      // Assign the resulting stream to a string variable now containing the 
+      // fully-formed JSON object.
+      SeShippingLabelRequestJson = Encoding.UTF8.GetString(Stream.ToArray());
+      // Assign the result of a http request to the ShipEngine API with the
+      // shipping label parameters to a string variable.
+      SeShippingLabelResponseJson =
+        (_option.Value.ShipEngineGetLabelUrlFromIdUrl + Model.ShipEngineRateId).PostJsonToUrlAsync(
+          SeShippingLabelRequestJson,
+        requestFilter: webReq =>
+        {
+          webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+        }).Result;
+    }
+
+    private void ParseJsonDocumentAndObtainTrackingNumberAndLabelUrl(ref CheckoutViewModel Model, 
+      ref string SeShippingLabelResponseJson)
+    {
+      using (JsonDocument document = JsonDocument.Parse(SeShippingLabelResponseJson))
+      {
+        // Grab the root element.
+        JsonElement root = document.RootElement;
+        // Transverse the tree to obtain the the tracking number and url 
+        // for the pdf generated by ShipEngine for us to pick up later.
+        Model.TrackingNumber = root.GetProperty("tracking_number").ToString();
+        Model.ShipEngineLabelUrl = root.GetProperty("label_download").GetProperty("pdf").ToString();
+      }
+    }
+
+    private void IfNoTrackingNumberYetAddMessageToModel(ref CheckoutViewModel Model)
+    {
+      // If we weren't able to retrieve the tracking number, assign a text
+      // explaining it will be assigned soon, for UI consumption.
+      if (Model.TrackingNumber == null || Model.TrackingNumber.Trim().Count() == 0)
+      {
+        Model.TrackingNumber = "Will be Assigned Soon.";
+      }
+    }
+
+    private void AddBillToAddressToOrder(ref CheckoutViewModel Model, ref ProductOrder Order)
+    {
+      _context.OrderBillTos.Add(new OrderBillTo()
+      {
+        NameOnCreditCard = Model.BillingName,
+        AddressLine1 = Model.BillingAddress1,
+        AddressLine2 = Model.BillingAddress2,
+        CityName = Model.BillingCity,
+        StateName = Model.BillingState,
+        CountryName = Model.BillingCountry,
+        PostalCode = Model.BillingPostalCode,
+        BillingDate = Model.BilledOn,
+        Order = Order.Id
+      });
+      // Save information to database.
+      _context.SaveChanges();
+    }
+
+    private void IfThereIsACustomerBillingAddressRemoveIt()
+    {
+      // If there's a previous billing address on the customer's address book
+      if (_context.Addresses.Where(
+        x => x.User.Equals(_context.AspNetUsers.Where(
+        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+        x => x.AddressType == 1).FirstOrDefault() != null)
+      {
+        // remove it.
+        _context.Addresses.Remove(_context.Addresses.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+          x => x.AddressType == 1).FirstOrDefault());
+        // Persist this change to database.
+        _context.SaveChanges();
+      }
+    }
+
+    private void AddOrderBillingAddressToCustomerAsLatest(ref CheckoutViewModel Model)
+    {
+      // Add billing address used in this purchase as the latest
+      // (to be suggested on next purchase.)
+      _context.Addresses.Add(new ORM.Address()
+      {
+        Name = Model.BillingName,
+        AddressType = 1, // Billing.
+        CountryName = Model.BillingCountry,
+        Line1 = Model.BillingAddress1,
+        Line2 = Model.BillingAddress2,
+        PostalCode = Model.BillingPostalCode,
+        StateName = Model.BillingState,
+        CityName = Model.BillingCity,
+        User = _context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
+      });
+      // Save latest billing address.
+      _context.SaveChanges();
+    }
+
+    private void AddOrderShippingAddressUsingBillingAddress(ref CheckoutViewModel Model, ref ProductOrder Order)
+    {
+      // Add the database's order shipping address
+      // using the supplied billing address.
+      _context.OrderShipTos.Add(new OrderShipTo()
+      {
+        RecipientName = Model.BillingName,
+        AddressLine1 = Model.BillingAddress1,
+        AddressLine2 = Model.BillingAddress2,
+        CityName = Model.BillingCity,
+        StateName = Model.BillingState,
+        CountryName = Model.BillingCountry,
+        PostalCode = Model.BillingPostalCode,
+        ShipDate = Model.ShippedOn,
+        CarrierName = Model.CarrierName,
+        TrackingNumber = Model.TrackingNumber,
+        Order = Order.Id,
+        Arrives = Model.ExpectedToArrive,
+        ShipEngineId = Model.ShipEngineShipmentId,
+        ShipEngineRateId = Model.ShipEngineRateId,
+        ShippingLabelUrl = Model.ShipEngineLabelUrl
+      });
+      // Save this information to the database.
+      _context.SaveChanges();
+    }
+
+    private void IfCustomerHasShippingAddressRemoveIt()
+    {
+      // If there's a shipping address saved for this customer.
+      if (_context.Addresses.Where(
+        x => x.User.Equals(_context.AspNetUsers.Where(
+        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+        x => x.AddressType == 2).FirstOrDefault() != null)
+      {
+        // Remove it to make way for the new default shipping address.
+        _context.Addresses.Remove(_context.Addresses.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+          x => x.AddressType == 2).FirstOrDefault());
+        // Persist change to database.
+        _context.SaveChanges();
+      }
+    }
+
+    private void AddLatestBillToAddressAsLatestShipTo(ref CheckoutViewModel Model)
+    {
+      // Add latest bill to address as latest ship to address to be suggested in next
+      // purchase.
+      _context.Addresses.Add(new ORM.Address()
+      {
+        Name = Model.BillingName,
+        AddressType = 2, // Shipping.
+        CountryName = Model.BillingCountry,
+        Line1 = Model.BillingAddress1,
+        Line2 = Model.BillingAddress2,
+        PostalCode = Model.BillingPostalCode,
+        CityName = Model.BillingCity,
+        StateName = Model.BillingState,
+        User = _context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
+      });
+      // Save new ship address to database.
+      _context.SaveChanges();
+    }
+
+    private void AddShipToAddressToOrder(ref CheckoutViewModel Model, ref ProductOrder Order)
+    {
+      // Add ship to address to be attached to order.
+      _context.OrderShipTos.Add(new OrderShipTo()
+      {
+        RecipientName = Model.ShippingName,
+        AddressLine1 = Model.ShippingAddress1,
+        AddressLine2 = Model.ShippingAddress2,
+        CityName = Model.ShippingCity,
+        StateName = Model.ShippingState,
+        CountryName = Model.ShippingCountry,
+        PostalCode = Model.ShippingPostalCode,
+        ShipDate = Model.ShippedOn,
+        CarrierName = Model.CarrierName,
+        TrackingNumber = Model.TrackingNumber,
+        Order = Order.Id,
+        Arrives = Model.ExpectedToArrive,
+        ShipEngineId = Model.ShipEngineShipmentId,
+        ShipEngineRateId = Model.ShipEngineRateId,
+        ShippingLabelUrl = Model.ShipEngineLabelUrl
+      });
+      // Save it to the databse.
+      _context.SaveChanges();
+    }
+
+    private void IfThereIsAPreviousShipToAddressForCustomerRemoveIt()
+    {
+      // If there's a previous ship to address for this customer
+      if (_context.Addresses.Where(
+        x => x.User.Equals(_context.AspNetUsers.Where(
+        x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+        x => x.AddressType == 2).FirstOrDefault() != null)
+      {
+        // Remove it.
+        _context.Addresses.Remove(_context.Addresses.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Where(
+          x => x.AddressType == 2).FirstOrDefault());
+        // Persist change to database.
+        _context.SaveChanges();
+      }
+    }
+
+    private void AddNewShipToAddressToCustomerInDatabase(ref CheckoutViewModel Model)
+    {
+      // Add new shipping address to customer in database.
+      _context.Addresses.Add(new ORM.Address()
+      {
+        Name = Model.ShippingName,
+        AddressType = 2, // Shipping.
+        CountryName = Model.ShippingCountry,
+        Line1 = Model.ShippingAddress1,
+        Line2 = Model.ShippingAddress2,
+        PostalCode = Model.ShippingPostalCode,
+        CityName = Model.ShippingCity,
+        StateName = Model.ShippingState,
+        User = _context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()
+      });
+      // Save changes to database.
+      _context.SaveChanges();
+    }
+
+    private void ObtainParseGeoLocationJsonAddCoordinatesToModel(ref string GeoLocationUrl, ref string GeoLocationJson, 
+      ref CheckoutViewModel Model)
     {
       GeoLocationJson = (GeoLocationUrl).GetJsonFromUrl();
       // Create JSON document to obtain data from Bing.
@@ -2464,7 +2538,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private void CreateGeoLocationUrl(ref String GeoLocationUrl, ref CheckoutViewModel Model)
+    private void CreateGeoLocationUrl(ref string GeoLocationUrl, ref CheckoutViewModel Model)
     {
       GeoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
           .Replace("{adminDistrict}", Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState)
@@ -2473,13 +2547,13 @@ namespace XOSkinWebApp.Controllers
           .Replace("{locality}", Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim())
           .Replace("{addressLine}", Model.ShippingAddressSame ?
           Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
-          (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == String.Empty) ? String.Empty :
+          (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == string.Empty) ? string.Empty :
           " " + Model.BillingAddress2.Trim()) :
           Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ||
-          (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == String.Empty) ? String.Empty :
+          (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == string.Empty) ? string.Empty :
           " " + Model.ShippingAddress2.Trim()))
           .Replace("{includeNeighborhood}", "0")
-          .Replace("{includeValue}", String.Empty)
+          .Replace("{includeValue}", string.Empty)
           .Replace("{maxResults}", "1")
           .Replace("{BingMapsAPIKey}", _option.Value.BingMapsKey);
       GeoLocationUrl = HttpUtility.UrlPathEncode(GeoLocationUrl);
