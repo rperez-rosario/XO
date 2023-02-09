@@ -33,10 +33,10 @@ namespace XOSkinWebApp.Controllers
       _option = option;
     }
 
-    public async Task<IActionResult> Index(CheckoutViewModel Model = null)
+    public async Task<IActionResult> Index(Models.CheckoutViewModel Model = null)
     {
-      CheckoutViewModel checkoutViewModel = new CheckoutViewModel();
-      List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
+      Models.CheckoutViewModel checkoutViewModel = new Models.CheckoutViewModel();
+      List<Models.ShoppingCartLineItemViewModel> lineItemViewModel = new List<Models.ShoppingCartLineItemViewModel>();
       List<ShoppingCartLineItem> lineItem = _context.ShoppingCartLineItems.Where(
         x => x.ShoppingCart == _context.ShoppingCarts.Where(x => x.User.Equals(_context.AspNetUsers.Where(
         x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
@@ -59,7 +59,7 @@ namespace XOSkinWebApp.Controllers
 
       foreach (ShoppingCartLineItem li in lineItem)
       {
-        lineItemViewModel.Add(new ShoppingCartLineItemViewModel()
+        lineItemViewModel.Add(new Models.ShoppingCartLineItemViewModel()
         {
           Id = li.Id,
           ProductId = li.Product,
@@ -265,11 +265,11 @@ namespace XOSkinWebApp.Controllers
       return View(checkoutViewModel);
     }
 
-    public async Task<IActionResult> CalculateShippingCostAndTaxes(CheckoutViewModel Model)
+    public async Task<IActionResult> CalculateShippingCostAndTaxes(Models.CheckoutViewModel Model)
     {
       string seShipmentDetailsJson = null;
       string seShipmentCostJson = null;
-      List<ShoppingCartLineItemViewModel> lineItemViewModel = new List<ShoppingCartLineItemViewModel>();
+      List<Models.ShoppingCartLineItemViewModel> lineItemViewModel = new List<Models.ShoppingCartLineItemViewModel>();
       List<ShoppingCartLineItem> lineItem = _context.ShoppingCartLineItems.Where(
         x => x.ShoppingCart == _context.ShoppingCarts.Where(x => x.User.Equals(_context.AspNetUsers.Where(
         x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault()))
@@ -302,7 +302,7 @@ namespace XOSkinWebApp.Controllers
 
       foreach (ShoppingCartLineItem li in lineItem)
       {
-        lineItemViewModel.Add(new ShoppingCartLineItemViewModel()
+        lineItemViewModel.Add(new Models.ShoppingCartLineItemViewModel()
         {
           Id = li.Id,
           ProductId = li.Product,
@@ -369,7 +369,7 @@ namespace XOSkinWebApp.Controllers
 
           if (coupon.DiscountAsInGlobalOrderPercentage || coupon.DiscountAsInGlobalOrderPercentage)
           {
-            foreach (ShoppingCartLineItemViewModel item in Model.LineItem)
+            foreach (Models.ShoppingCartLineItemViewModel item in Model.LineItem)
             {
               totalNumberOfProducts += item.Quantity;
             }
@@ -448,7 +448,7 @@ namespace XOSkinWebApp.Controllers
 
           if (coupon.DiscountAsInGlobalOrderPercentage || coupon.DiscountAsInGlobalOrderDollars)
           {
-            foreach (ShoppingCartLineItemViewModel item in Model.LineItem)
+            foreach (Models.ShoppingCartLineItemViewModel item in Model.LineItem)
             {
               totalNumberOfProducts += item.Quantity;
             }
@@ -528,7 +528,7 @@ namespace XOSkinWebApp.Controllers
 
           if (code.DiscountAsInGlobalOrderPercentage || code.DiscountAsInGlobalOrderDollars)
           {
-            foreach (ShoppingCartLineItemViewModel item in Model.LineItem)
+            foreach (Models.ShoppingCartLineItemViewModel item in Model.LineItem)
             {
               totalNumberOfProducts += item.Quantity;
             }
@@ -762,7 +762,7 @@ namespace XOSkinWebApp.Controllers
       return View("Index", Model);
     }
 
-    public async Task<IActionResult> PlaceOrder(CheckoutViewModel Model)
+    public async Task<IActionResult> PlaceOrder(Models.CheckoutViewModel Model)
     {
       ShopifySharp.ProductService shProductService = null;
       ProductVariantService shProductVariantService = null;
@@ -1862,7 +1862,7 @@ namespace XOSkinWebApp.Controllers
       Model = AddOrderLineItemsToDatabase(order, product, originalProductStock, shProduct,
         shProductVariant, shProductService, shProductVariantService, shInventoryItem,
         shInventoryItemService, shLocation, shLocationService, shInventoryLevelService,
-        updatedKit, kit, kitProduct, stock, originalKitStock, Model);
+        updatedKit, kit, kitProduct, stock, originalKitStock, Model).Result;
 
       UpdateLedger(order, ref balanceBeforeTransaction, ref applicableTaxes, ref shippingCost,
         ref subTotal, ref couponDiscount, ref codeDiscount, ref stCharge, ref total);
