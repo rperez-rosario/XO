@@ -17,7 +17,7 @@ using ServiceStack;
 using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
-using EllipticCurve.Utils;
+using XOSkinWebApp.Areas.Administration.Models;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -1856,258 +1856,14 @@ namespace XOSkinWebApp.Controllers
       Model.OrderId = order.Id;
       Model.ShopifyId = (long)shOrder.Id;
       // Initialize ui model line items.
-      Model.LineItem = new List<ShoppingCartLineItemViewModel>();
+      Model.LineItem = new List<XOSkinWebApp.Models.ShoppingCartLineItemViewModel>();
 
-      // Add product order line items to the database by iterating over 
-      // the shopping cart line items.
-      try
-      {
-        foreach (ShoppingCartLineItem item in _context.ShoppingCartLineItems.Where(
-          x => x.ShoppingCart.Equals(_context.ShoppingCarts.Where(
-          x => x.User.Equals(_context.AspNetUsers.Where(
-          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Select(
-          x => x.Id).FirstOrDefault())).ToList())
-        {
-          _context.ProductOrderLineItems.Add(new ProductOrderLineItem()
-          {
-            // Data to be saved to database product order line items table.
-            ImageSource = _context.Products.Where(
-              x => x.Id.Equals(item.Product)).Select(x => x.ImagePathLarge).FirstOrDefault(),
-            Product = item.Product,
-            Sample = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Sample).FirstOrDefault(),
-            Sku = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Sku).FirstOrDefault(),
-            Name = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Name).FirstOrDefault(),
-            Description = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Description).FirstOrDefault(),
-            ProductType = _context.Products.Where(x => x.Id == item.Product).Select(x => x.ProductType).FirstOrDefault(),
-            KitType = _context.Products.Where(x => x.Id == item.Product).Select(x => x.KitType).FirstOrDefault(),
-            VolumeInFluidOunces = _context.Products.Where(
-              x => x.Id == item.Product).Select(x => x.VolumeInFluidOunces).FirstOrDefault(),
-            PhBalance = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Ph).FirstOrDefault(),
-            ShippingWeightLb = _context.Products.Where(
-              x => x.Id == item.Product).Select(x => x.ShippingWeightLb).FirstOrDefault(),
-            Price = _context.Products.Where(x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault(),
-            Cost = (long)_context.Products.Where(x => x.Id == item.Product).Select(x => x.Cost).FirstOrDefault(),
-            ProductOrder = order.Id,
-            Quantity = item.Quantity,
-            Total = _context.Prices.Where(
-              x => x.Id == _context.Products.Where(
-              x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
-              x => x.Amount).FirstOrDefault() * item.Quantity
-          });
-          // Persist data to db.
-          _context.SaveChanges();
-          // Update the local db and Shopify inventory.
-          // Start with regular products (non-kit-related.)
-          if (_context.Products.Where(x => x.Id == item.Product).Select(x => x.KitType).FirstOrDefault() == null)
-          {
-            // Update local db with new inventory information.
-            product = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
-            originalProductStock = (long)product.Stock;
-            product.Stock -= item.Quantity;
-            _context.Products.Update(product);
-            _context.SaveChanges();
+      // Add product order line items to the database, populate UI model to reflect this.
+      Model = AddOrderLineItemsToDatabase(order, product, originalProductStock, shProduct,
+        shProductVariant, shProductService, shProductVariantService, shInventoryItem,
+        shInventoryItemService, shLocation, shLocationService, shInventoryLevelService,
+        updatedKit, kit, kitProduct, stock, originalKitStock, Model);
 
-            try
-            {
-              // Update Shopify with new inventory information.
-              shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
-              shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
-              shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
-              shLocation = (List<Location>)await shLocationService.ListAsync();
-              // Call inventory levels service to make the inventory adjustment.
-              await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
-              {
-                AvailableAdjustment = (int?)(-1 * item.Quantity),
-                InventoryItemId = shInventoryItem.Id,
-                LocationId = shLocation.First().Id // Change this when we get multiple locations.
-              });
-            }
-            catch (Exception ex)
-            {
-              throw new Exception("An error was encountered while updating Shopify product inventory levels.", ex);
-            }
-
-            updatedKit = new List<long>();
-
-            // Update local db for kit products.
-            foreach (KitProduct kp in _context.KitProducts.ToList())
-            {
-              if (kp.Product == product.Id)
-              {
-                kit = _context.Products.Where(x => x.Id == kp.Kit).FirstOrDefault();
-
-                if (!updatedKit.Any(x => x.Equals(kit.Id)))
-                {
-                  kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
-                  stock = long.MaxValue;
-
-                  foreach (KitProduct kpB in kitProduct)
-                  {
-                    if (_context.Products.Where(
-                      x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault() < stock)
-                    {
-                      stock = (long)_context.Products.Where(
-                        x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault();
-                    }
-                  }
-
-                  originalKitStock = (long)kit.Stock;
-                  kit.Stock = stock;
-                  // Update kit stock in local db.
-                  _context.Products.Update(kit);
-                  _context.SaveChanges();
-
-                  try
-                  {
-                    // Update kit stock in Shopify.
-                    shProduct = await shProductService.GetAsync((long)kit.ShopifyProductId);
-                    shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
-                    shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
-                    shLocation = (List<Location>)await shLocationService.ListAsync();
-                    // Call inventory levels service and make the actual adjustment.
-                    await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
-                    {
-                      AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
-                      InventoryItemId = shInventoryItem.Id,
-                      LocationId = shLocation.First().Id // Change this when we get multiple locations.
-                    });
-
-                    updatedKit.Add(kit.Id);
-                  }
-                  catch (Exception ex)
-                  {
-                    throw new Exception("An error was encountered while updating Shopify kit inventory levels.", ex);
-                  }
-                }
-              }
-            }
-          }
-          // It's a kit product, process accordingly.
-          else
-          {
-            kit = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
-            kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
-            // Iterate over products in kit.
-            foreach (KitProduct kp in kitProduct)
-            {
-              product = _context.Products.Where(x => x.Id == kp.Product).FirstOrDefault();
-              product.Stock -= 1 * item.Quantity;
-              // Save updated inventory levels to db.
-              _context.Products.Update(product);
-              _context.SaveChanges();
-
-              try
-              {
-                // Save updated inventory levels to Shopify.
-                shProduct = await shProductService.GetAsync((long)product.ShopifyProductId);
-                shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
-                shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
-                shLocation = (List<Location>)await shLocationService.ListAsync();
-                // Call inventory levels service to make all necessary adjustments.
-                await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
-                {
-                  AvailableAdjustment = -1 * item.Quantity,
-                  InventoryItemId = shInventoryItem.Id,
-                  LocationId = shLocation.First().Id
-                });
-              }
-              catch (Exception ex)
-              {
-                throw new Exception("An error was encountered while updating Shopify kit-product inventory levels.", ex);
-              }
-            }
-
-            updatedKit = new List<long>();
-
-            // Update kit stock in local database.
-            foreach (KitProduct kp in kitProduct)
-            {
-              foreach (KitProduct kpB in _context.KitProducts.ToList())
-              {
-                if (kpB.Product == kp.Product)
-                {
-                  kit = _context.Products.Where(x => x.Id == kpB.Kit).FirstOrDefault();
-
-                  if (!updatedKit.Any(x => x.Equals(kit.Id)))
-                  {
-                    kitProduct = _context.KitProducts.Where(x => x.Kit == kit.Id).ToList();
-                    stock = long.MaxValue;
-
-                    foreach (KitProduct kpC in kitProduct)
-                    {
-                      if (_context.Products.Where(
-                        x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault() < stock)
-                      {
-                        stock = (long)_context.Products.Where(
-                          x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault();
-                      }
-                    }
-
-                    originalKitStock = (long)kit.Stock;
-                    kit.Stock = stock;
-
-                    try
-                    {
-                      // Update Shopify with appropriate kit inventory adjustment.
-                      shProduct = await shProductService.GetAsync((long)kit.ShopifyProductId);
-                      shProductVariant = await shProductVariantService.GetAsync((long)shProduct.Variants.First().Id);
-                      shInventoryItem = await shInventoryItemService.GetAsync((long)shProductVariant.InventoryItemId);
-                      shLocation = (List<Location>)await shLocationService.ListAsync();
-                      // Call inventory levels service to make the adjustment.
-                      await shInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
-                      {
-                        AvailableAdjustment = (int?)(kit.Stock - originalKitStock),
-                        InventoryItemId = shInventoryItem.Id,
-                        LocationId = shLocation.First().Id
-                      });
-                    }
-                    catch (Exception ex)
-                    {
-                      throw new Exception("An error was encountered while updating Shopify kit inventory levels.", ex);
-                    }
-
-                    updatedKit.Add(kit.Id);
-                    // Save updated kit information to the local database.
-                    _context.Products.Update(kit);
-                    _context.SaveChanges();
-                  }
-                }
-              }
-            }
-          }
-          // Save any pending changes to the local db.
-          _context.SaveChanges();
-          // Add current item to the UI's model for line items.
-          Model.LineItem.Add(new ShoppingCartLineItemViewModel()
-          {
-            Id = item.Id,
-            ProductId = item.Product,
-            ImageSource = _context.Products.Where(
-              x => x.Id.Equals(item.Product)).Select(x => x.ImagePathLarge).FirstOrDefault(),
-            ProductName = _context.ProductOrderLineItems.Where(
-              x => x.ProductOrder == order.Id).Where(
-              x => x.Product == item.Product).Select(x => x.Name).FirstOrDefault(),
-            ProductDescription = _context.ProductOrderLineItems.Where(
-              x => x.ProductOrder == order.Id).Where(
-              x => x.Product == item.Product).Select(x => x.Description).FirstOrDefault(),
-            Quantity = item.Quantity,
-            Total = _context.Prices.Where(
-              x => x.Id == _context.Products.Where(
-              x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
-              x => x.Amount).FirstOrDefault() * item.Quantity
-          });
-          // Remove item from current shopping cart as it's been processed already.
-          _context.ShoppingCartLineItems.Remove(item);
-          // Save this change to the database.
-          _context.SaveChanges();
-        }
-      }
-      catch (Exception ex)
-      {
-        throw (new Exception("An error was encountered while adding order line items to the database.", ex));
-      }
-
-      // Commence ledger maintenance code.
       UpdateLedger(order, ref balanceBeforeTransaction, ref applicableTaxes, ref shippingCost,
         ref subTotal, ref couponDiscount, ref codeDiscount, ref stCharge, ref total);
 
@@ -2175,14 +1931,274 @@ namespace XOSkinWebApp.Controllers
       return View("OrderConfirmation", Model);
     }
 
+    private async Task<XOSkinWebApp.Models.CheckoutViewModel> AddOrderLineItemsToDatabase(
+      ProductOrder Order, ORM.Product Product, 
+      long OriginalProductStock, ShopifySharp.Product ShProduct, 
+      ProductVariant ShProductVariant, ShopifySharp.ProductService ShProductService,
+      ProductVariantService ShProductVariantService, InventoryItem ShInventoryItem,
+      InventoryItemService ShInventoryItemService, List<Location> ShLocation, 
+      LocationService ShLocationService, InventoryLevelService ShInventoryLevelService,
+      List<long> UpdatedKit, ORM.Product Kit, List<KitProduct> KitProduct, long Stock,
+      long OriginalKitStock, XOSkinWebApp.Models.CheckoutViewModel Model)
+    {
+      // Add product order line items to the database by iterating over 
+      // the shopping cart line items.
+      try
+      {
+        foreach (ShoppingCartLineItem item in _context.ShoppingCartLineItems.Where(
+          x => x.ShoppingCart.Equals(_context.ShoppingCarts.Where(
+          x => x.User.Equals(_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault())).Select(
+          x => x.Id).FirstOrDefault())).ToList())
+        {
+          _context.ProductOrderLineItems.Add(new ProductOrderLineItem()
+          {
+            // Data to be saved to database product order line items table.
+            ImageSource = _context.Products.Where(
+              x => x.Id.Equals(item.Product)).Select(x => x.ImagePathLarge).FirstOrDefault(),
+            Product = item.Product,
+            Sample = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Sample).FirstOrDefault(),
+            Sku = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Sku).FirstOrDefault(),
+            Name = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Name).FirstOrDefault(),
+            Description = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Description).FirstOrDefault(),
+            ProductType = _context.Products.Where(x => x.Id == item.Product).Select(x => x.ProductType).FirstOrDefault(),
+            KitType = _context.Products.Where(x => x.Id == item.Product).Select(x => x.KitType).FirstOrDefault(),
+            VolumeInFluidOunces = _context.Products.Where(
+              x => x.Id == item.Product).Select(x => x.VolumeInFluidOunces).FirstOrDefault(),
+            PhBalance = _context.Products.Where(x => x.Id == item.Product).Select(x => x.Ph).FirstOrDefault(),
+            ShippingWeightLb = _context.Products.Where(
+              x => x.Id == item.Product).Select(x => x.ShippingWeightLb).FirstOrDefault(),
+            Price = _context.Products.Where(x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault(),
+            Cost = (long)_context.Products.Where(x => x.Id == item.Product).Select(x => x.Cost).FirstOrDefault(),
+            ProductOrder = Order.Id,
+            Quantity = item.Quantity,
+            Total = _context.Prices.Where(
+              x => x.Id == _context.Products.Where(
+              x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+              x => x.Amount).FirstOrDefault() * item.Quantity
+          });
+          // Persist data to db.
+          _context.SaveChanges();
+          // Update the local db and Shopify inventory.
+          // Start with regular products (non-kit-related.)
+          if (_context.Products.Where(x => x.Id == item.Product).Select(x => x.KitType).FirstOrDefault() == null)
+          {
+            // Update local db with new inventory information.
+            Product = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
+            OriginalProductStock = (long)Product.Stock;
+            Product.Stock -= item.Quantity;
+            _context.Products.Update(Product);
+            _context.SaveChanges();
+
+            try
+            {
+              // Update Shopify with new inventory information.
+              ShProduct = await ShProductService.GetAsync((long)Product.ShopifyProductId);
+              ShProductVariant = await ShProductVariantService.GetAsync((long)ShProduct.Variants.First().Id);
+              ShInventoryItem = await ShInventoryItemService.GetAsync((long)ShProductVariant.InventoryItemId);
+              ShLocation = (List<Location>)await ShLocationService.ListAsync();
+              // Call inventory levels service to make the inventory adjustment.
+              await ShInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+              {
+                AvailableAdjustment = (int?)(-1 * item.Quantity),
+                InventoryItemId = ShInventoryItem.Id,
+                LocationId = ShLocation.First().Id // Change this when we get multiple locations.
+              });
+            }
+            catch (Exception ex)
+            {
+              throw new Exception("An error was encountered while updating Shopify product inventory levels.", ex);
+            }
+
+            UpdatedKit = new List<long>();
+
+            // Update local db for kit products.
+            foreach (KitProduct kp in _context.KitProducts.ToList())
+            {
+              if (kp.Product == Product.Id)
+              {
+                Kit = _context.Products.Where(x => x.Id == kp.Kit).FirstOrDefault();
+
+                if (!UpdatedKit.Any(x => x.Equals(Kit.Id)))
+                {
+                  KitProduct = _context.KitProducts.Where(x => x.Kit == Kit.Id).ToList();
+                  Stock = long.MaxValue;
+
+                  foreach (KitProduct kpB in KitProduct)
+                  {
+                    if (_context.Products.Where(
+                      x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault() < Stock)
+                    {
+                      Stock = (long)_context.Products.Where(
+                        x => x.Id == kpB.Product).Select(x => x.Stock).FirstOrDefault();
+                    }
+                  }
+
+                  OriginalKitStock = (long)Kit.Stock;
+                  Kit.Stock = Stock;
+                  // Update kit stock in local db.
+                  _context.Products.Update(Kit);
+                  _context.SaveChanges();
+
+                  try
+                  {
+                    // Update kit stock in Shopify.
+                    ShProduct = await ShProductService.GetAsync((long)Kit.ShopifyProductId);
+                    ShProductVariant = await ShProductVariantService.GetAsync((long)ShProduct.Variants.First().Id);
+                    ShInventoryItem = await ShInventoryItemService.GetAsync((long)ShProductVariant.InventoryItemId);
+                    ShLocation = (List<Location>)await ShLocationService.ListAsync();
+                    // Call inventory levels service and make the actual adjustment.
+                    await ShInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                    {
+                      AvailableAdjustment = (int?)(Kit.Stock - OriginalKitStock),
+                      InventoryItemId = ShInventoryItem.Id,
+                      LocationId = ShLocation.First().Id // Change this when we get multiple locations.
+                    });
+
+                    UpdatedKit.Add(Kit.Id);
+                  }
+                  catch (Exception ex)
+                  {
+                    throw new Exception("An error was encountered while updating Shopify kit inventory levels.", ex);
+                  }
+                }
+              }
+            }
+          }
+          // It's a kit product, process accordingly.
+          else
+          {
+            Kit = _context.Products.Where(x => x.Id == item.Product).FirstOrDefault();
+            KitProduct = _context.KitProducts.Where(x => x.Kit == Kit.Id).ToList();
+            // Iterate over products in kit.
+            foreach (KitProduct kp in KitProduct)
+            {
+              Product = _context.Products.Where(x => x.Id == kp.Product).FirstOrDefault();
+              Product.Stock -= 1 * item.Quantity;
+              // Save updated inventory levels to db.
+              _context.Products.Update(Product);
+              _context.SaveChanges();
+
+              try
+              {
+                // Save updated inventory levels to Shopify.
+                ShProduct = await ShProductService.GetAsync((long)Product.ShopifyProductId);
+                ShProductVariant = await ShProductVariantService.GetAsync((long)ShProduct.Variants.First().Id);
+                ShInventoryItem = await ShInventoryItemService.GetAsync((long)ShProductVariant.InventoryItemId);
+                ShLocation = (List<Location>)await ShLocationService.ListAsync();
+                // Call inventory levels service to make all necessary adjustments.
+                await ShInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                {
+                  AvailableAdjustment = -1 * item.Quantity,
+                  InventoryItemId = ShInventoryItem.Id,
+                  LocationId = ShLocation.First().Id
+                });
+              }
+              catch (Exception ex)
+              {
+                throw new Exception("An error was encountered while updating Shopify kit-product inventory levels.", ex);
+              }
+            }
+
+            UpdatedKit = new List<long>();
+
+            // Update kit stock in local database.
+            foreach (KitProduct kp in KitProduct)
+            {
+              foreach (KitProduct kpB in _context.KitProducts.ToList())
+              {
+                if (kpB.Product == kp.Product)
+                {
+                  Kit = _context.Products.Where(x => x.Id == kpB.Kit).FirstOrDefault();
+
+                  if (!UpdatedKit.Any(x => x.Equals(Kit.Id)))
+                  {
+                    KitProduct = _context.KitProducts.Where(x => x.Kit == Kit.Id).ToList();
+                    Stock = long.MaxValue;
+
+                    foreach (KitProduct kpC in KitProduct)
+                    {
+                      if (_context.Products.Where(
+                        x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault() < Stock)
+                      {
+                        Stock = (long)_context.Products.Where(
+                          x => x.Id == kpC.Product).Select(x => x.Stock).FirstOrDefault();
+                      }
+                    }
+
+                    OriginalKitStock = (long)Kit.Stock;
+                    Kit.Stock = Stock;
+
+                    try
+                    {
+                      // Update Shopify with appropriate kit inventory adjustment.
+                      ShProduct = await ShProductService.GetAsync((long)Kit.ShopifyProductId);
+                      ShProductVariant = await ShProductVariantService.GetAsync((long)ShProduct.Variants.First().Id);
+                      ShInventoryItem = await ShInventoryItemService.GetAsync((long)ShProductVariant.InventoryItemId);
+                      ShLocation = (List<Location>)await ShLocationService.ListAsync();
+                      // Call inventory levels service to make the adjustment.
+                      await ShInventoryLevelService.AdjustAsync(new InventoryLevelAdjust()
+                      {
+                        AvailableAdjustment = (int?)(Kit.Stock - OriginalKitStock),
+                        InventoryItemId = ShInventoryItem.Id,
+                        LocationId = ShLocation.First().Id
+                      });
+                    }
+                    catch (Exception ex)
+                    {
+                      throw new Exception("An error was encountered while updating Shopify kit inventory levels.", ex);
+                    }
+
+                    UpdatedKit.Add(Kit.Id);
+                    // Save updated kit information to the local database.
+                    _context.Products.Update(Kit);
+                    _context.SaveChanges();
+                  }
+                }
+              }
+            }
+          }
+          // Save any pending changes to the local db.
+          _context.SaveChanges();
+          // Add current item to the UI's model for line items.
+          Model.LineItem.Add(new XOSkinWebApp.Models.ShoppingCartLineItemViewModel()
+          {
+            Id = item.Id,
+            ProductId = item.Product,
+            ImageSource = _context.Products.Where(
+              x => x.Id.Equals(item.Product)).Select(x => x.ImagePathLarge).FirstOrDefault(),
+            ProductName = _context.ProductOrderLineItems.Where(
+              x => x.ProductOrder == Order.Id).Where(
+              x => x.Product == item.Product).Select(x => x.Name).FirstOrDefault(),
+            ProductDescription = _context.ProductOrderLineItems.Where(
+              x => x.ProductOrder == Order.Id).Where(
+              x => x.Product == item.Product).Select(x => x.Description).FirstOrDefault(),
+            Quantity = item.Quantity,
+            Total = _context.Prices.Where(
+              x => x.Id == _context.Products.Where(
+              x => x.Id == item.Product).Select(x => x.CurrentPrice).FirstOrDefault()).Select(
+              x => x.Amount).FirstOrDefault() * item.Quantity
+          });
+          // Remove item from current shopping cart as it's been processed already.
+          _context.ShoppingCartLineItems.Remove(item);
+          // Save this change to the database.
+          _context.SaveChanges();
+        }
+        return Model;
+      }
+      catch (Exception ex)
+      {
+        throw (new Exception("An error was encountered while adding order line items to the database.", ex));
+      }
+    }
+
     private void UpdateLedger(ProductOrder Order, ref decimal BalanceBeforeTransaction, ref decimal ApplicableTaxes, 
       ref decimal ShippingCost, ref decimal SubTotal, ref decimal CouponDiscount, ref decimal CodeDiscount, 
       ref Stripe.Charge StCharge, ref decimal Total)
     {
       try
       {
-        // Commence ledger maintenance code.
-        // If the user has an existing ledger associated with it, grab the current balance
+        // If the user has an existing ledger associated with it, grab the current balance.
         if (_context.UserLedgerTransactions.Where(
           x => x.User == Order.User).OrderBy(x => x.Id).LastOrDefault() != null)
         {
