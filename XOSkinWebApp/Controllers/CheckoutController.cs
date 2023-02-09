@@ -97,7 +97,7 @@ namespace XOSkinWebApp.Controllers
       {
         coupon = await _context.DiscountCoupons.FindAsync(long.Parse(item.Value));
         couponProduct = _context.DiscountCouponProducts.Where(x => x.Coupon == coupon.Id).ToList();
-        
+
         percentage = coupon.DiscountNproductPercentage == null ? 0.0M : (decimal)coupon.DiscountNproductPercentage;
         minimumNumberOfProducts = coupon.DiscountProductN == null ? (short)0 : (short)coupon.DiscountProductN;
         minimumPurchase = coupon.MinimumPurchase == null ? 0.0M : (decimal)coupon.MinimumPurchase;
@@ -129,7 +129,7 @@ namespace XOSkinWebApp.Controllers
             selectedProductSubTotal = 0.0M;
             foreach (DiscountCouponProduct product in couponProduct)
             {
-              selectedProductSubTotal += lineItem.Find(x => x.Product == product.Product) == null ? 
+              selectedProductSubTotal += lineItem.Find(x => x.Product == product.Product) == null ?
                 0.0M : (decimal)lineItem.Find(x => x.Product == product.Product).Total;
             }
             if (selectedProductSubTotal < minimumPurchase)
@@ -174,7 +174,7 @@ namespace XOSkinWebApp.Controllers
       checkoutViewModel.ShippedOn = DateTime.UtcNow.TimeOfDay > new TimeSpan(10, 0, 0) ? // 5:00 PM PTDT.
          DateTime.UtcNow.AddDays(2) : DateTime.UtcNow.AddDays(1); // If after 4:00 PM PDT, two-days (2), else one (1). 
       checkoutViewModel.ExpectedToArrive = checkoutViewModel.ShippedOn.AddDays(3);
-      checkoutViewModel.Total = checkoutViewModel.SubTotal + checkoutViewModel.Taxes + 
+      checkoutViewModel.Total = checkoutViewModel.SubTotal + checkoutViewModel.Taxes +
         checkoutViewModel.ShippingCharges - checkoutViewModel.CodeDiscount - checkoutViewModel.CouponDiscount;
 
       ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
@@ -259,7 +259,7 @@ namespace XOSkinWebApp.Controllers
         checkoutViewModel.ShippingPostalCode = Model.ShippingPostalCode;
       }
 
-      checkoutViewModel.ShippingAddressSame = Model == null ? 
+      checkoutViewModel.ShippingAddressSame = Model == null ?
         checkoutViewModel.ShippingAddressSame : Model.ShippingAddressSame;
 
       return View(checkoutViewModel);
@@ -587,13 +587,13 @@ namespace XOSkinWebApp.Controllers
           }
         }
       }
-      
+
       ViewData.Add("Checkout.WelcomeText", _context.LocalizedTexts.Where(
        x => x.PlacementPointCode.Equals("Checkout.WelcomeText"))
        .Select(x => x.Text).FirstOrDefault());
 
       Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrier;
-      
+
       if (!Model.CalculatedShippingAndTaxes)
       {
         try
@@ -758,7 +758,7 @@ namespace XOSkinWebApp.Controllers
         Model.CodeDiscount - Model.CouponDiscount;
 
       Model.CalculatedShippingAndTaxes = true;
-      
+
       return View("Index", Model);
     }
 
@@ -867,7 +867,7 @@ namespace XOSkinWebApp.Controllers
           _option.Value.ShopifyStoreFrontAccessToken);
         shCustomerService = new ShopifySharp.CustomerService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
-        shTransactionService = new TransactionService(_option.Value.ShopifyUrl, 
+        shTransactionService = new TransactionService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
       }
       catch (Exception ex)
@@ -928,7 +928,7 @@ namespace XOSkinWebApp.Controllers
               x => x.Id == cli.Product).Select(
               x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault() *
               cli.Quantity;
-          
+
           // Add line item to Shopify line item list.
           shLineItemList.Add(new ShopifySharp.LineItem()
           {
@@ -995,7 +995,7 @@ namespace XOSkinWebApp.Controllers
           // Get ShipEngine shipment rate Json document using ShipEngine shipment id obtained 
           // from CalculateShippingCostAndTaxes previously.
           seShipmentRateJson = (_option.Value.ShipEngineGetShipmentCostFromIdPrefixUrl +
-            Model.ShipEngineShipmentId + 
+            Model.ShipEngineShipmentId +
             _option.Value.ShipEngineGetShipmentCostFromIdPostfixUrl).GetJsonFromUrl(
             requestFilter: webReq =>
             {
@@ -1025,7 +1025,7 @@ namespace XOSkinWebApp.Controllers
           // Assign shipping carrier and shipping charges to model.
           Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrierName;
           Model.ShippingCharges = shippingCost;
-        
+
           try
           {
             // Initialize Stripe api key.
@@ -1269,7 +1269,7 @@ namespace XOSkinWebApp.Controllers
                 return RedirectToAction("CalculateShippingCostAndTaxes", Model);
               }
             }
-            
+
             // If the service is enabled in the configuration file.
             // This flag is normally set to true, allows us to switch it off from the configuration file in order to 
             // bypass the service for any given reason.
@@ -1494,7 +1494,7 @@ namespace XOSkinWebApp.Controllers
             {
               Amount = (long?)total * 100, // Stripe encodes dollar amounts as a nullable long.
               Currency = "usd",
-              Description = "Total charges for an XO Skin customer order #XO" + 
+              Description = "Total charges for an XO Skin customer order #XO" +
                 (order.Id + 10000).ToString() +
                 ". Customer: " + User.Identity.Name + ".",
               Metadata = stCreditTransactionMetaValue,
@@ -1765,19 +1765,19 @@ namespace XOSkinWebApp.Controllers
           // Set Shopify order billing address for the order.
           shOrder.BillingAddress = new ShopifySharp.Address()
           {
-            Address1 = stCharge.BillingDetails.Address.Line1 == null ? string.Empty : 
+            Address1 = stCharge.BillingDetails.Address.Line1 == null ? string.Empty :
               stCharge.BillingDetails.Address.Line1,
-            Address2 = stCharge.BillingDetails.Address.Line2 == null ? string.Empty : 
+            Address2 = stCharge.BillingDetails.Address.Line2 == null ? string.Empty :
               stCharge.BillingDetails.Address.Line2,
-            City = stCharge.BillingDetails.Address.City == null ? string.Empty : 
+            City = stCharge.BillingDetails.Address.City == null ? string.Empty :
               stCharge.BillingDetails.Address.City,
-            Country = stCharge.BillingDetails.Address.Country == null ? string.Empty : 
+            Country = stCharge.BillingDetails.Address.Country == null ? string.Empty :
               stCharge.BillingDetails.Address.Country,
             Name = stCharge.BillingDetails.Name == null ? string.Empty : stCharge.BillingDetails.Name,
             Phone = stCharge.BillingDetails.Phone == null ? string.Empty : stCharge.BillingDetails.Phone,
-            Province = stCharge.BillingDetails.Address.State == null ? string.Empty : 
+            Province = stCharge.BillingDetails.Address.State == null ? string.Empty :
               stCharge.BillingDetails.Address.State,
-            Zip = stCharge.BillingDetails.Address.PostalCode == null ? string.Empty : 
+            Zip = stCharge.BillingDetails.Address.PostalCode == null ? string.Empty :
               stCharge.BillingDetails.Address.PostalCode
           };
           // Set Shopify order shipping address for the order.
@@ -1790,7 +1790,7 @@ namespace XOSkinWebApp.Controllers
             Name = Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName,
             Phone = _context.AspNetUsers.Where(
               x => x.Email.Equals(
-                User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault() == null ? 
+                User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault() == null ?
               string.Empty : _context.AspNetUsers.Where(
               x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
             Province = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
@@ -2018,7 +2018,7 @@ namespace XOSkinWebApp.Controllers
             }
 
             updatedKit = new List<long>();
-            
+
             // Update kit stock in local database.
             foreach (KitProduct kp in kitProduct)
             {
@@ -2101,111 +2101,15 @@ namespace XOSkinWebApp.Controllers
           // Save this change to the database.
           _context.SaveChanges();
         }
-
-        // Commence ledger maintenance code.
-        // If the user has an existing ledger associated with it, grab the current balance
-        if (_context.UserLedgerTransactions.Where(
-          x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault() != null)
-        {
-          // and assign it to our running balance variable.
-          balanceBeforeTransaction = _context.UserLedgerTransactions.Where(
-            x => x.User == order.User).OrderBy(x => x.Id).LastOrDefault().BalanceAfterTransaction;
-        }
-        // Add a new transaction representing the current purchase, this time for taxation.
-        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
-        {
-          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-          ProductOrder = order.Id,
-          TransactionType = 2, // Debit.
-          Description = "Order #" + order.Id + ". Taxes.",
-          Concept = 3, // Taxation.
-          Amount = applicableTaxes,
-          BalanceBeforeTransaction = balanceBeforeTransaction,
-          BalanceAfterTransaction = balanceBeforeTransaction - applicableTaxes,
-          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-          Created = DateTime.UtcNow
-        });
-        // Save new transaction to database.
-        _context.SaveChanges();
-        // Affect balance negatively using previously calculated applicable taxes.
-        balanceBeforeTransaction -= applicableTaxes;
-        // Add another transaction to the ledger, this time covering shipping.
-        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
-        {
-          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-          ProductOrder = order.Id,
-          TransactionType = 2, // Debit.
-          Description = "Order #" + order.Id + ". Shipping.",
-          Concept = 2, // Shipping.
-          Amount = shippingCost,
-          BalanceBeforeTransaction = balanceBeforeTransaction,
-          BalanceAfterTransaction = balanceBeforeTransaction - shippingCost,
-          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-          Created = DateTime.UtcNow
-        });
-        // Save new transaction to database.
-        _context.SaveChanges();
-        // Deduct shipping costs from balance.
-        balanceBeforeTransaction -= shippingCost;
-        // Add a new ledger transaction for the product subtotal.
-        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
-        {
-          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-          ProductOrder = order.Id,
-          TransactionType = 2, // Debit.
-          Description = "Order #" + order.Id + ". Product.",
-          Concept = 1, // Product.
-          Amount = subTotal,
-          BalanceBeforeTransaction = balanceBeforeTransaction,
-          BalanceAfterTransaction = balanceBeforeTransaction - subTotal,
-          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-          Created = DateTime.UtcNow
-        });
-        // Deduct product subtotal from balance.
-        balanceBeforeTransaction -= subTotal;
-        // If there's either a coupon or code discount.
-        if (couponDiscount + codeDiscount > 0)
-        {
-          // Create a new ledger transaction recording the discount as such.
-          _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
-          {
-            User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-            ProductOrder = order.Id,
-            TransactionType = 1, // Credit.
-            Description = "Order #" + order.Id + ". Discount.",
-            Concept = 6, // Discount.
-            Amount = couponDiscount + codeDiscount,
-            BalanceBeforeTransaction = balanceBeforeTransaction,
-            BalanceAfterTransaction = balanceBeforeTransaction + couponDiscount + codeDiscount,
-            CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-            Created = DateTime.UtcNow
-          });
-          // Save ledger transaction to database.
-          _context.SaveChanges();
-          // Add discount to balance.
-          balanceBeforeTransaction += couponDiscount + codeDiscount;
-        }
-        // Add a new ledger transaction for the total amount credited to this account.
-        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
-        {
-          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-          ProductOrder = order.Id,
-          TransactionType = 1, // Credit.
-          Description = "Order #" + order.Id + ". Payment. Stripe charge identification: " + stCharge.Id + ".",
-          Concept = 4, // Total.
-          Amount = total,
-          BalanceBeforeTransaction = balanceBeforeTransaction,
-          BalanceAfterTransaction = balanceBeforeTransaction + total,
-          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
-          Created = DateTime.UtcNow
-        });
-        // Save this final transaction to finalize the ledger entries for this order.
-        _context.SaveChanges();
       }
       catch (Exception ex)
       {
-        throw new Exception("An error was encountered while saving the order's ledger.", ex);
+        throw (new Exception("An error was encountered while adding order line items to the database.", ex));
       }
+
+      // Commence ledger maintenance code.
+      UpdateLedger(order, ref balanceBeforeTransaction, ref applicableTaxes, ref shippingCost,
+        ref subTotal, ref couponDiscount, ref codeDiscount, ref stCharge, ref total);
 
       // Commence shipping label related code.
       try
@@ -2218,7 +2122,7 @@ namespace XOSkinWebApp.Controllers
         using var stream = ConstructShippingLabelRequestJson(ref options);
         // Assign the resulting stream to a string variable now containing the 
         // fully-formed JSON object.
-        RequestShippingLabelResponseJson(ref Model, ref seShippingLabelRequestJson, stream, 
+        RequestShippingLabelResponseJson(ref Model, ref seShippingLabelRequestJson, stream,
           ref seShippingLabelResponseJson);
         // Using a JsonDocument object which we obtain by parsing the previous request response.
         ParseJsonDocumentAndObtainTrackingNumberAndLabelUrl(ref Model, ref seShippingLabelResponseJson);
@@ -2270,6 +2174,118 @@ namespace XOSkinWebApp.Controllers
 
       return View("OrderConfirmation", Model);
     }
+
+    private void UpdateLedger(ProductOrder Order, ref decimal BalanceBeforeTransaction, ref decimal ApplicableTaxes, 
+      ref decimal ShippingCost, ref decimal SubTotal, ref decimal CouponDiscount, ref decimal CodeDiscount, 
+      ref Stripe.Charge StCharge, ref decimal Total)
+    {
+      try
+      {
+        // Commence ledger maintenance code.
+        // If the user has an existing ledger associated with it, grab the current balance
+        if (_context.UserLedgerTransactions.Where(
+          x => x.User == Order.User).OrderBy(x => x.Id).LastOrDefault() != null)
+        {
+          // and assign it to our running balance variable.
+          BalanceBeforeTransaction = _context.UserLedgerTransactions.Where(
+            x => x.User == Order.User).OrderBy(x => x.Id).LastOrDefault().BalanceAfterTransaction;
+        }
+        // Add a new transaction representing the current purchase, this time for taxation.
+        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          ProductOrder = Order.Id,
+          TransactionType = 2, // Debit.
+          Description = "Order #" + Order.Id + ". Taxes.",
+          Concept = 3, // Taxation.
+          Amount = ApplicableTaxes,
+          BalanceBeforeTransaction = BalanceBeforeTransaction,
+          BalanceAfterTransaction = BalanceBeforeTransaction - ApplicableTaxes,
+          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          Created = DateTime.UtcNow
+        });
+        // Save new transaction to database.
+        _context.SaveChanges();
+        // Affect balance negatively using previously calculated applicable taxes.
+        BalanceBeforeTransaction -= ApplicableTaxes;
+        // Add another transaction to the ledger, this time covering shipping.
+        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          ProductOrder = Order.Id,
+          TransactionType = 2, // Debit.
+          Description = "Order #" + Order.Id + ". Shipping.",
+          Concept = 2, // Shipping.
+          Amount = ShippingCost,
+          BalanceBeforeTransaction = BalanceBeforeTransaction,
+          BalanceAfterTransaction = BalanceBeforeTransaction - ShippingCost,
+          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          Created = DateTime.UtcNow
+        });
+        // Save new transaction to database.
+        _context.SaveChanges();
+        // Deduct shipping costs from balance.
+        BalanceBeforeTransaction -= ShippingCost;
+        // Add a new ledger transaction for the product subtotal.
+        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          ProductOrder = Order.Id,
+          TransactionType = 2, // Debit.
+          Description = "Order #" + Order.Id + ". Product.",
+          Concept = 1, // Product.
+          Amount = SubTotal,
+          BalanceBeforeTransaction = BalanceBeforeTransaction,
+          BalanceAfterTransaction = BalanceBeforeTransaction - SubTotal,
+          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          Created = DateTime.UtcNow
+        });
+        // Deduct product subtotal from balance.
+        BalanceBeforeTransaction -= SubTotal;
+        // If there's either a coupon or code discount.
+        if (CouponDiscount + CodeDiscount > 0)
+        {
+          // Create a new ledger transaction recording the discount as such.
+          _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+          {
+            User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+            ProductOrder = Order.Id,
+            TransactionType = 1, // Credit.
+            Description = "Order #" + Order.Id + ". Discount.",
+            Concept = 6, // Discount.
+            Amount = CouponDiscount + CodeDiscount,
+            BalanceBeforeTransaction = BalanceBeforeTransaction,
+            BalanceAfterTransaction = BalanceBeforeTransaction + CouponDiscount + CodeDiscount,
+            CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+            Created = DateTime.UtcNow
+          });
+          // Save ledger transaction to database.
+          _context.SaveChanges();
+          // Add discount to balance.
+          BalanceBeforeTransaction += CouponDiscount + CodeDiscount;
+        }
+        // Add a new ledger transaction for the total amount credited to this account.
+        _context.UserLedgerTransactions.Add(new UserLedgerTransaction()
+        {
+          User = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          ProductOrder = Order.Id,
+          TransactionType = 1, // Credit.
+          Description = "Order #" + Order.Id + ". Payment. Stripe charge identification: " + StCharge.Id + ".",
+          Concept = 4, // Total.
+          Amount = Total,
+          BalanceBeforeTransaction = BalanceBeforeTransaction,
+          BalanceAfterTransaction = BalanceBeforeTransaction + Total,
+          CreatedBy = _context.AspNetUsers.Where(x => x.Email.Equals(User.Identity.Name)).Select(x => x.Id).FirstOrDefault(),
+          Created = DateTime.UtcNow
+        });
+        // Save this final transaction to finalize the ledger entries for this order.
+        _context.SaveChanges();
+      }
+      catch(Exception ex)
+      {
+        throw new Exception("An error was encountered while saving the order's ledger.", ex);
+      }
+    } 
 
     private MemoryStream ConstructShippingLabelRequestJson(ref JsonWriterOptions Options)
     {
