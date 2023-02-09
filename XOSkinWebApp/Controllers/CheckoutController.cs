@@ -2324,7 +2324,7 @@ namespace XOSkinWebApp.Controllers
       return stream;
     }
 
-    private void RequestShippingLabelResponseJson(ref CheckoutViewModel Model, ref string SeShippingLabelRequestJson,
+    private void RequestShippingLabelResponseJson(ref Models.CheckoutViewModel Model, ref string SeShippingLabelRequestJson,
       MemoryStream Stream, ref string SeShippingLabelResponseJson)
     {
       // Assign the resulting stream to a string variable now containing the 
@@ -2341,7 +2341,7 @@ namespace XOSkinWebApp.Controllers
         }).Result;
     }
 
-    private void ParseJsonDocumentAndObtainTrackingNumberAndLabelUrl(ref CheckoutViewModel Model, 
+    private void ParseJsonDocumentAndObtainTrackingNumberAndLabelUrl(ref Models.CheckoutViewModel Model, 
       ref string SeShippingLabelResponseJson)
     {
       using (JsonDocument document = JsonDocument.Parse(SeShippingLabelResponseJson))
@@ -2355,7 +2355,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private void IfNoTrackingNumberYetAddMessageToModel(ref CheckoutViewModel Model)
+    private void IfNoTrackingNumberYetAddMessageToModel(ref Models.CheckoutViewModel Model)
     {
       // If we weren't able to retrieve the tracking number, assign a text
       // explaining it will be assigned soon, for UI consumption.
@@ -2365,7 +2365,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private void AddBillToAddressToOrder(ref CheckoutViewModel Model, ref ProductOrder Order)
+    private void AddBillToAddressToOrder(ref Models.CheckoutViewModel Model, ref ProductOrder Order)
     {
       _context.OrderBillTos.Add(new OrderBillTo()
       {
@@ -2401,7 +2401,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private void AddOrderBillingAddressToCustomerAsLatest(ref CheckoutViewModel Model)
+    private void AddOrderBillingAddressToCustomerAsLatest(ref Models.CheckoutViewModel Model)
     {
       // Add billing address used in this purchase as the latest
       // (to be suggested on next purchase.)
@@ -2422,7 +2422,7 @@ namespace XOSkinWebApp.Controllers
       _context.SaveChanges();
     }
 
-    private void AddOrderShippingAddressUsingBillingAddress(ref CheckoutViewModel Model, ref ProductOrder Order)
+    private void AddOrderShippingAddressUsingBillingAddress(ref Models.CheckoutViewModel Model, ref ProductOrder Order)
     {
       // Add the database's order shipping address
       // using the supplied billing address.
@@ -2466,7 +2466,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private void AddLatestBillToAddressAsLatestShipTo(ref CheckoutViewModel Model)
+    private void AddLatestBillToAddressAsLatestShipTo(ref Models.CheckoutViewModel Model)
     {
       // Add latest bill to address as latest ship to address to be suggested in next
       // purchase.
@@ -2487,7 +2487,7 @@ namespace XOSkinWebApp.Controllers
       _context.SaveChanges();
     }
 
-    private void AddShipToAddressToOrder(ref CheckoutViewModel Model, ref ProductOrder Order)
+    private void AddShipToAddressToOrder(ref Models.CheckoutViewModel Model, ref ProductOrder Order)
     {
       // Add ship to address to be attached to order.
       _context.OrderShipTos.Add(new OrderShipTo()
@@ -2530,7 +2530,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private void AddNewShipToAddressToCustomerInDatabase(ref CheckoutViewModel Model)
+    private void AddNewShipToAddressToCustomerInDatabase(ref Models.CheckoutViewModel Model)
     {
       // Add new shipping address to customer in database.
       _context.Addresses.Add(new ORM.Address()
@@ -2551,7 +2551,7 @@ namespace XOSkinWebApp.Controllers
     }
 
     private void ObtainParseGeoLocationJsonAddCoordinatesToModel(ref string GeoLocationUrl, ref string GeoLocationJson, 
-      ref CheckoutViewModel Model)
+      ref Models.CheckoutViewModel Model)
     {
       GeoLocationJson = (GeoLocationUrl).GetJsonFromUrl();
       // Create JSON document to obtain data from Bing.
@@ -2570,7 +2570,7 @@ namespace XOSkinWebApp.Controllers
       }
     }
 
-    private void CreateGeoLocationUrl(ref string GeoLocationUrl, ref CheckoutViewModel Model)
+    private void CreateGeoLocationUrl(ref string GeoLocationUrl, ref Models.CheckoutViewModel Model)
     {
       GeoLocationUrl = new string(_option.Value.BingMapsGeolocationUrl)
           .Replace("{adminDistrict}", Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState)
