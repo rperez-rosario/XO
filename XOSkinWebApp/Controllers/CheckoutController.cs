@@ -18,6 +18,9 @@ using XOSkinWebApp.ConfigurationHelper;
 using XOSkinWebApp.Models;
 using XOSkinWebApp.ORM;
 using XOSkinWebApp.Areas.Administration.Models;
+using EllipticCurve.Utils;
+using static Microsoft.AspNetCore.Razor.Language.TagHelperMetadata;
+using Stripe.Issuing;
 
 namespace XOSkinWebApp.Controllers
 {
@@ -820,7 +823,7 @@ namespace XOSkinWebApp.Controllers
       object[] tjLineItem = null;
       List<ShoppingCartLineItem> lineItem = null;
       int i = 0;
-      List<Transaction> shOrderTransactions = null;
+      List<ShopifySharp.Transaction> shOrderTransactions = null;
       string clientIpAddress = null;
       string seShippingLabelRequestJson = null;
       string seShippingLabelResponseJson = null;
@@ -867,7 +870,7 @@ namespace XOSkinWebApp.Controllers
           _option.Value.ShopifyStoreFrontAccessToken);
         shCustomerService = new ShopifySharp.CustomerService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
-        shTransactionService = new TransactionService(_option.Value.ShopifyUrl,
+        shTransactionService = new ShopifySharp.TransactionService(_option.Value.ShopifyUrl,
           _option.Value.ShopifyStoreFrontAccessToken);
       }
       catch (Exception ex)
@@ -1805,7 +1808,7 @@ namespace XOSkinWebApp.Controllers
           shOrderTransactions = shTransactionService.ListAsync((long)shOrder.Id).Result.ToList();
           // Create a new Shopify transaction object using information from the Shopify order transaction object,
           // and other Shopify objects.
-          shTransaction = new Transaction()
+          shTransaction = new ShopifySharp.Transaction()
           {
             Kind = "capture",
             Gateway = "manual",
@@ -1847,19 +1850,15 @@ namespace XOSkinWebApp.Controllers
       }
       catch (Exception ex)
       {
-        // At this point we already charged the customer so it's a matter of entering
-        // the report data to Shopify manually.
         throw new Exception("An error was encontered while initializing the product order.", ex);
       }
+      
+      /** At this point we have already charged the customer. **/
 
-      // Populate the ui model with data obtained from Shopify. 
-      Model.OrderId = order.Id;
-      Model.ShopifyId = (long)shOrder.Id;
-      // Initialize ui model line items.
-      Model.LineItem = new List<XOSkinWebApp.Models.ShoppingCartLineItemViewModel>();
+      PopulateUIModelWithShopifyDataAndInitializeLineItems(ref Model, ref order, ref shOrder);
 
       // Add product order line items to the database, populate UI model to reflect this.
-      Model = AddOrderLineItemsToDatabase(order, product, originalProductStock, shProduct,
+      Model = PersistOrderLineItemsToDatabase(order, product, originalProductStock, shProduct,
         shProductVariant, shProductService, shProductVariantService, shInventoryItem,
         shInventoryItemService, shLocation, shLocationService, shInventoryLevelService,
         updatedKit, kit, kitProduct, stock, originalKitStock, Model).Result;
@@ -1931,7 +1930,959 @@ namespace XOSkinWebApp.Controllers
       return View("OrderConfirmation", Model);
     }
 
-    private async Task<XOSkinWebApp.Models.CheckoutViewModel> AddOrderLineItemsToDatabase(
+    private void InitializeProductOrder(ref List<ShopifySharp.LineItem> ShLineItemList,
+      ref List<ShoppingCartLineItem> LineItem, ref decimal SubTotal, 
+      ref ShopifySharp.ProductService ShProductService, ref object[] TjLineItem, 
+      ref int I, ref ShopifySharp.Order ShOrder, ref Models.CheckoutViewModel Model,
+      ref string SeShipmentRateJson, ref decimal ShippingCost, 
+      ref OrderBillTo PreviousOrderBillTo, 
+      ref CardCreateNestedOptions StCardCreateNestedOptions, 
+      ref Stripe.CustomerCreateOptions StCustomerCreateOptions,
+      ref Stripe.CustomerService StCustomerService, ref Stripe.Customer StCustomer)
+    {
+      // Create Shopify line item list.
+      ShLineItemList = new List<ShopifySharp.LineItem>();
+
+      // Iterate over line items in order.
+      foreach (ShoppingCartLineItem cli in LineItem)
+      {
+        // Update subtotal calculation based on current line item.
+        SubTotal += _context.Prices.Where(
+          x => x.Id == _context.Products.Where(
+            x => x.Id == cli.Product).Select(
+            x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault() *
+            cli.Quantity;
+
+        // Add line item to Shopify line item list.
+        ShLineItemList.Add(new ShopifySharp.LineItem()
+        {
+          ProductId = _context.Products.Where(x => x.Id == cli.Product).Select(
+            x => x.ShopifyProductId).FirstOrDefault(),
+          VariantId = ShProductService.GetAsync((long)_context.Products.Where(
+            x => x.Id == cli.Product).Select(
+            x => x.ShopifyProductId).FirstOrDefault()).Result.Variants.First().Id,
+          Quantity = cli.Quantity,
+          Taxable = true,
+          RequiresShipping = true
+        });
+
+        // Add line item to TaxJar line item array.
+        TjLineItem[I] = new
+        {
+          quantity = cli.Quantity,
+          product_identifier = _context.Products.Where(
+            x => x.Id == cli.Product).Select(x => x.Id).FirstOrDefault().ToString(),
+          description = _context.Products.Where(
+            x => x.Id == cli.Product).Select(x => x.Name).FirstOrDefault(),
+          unit_price = _context.Prices.Where(
+            x => x.Id == _context.Products.Where(
+            x => x.Id == cli.Product).Select(
+              x => x.CurrentPrice).FirstOrDefault()).Select(x => x.Amount).FirstOrDefault()
+        };
+        // Increment TaxJar line item array index.
+        I++;
+      }
+
+      try
+      {
+        // Create Shopify order.
+        ShOrder = new ShopifySharp.Order()
+        {
+          // Add billing address.
+          BillingAddress = new ShopifySharp.Address()
+          {
+            Address1 = Model.BillingAddress1,
+            Address2 = Model.BillingAddress2,
+            City = Model.BillingCity,
+            Province = Model.BillingState,
+            Zip = Model.BillingPostalCode,
+            Phone = _context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
+            Name = Model.BillingName,
+            Country = Model.BillingCountry
+          },
+          // Add shipping address.
+          ShippingAddress = new ShopifySharp.Address()
+          {
+            Address1 = Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1,
+            Address2 = Model.ShippingAddressSame ? Model.BillingAddress2 : Model.ShippingAddress2,
+            City = Model.ShippingAddressSame ? Model.BillingCity : Model.ShippingCity,
+            Province = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+            Zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+            Phone = _context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
+            Name = Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName,
+            Country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry
+          }
+        };
+
+        // Get ShipEngine shipment rate Json document using ShipEngine shipment id obtained 
+        // from CalculateShippingCostAndTaxes previously.
+        SeShipmentRateJson = (_option.Value.ShipEngineGetShipmentCostFromIdPrefixUrl +
+          Model.ShipEngineShipmentId +
+          _option.Value.ShipEngineGetShipmentCostFromIdPostfixUrl).GetJsonFromUrl(
+          requestFilter: webReq =>
+          {
+            webReq.Headers["API-Key"] = _option.Value.ShipEngineApiKey;
+          }, responseFilter: null);
+
+        // Parse the Json document to obtain shipping cost using configured defaults for carrier,
+        // rate type, package type and service code.
+        using (JsonDocument document = JsonDocument.Parse(SeShipmentRateJson))
+        {
+          JsonElement root = document.RootElement;
+          JsonElement ratesElement = root.EnumerateArray().ElementAt(0).GetProperty("rates");
+          foreach (JsonElement rate in ratesElement.EnumerateArray())
+          {
+            if (rate.GetProperty("carrier_id").ValueEquals(_option.Value.ShipEngineDefaultCarrier) &&
+              rate.GetProperty("rate_type").ValueEquals(_option.Value.ShipEngineDefaultRateType) &&
+              rate.GetProperty("package_type").ValueEquals(_option.Value.ShipEngineDefaultPackageType) &&
+              rate.GetProperty("service_code").ValueEquals(_option.Value.ShipEngineDefaultServiceCode))
+            {
+              ShippingCost = decimal.Parse(
+                rate.GetProperty("shipping_amount").GetProperty("amount").ToString());
+              break;
+            }
+          }
+        }
+
+        // Assign shipping carrier and shipping charges to model.
+        Model.ShippingCarrier = _option.Value.ShipEngineDefaultCarrierName;
+        Model.ShippingCharges = ShippingCost;
+
+        try
+        {
+          // Initialize Stripe api key.
+          Stripe.StripeConfiguration.ApiKey = _option.Value.StripeSecretKey;
+          PreviousOrderBillTo = _context.OrderBillTos.OrderByDescending(x => x.Order).FirstOrDefault();
+
+          // If we need to create a Stripe user for the order's customer, create it.
+          if ((_context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(
+            x => x.StripeCustomerId).FirstOrDefault() == null &&
+            PreviousOrderBillTo != null) &&
+            ((PreviousOrderBillTo.NameOnCreditCard == null ? (Model.BillingName == null ||
+            Model.BillingName.Trim().Equals(string.Empty)) :
+            !PreviousOrderBillTo.NameOnCreditCard.Equals(Model.BillingName == null ?
+              string.Empty : Model.BillingName.Trim())) ||
+            (PreviousOrderBillTo.AddressLine1 == null ? (Model.BillingAddress1 == null ||
+            Model.BillingAddress1.Trim().Equals(string.Empty)) :
+            !PreviousOrderBillTo.AddressLine1.Equals(Model.BillingAddress1 == null ?
+              string.Empty : Model.BillingAddress1.Trim())) ||
+            (PreviousOrderBillTo.AddressLine2 == null ? (Model.BillingAddress2 == null ||
+            Model.BillingAddress2.Trim().Equals(string.Empty)) :
+            !PreviousOrderBillTo.AddressLine2.Equals(Model.BillingAddress2 == null ?
+              string.Empty : Model.BillingAddress2.Trim())) ||
+            (PreviousOrderBillTo.CityName == null ? (Model.BillingCity == null ||
+            Model.BillingCity.Trim().Equals(string.Empty)) :
+            !PreviousOrderBillTo.CityName.Equals(Model.BillingCity == null ?
+              string.Empty : Model.BillingCity.Trim())) ||
+            (PreviousOrderBillTo.StateName == null ? (Model.BillingState == null ||
+            Model.BillingState.Trim().Equals(string.Empty)) :
+            !PreviousOrderBillTo.StateName.Equals(Model.BillingState == null ?
+              string.Empty : Model.BillingState.Trim())) ||
+            (PreviousOrderBillTo.CountryName == null ? (Model.BillingCountry == null ||
+            Model.BillingCountry.Trim().Equals(string.Empty)) :
+            !PreviousOrderBillTo.CountryName.Equals(Model.BillingCountry == null ?
+              string.Empty : Model.BillingCountry.Trim())) ||
+            (PreviousOrderBillTo.PostalCode == null ? (Model.BillingPostalCode == null ||
+            Model.BillingPostalCode.Trim().Equals(string.Empty)) :
+            !PreviousOrderBillTo.PostalCode.Equals(Model.BillingPostalCode == null ?
+            string.Empty : Model.BillingPostalCode.Trim()))))
+          {
+            try
+            {
+              // Create and initialize Stripe nested options object using Model data.
+              StCardCreateNestedOptions = new CardCreateNestedOptions()
+              {
+                AddressCity = Model.BillingCity,
+                AddressCountry = Model.BillingCountry,
+                AddressLine1 = Model.BillingAddress1,
+                AddressLine2 = Model.BillingAddress2,
+                AddressState = Model.BillingState,
+                AddressZip = Model.BillingPostalCode,
+                Cvc = Model.CreditCardCVC,
+                ExpMonth = Model.CreditCardExpirationDate.Month,
+                ExpYear = Model.CreditCardExpirationDate.Year,
+                Name = Model.BillingName,
+                Number = Model.CreditCardNumber
+              };
+
+              // Create and initialize Stripe customer create options object.
+              StCustomerCreateOptions = new Stripe.CustomerCreateOptions();
+              StCustomerCreateOptions.Email = User.Identity.Name;
+              StCustomerCreateOptions.Source = StCardCreateNestedOptions;
+              StCustomerCreateOptions.Description = "XO Skin Customer.";
+
+              // Instantiate a Stripe customer service object.
+              StCustomerService = new Stripe.CustomerService();
+              // Create a Stripe customer.
+              StCustomer = StCustomerService.Create(StCustomerCreateOptions);
+
+              // Null credit card information.
+              StCustomerCreateOptions = null;
+              Model.CreditCardNumber = null;
+              Model.CreditCardCVC = null;
+              Model.CreditCardExpirationDate = DateTime.MinValue;
+
+              // TODO: Continue here.
+
+              // Save Stripe customer id to user in database.
+              user = _context.AspNetUsers.Where(
+                x => x.Email.Equals(User.Identity.Name)).FirstOrDefault();
+              user.StripeCustomerId = StCustomer.Id;
+              _context.AspNetUsers.Update(user);
+              _context.SaveChanges();
+            }
+            catch
+            {
+              // In case of error, pass a CardDeclined flag to the ui.
+              Model.CardDeclined = true;
+              Model.CalculatedShippingAndTaxes = true;
+              return RedirectToAction("CalculateShippingCostAndTaxes", Model);
+            }
+          }
+          // If the order's customer already has a Stripe customer id.
+          else
+          {
+            // Instantiate a Stripe customer service object.
+            StCustomerService = new Stripe.CustomerService();
+            // Retrieve Stripe customer using id from database.
+            stCustomer = StCustomerService.Get(_context.AspNetUsers.Where(
+              x => x.Email.Equals(User.Identity.Name)).Select(
+              x => x.StripeCustomerId).FirstOrDefault());
+
+            // Create Stripe token card options object using data from the model
+            stTokenCardOptions = new TokenCardOptions()
+            {
+              AddressCity = Model.BillingCity,
+              AddressCountry = Model.BillingCountry,
+              AddressLine1 = Model.BillingAddress1,
+              AddressLine2 = Model.BillingAddress2,
+              AddressState = Model.BillingState,
+              AddressZip = Model.BillingPostalCode,
+              Cvc = Model.CreditCardCVC,
+              ExpMonth = Model.CreditCardExpirationDate.Month,
+              ExpYear = Model.CreditCardExpirationDate.Year,
+              Name = Model.BillingName,
+              Number = Model.CreditCardNumber
+            };
+            // Create Stripe token create options object using token card options.
+            stTokenCreateOptions = new TokenCreateOptions()
+            {
+              Card = stTokenCardOptions
+            };
+
+            // Instantiate Stripe token service.
+            stTokenService = new TokenService();
+            // Create Stripe token using token create options.
+            stToken = stTokenService.Create(stTokenCreateOptions);
+
+            // Null credit card information.
+            stTokenCreateOptions = null;
+            Model.CreditCardNumber = null;
+            Model.CreditCardCVC = null;
+            Model.CreditCardExpirationDate = DateTime.MinValue;
+
+            // Instantiate a Stripe source create options object.
+            stSourceCreateOptions = new SourceCreateOptions()
+            {
+              Token = stToken.Id,
+              Type = SourceType.Card
+            };
+
+            // Once we instantiate the source create options object using the token id,
+            // we null the token.
+            stToken = null;
+
+            // Instantiate Stripe source service client.
+            stSourceService = new SourceService();
+            // Instantiate Stripe source object using Stripe source create options.
+            stSource = await stSourceService.CreateAsync(stSourceCreateOptions);
+
+            // We attempt to attach our source service client to Stripe.
+            try
+            {
+              stSourceService.Attach(stCustomer.Id, new SourceAttachOptions()
+              {
+                Source = stSource.Id
+              });
+            }
+            catch
+            {
+              // In case of error, pass a CardDeclined flag to the ui.
+              Model.CardDeclined = true;
+              Model.CalculatedShippingAndTaxes = true;
+              return RedirectToAction("CalculateShippingCostAndTaxes", Model);
+            }
+          }
+
+          try
+          {
+            // Instantiate TaxJar (web api used to calculate taxes applicable to the sale) using key in the options configuration.
+            tjService = new TaxjarApi(_option.Value.TaxJarApiKey);
+            // Call TaxJar service to get tax rate information using our order's information.
+            tjTaxRate = tjService.TaxForOrder(new
+            {
+              // This is self-explanatory.
+              amount = (decimal)Model.SubTotal,
+              from_city = _option.Value.ShipFromCity,
+              from_country = _option.Value.ShipFromCountryCode,
+              from_state = _option.Value.ShipFromState,
+              from_street = _option.Value.ShipFromAddressLine1,
+              from_zip = _option.Value.ShipFromPostalCode,
+              line_items = tjLineItem,
+              shipping = shippingCost,
+              to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
+              to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+              to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+              // There is some boolean logic applied to calculating the right street address.
+              to_street = Model.ShippingAddressSame ?
+                (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
+                (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == string.Empty) ? string.Empty :
+                " " + Model.BillingAddress2.Trim())) :
+                (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ||
+                (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == string.Empty) ? string.Empty :
+                " " + Model.ShippingAddress2.Trim())),
+              to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+              // Handles the concept of nexus address(es). See https://quickbooks.intuit.com/r/taxes/nexus-guide/ (Retrieved 12/13/2022.)
+              nexus_addresses = new[]
+              {
+                new
+                {
+                  id = _option.Value.ShipFromName,
+                  country = _option.Value.ShipFromCountryCode,
+                  zip = _option.Value.ShipFromPostalCode,
+                  state = _option.Value.ShipFromState,
+                  city = _option.Value.ShipFromCity,
+                  street = _option.Value.ShipFromAddressLine1
+                }
+              }
+            });
+            // We create a TaxJar order object including information obtained from the previous service call and the actual line items.
+            tjOrder = tjService.CreateOrder(new
+            {
+              transaction_id = Model.OrderId.ToString(),
+              transaction_date = DateTime.UtcNow.ToString(),
+              to_country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+              to_state = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+              to_zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode,
+              to_city = Model.ShippingAddressSame ? Model.BillingCity.Trim() : Model.ShippingCity.Trim(),
+              // Same concept applied to the street address calculation for the order.
+              to_street = Model.ShippingAddressSame ?
+                (Model.BillingAddress1.Trim() + (Model.BillingAddress2 == null ||
+                (Model.BillingAddress2 != null && Model.BillingAddress2.Trim() == string.Empty) ? string.Empty :
+                " " + Model.BillingAddress2.Trim())) :
+                (Model.ShippingAddress1.Trim() + (Model.ShippingAddress2 == null ||
+                (Model.ShippingAddress2 != null && Model.ShippingAddress2.Trim() == string.Empty) ? string.Empty :
+                " " + Model.ShippingAddress2.Trim())),
+              amount = subTotal,
+              lineItems = tjLineItem,
+              // This is the only item we grab from the previous service call.
+              sales_tax = tjTaxRate.AmountToCollect,
+              shipping = shippingCost
+            });
+          }
+          catch
+          {
+            // If the TaxJar-enabling switch on?
+            if (_option.Value.TaxJarEnabled)
+            {
+              // Send a flag to the UI using the view model to indicate that the tax calculation service in unavailable.
+              // A message will be displayed prompting the user to try again in a few minutes or to contact us.
+              Model.TaxCalculationServiceOffline = true;
+              Model.CalculatedShippingAndTaxes = true;
+              return RedirectToAction("CalculateShippingCostAndTaxes", Model);
+            }
+          }
+
+          // If the service is enabled in the configuration file.
+          // This flag is normally set to true, allows us to switch it off from the configuration file in order to 
+          // bypass the service for any given reason.
+          if (_option.Value.TaxJarEnabled)
+          {
+            applicableTaxes = tjOrder.SalesTax;
+          }
+          else
+          {
+            // Sets the tax to a bogus value to remind us that the service is disabled.
+            applicableTaxes = 0.00M;
+          }
+
+          // Pass the applicable taxes to the UI model.
+          Model.Taxes = applicableTaxes;
+
+          Model.CouponDiscount = 0.0M;
+          Model.CodeDiscount = 0.0M;
+
+          // Try to load any specified coupons.
+          coupon = await _context.DiscountCoupons.FindAsync(Model.DiscountCouponId);
+          // If there is a coupon.
+          if (coupon != null)
+          {
+            // Process coupon data according to rules set on the database.
+            couponProduct = _context.DiscountCouponProducts.Where(x => x.Coupon == coupon.Id).ToList();
+            percentage = coupon.DiscountAsInNproductPercentage ?
+            coupon.DiscountNproductPercentage == null ?
+            0.0M : (decimal)coupon.DiscountNproductPercentage : coupon.DiscountAsInGlobalOrderPercentage ?
+            coupon.DiscountGlobalOrderPercentage == null ? 0.0M : (decimal)coupon.DiscountGlobalOrderPercentage :
+              0.0M;
+            minimumNumberOfProducts = coupon.DiscountProductN == null ? (short)0 : (short)coupon.DiscountProductN;
+            minimumPurchase = coupon.MinimumPurchase == null ? 0.0M : (decimal)coupon.MinimumPurchase;
+            selectedProductSubTotal = 0.0M;
+            minimumNumberOfSelectedProductsMet = true;
+            totalNumberOfProducts = 0L;
+
+            // If it's a global order percentage or global order in dollars coupon.
+            if (coupon.DiscountAsInGlobalOrderPercentage || coupon.DiscountAsInGlobalOrderDollars)
+            {
+              // Calculate the total number of products.
+              foreach (ShoppingCartLineItem item in lineItem)
+              {
+                totalNumberOfProducts += item.Quantity;
+              }
+              // If coupon rules are met.
+              if (totalNumberOfProducts >= minimumNumberOfProducts &&
+                Model.SubTotal >= minimumPurchase)
+              {
+                // Apply dollar or percentage discount.
+                if (coupon.DiscountAsInGlobalOrderPercentage)
+                {
+                  Model.CouponDiscount = (Model.SubTotal * (coupon.DiscountGlobalOrderPercentage / 100));
+                }
+                else if (coupon.DiscountAsInGlobalOrderDollars)
+                {
+                  Model.CouponDiscount = coupon.DiscountGlobalOrderDollars;
+                }
+              }
+            }
+            // If it's a discount as in n product percentage or dollars coupon.
+            else if (coupon.DiscountAsInNproductPercentage || coupon.DiscountAsInNproductDollars)
+            {
+              // If a coupon product exists and its count is larger than zero.
+              if (couponProduct != null && couponProduct.Count > 0)
+              {
+                // If there's a minimum purchase required.
+                if (minimumPurchase > 0)
+                {
+                  foreach (DiscountCouponProduct p in couponProduct)
+                  {
+                    // Calculate the subtotal for the selected product.
+                    selectedProductSubTotal += lineItem.Find(x => x.Product == p.Product) == null ?
+                      0.0M : (decimal)lineItem.Find(x => x.Product == p.Product).Total;
+                  }
+                }
+                // For each product related to a coupon.
+                foreach (DiscountCouponProduct p in couponProduct)
+                {
+                  // Determine whether the product quantity is below the minimum number of products for the coupon.
+                  if (!lineItem.Any(x => x.Product == p.Product) || lineItem.Where(
+                    x => x.Product == p.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
+                  {
+                    // If so, set a flag and exit foreach.
+                    minimumNumberOfSelectedProductsMet = false;
+                    break;
+                  }
+                }
+                // If the minimum number of selected products is met and the selected product subtotal is more or
+                // equal to the minimum purchase specified by the coupon rules.
+                if (minimumNumberOfSelectedProductsMet && selectedProductSubTotal >= minimumPurchase)
+                {
+                  // If it's a N product percentage discount.
+                  if (coupon.DiscountAsInNproductPercentage)
+                  {
+                    // Apply discount.
+                    Model.CouponDiscount = _context.Prices.Where(
+                      x => x.Id == (_context.Products.FindAsync(
+                      couponProduct.Last().Product).Result.CurrentPrice)).Select(x => x.Amount).FirstOrDefault() *
+                      (coupon.DiscountNproductPercentage / 100);
+                  }
+                  // N product dollars discount.
+                  else if (coupon.DiscountAsInNproductDollars)
+                  {
+                    // Apply coupon discount.
+                    Model.CouponDiscount = coupon.DiscountInNproductDollars;
+                  }
+                }
+              }
+            }
+          }
+          // If there is a discount code.
+          else if (Model.DiscountCode != null && Model.DiscountCode.Trim().Length > 0)
+          {
+            // Fetch the discount code information from the database.
+            code = _context.DiscountCodes.Where(
+              x => x.Code.Trim().ToUpper().Equals(Model.DiscountCode.Trim().ToUpper())).FirstOrDefault();
+            // If there is discount code information on the database.
+            if (code != null)
+            {
+              // Initialize discount calculation variables.
+              codeProduct = _context.DiscountCodeProducts.Where(x => x.Code == code.Id).ToList();
+              percentage = code.DiscountAsInNproductPercentage ?
+                code.DiscountNproductPercentage == null ?
+                0.0M : (decimal)code.DiscountNproductPercentage : code.DiscountAsInGlobalOrderPercentage ?
+                code.DiscountGlobalOrderPercentage == null ? 0.0M : (decimal)code.DiscountGlobalOrderPercentage :
+                0.0M;
+              minimumNumberOfProducts = code.DiscountProductN == null ? (short)0 : (short)code.DiscountProductN;
+              minimumPurchase = code.MinimumPurchase == null ? 0.0M : (decimal)code.MinimumPurchase;
+              selectedProductSubTotal = 0.0M;
+              minimumNumberOfSelectedProductsMet = true;
+              totalNumberOfProducts = 0L;
+
+              // If the discount code is for a global order discount.
+              if (code.DiscountAsInGlobalOrderPercentage || code.DiscountAsInGlobalOrderDollars)
+              {
+                // Add the items and quantities to obtain the total number of products in the order.
+                foreach (ShoppingCartLineItem item in lineItem)
+                {
+                  totalNumberOfProducts += item.Quantity;
+                }
+
+                // If the total number of products exceeds the minimum set by the discount code, and the 
+                // order subtotal is greater or equal than the minimum purchase set by the same code.
+                if (totalNumberOfProducts >= minimumNumberOfProducts &&
+                  Model.SubTotal >= minimumPurchase)
+                {
+                  // Calculate discounts for globals, percentage or dollars.
+                  if (code.DiscountAsInGlobalOrderPercentage)
+                  {
+                    Model.CodeDiscount = (Model.SubTotal * (code.DiscountGlobalOrderPercentage / 100));
+                  }
+                  else if (code.DiscountAsInGlobalOrderDollars)
+                  {
+                    Model.CodeDiscount = code.DiscountGlobalOrderDollars;
+                  }
+                }
+              }
+              // If the discount code is a n product type.
+              else if (code.DiscountAsInNproductPercentage || code.DiscountAsInNproductDollars)
+              {
+                // Determine whether the discount applies, and if so, then apply it.
+                if (codeProduct != null && codeProduct.Count > 0)
+                {
+                  // If the minimum purchase for this discount code is higher than zero.
+                  if (minimumPurchase > 0)
+                  {
+                    // Add the selected product sub total.
+                    foreach (DiscountCodeProduct p in codeProduct)
+                    {
+                      selectedProductSubTotal += lineItem.Find(x => x.Product == p.Product) == null ?
+                        0.0M : (decimal)lineItem.Find(x => x.Product == p.Product).Total;
+                    }
+                  }
+                  // Check if the cart has the product featured in the discount code and
+                  // if the minumum number of products is met.
+                  foreach (DiscountCodeProduct p in codeProduct)
+                  {
+                    if (!lineItem.Any(x => x.Product == p.Product) || lineItem.Where(
+                      x => x.Product == p.Product).FirstOrDefault().Quantity <= minimumNumberOfProducts)
+                    {
+                      // If not, set a flag.
+                      minimumNumberOfSelectedProductsMet = false;
+                      break;
+                    }
+                  }
+                  // If the correct flags have been set and the subtotal of selected products is 
+                  // above the minimum purchase.
+                  if (minimumNumberOfSelectedProductsMet && selectedProductSubTotal >= minimumPurchase)
+                  {
+                    // Apply the correct discount according to code discount rules in the db.
+                    // Product percentage discount.
+                    if (code.DiscountAsInNproductPercentage)
+                    {
+                      Model.CodeDiscount = _context.Prices.Where(
+                        x => x.Id == (_context.Products.FindAsync(
+                        codeProduct.Last().Product).Result.CurrentPrice)).Select(x => x.Amount).FirstOrDefault() *
+                        (code.DiscountNproductPercentage / 100);
+                    }
+                    // Dollar discount.
+                    else if (code.DiscountAsInNproductDollars)
+                    {
+                      Model.CodeDiscount = code.DiscountInNproductDollars;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          // Set discount(s).
+          codeDiscount = Model.CodeDiscount == null ? 0.0M : (decimal)Model.CodeDiscount;
+          couponDiscount = Model.CouponDiscount == null ? 0.0M : (decimal)Model.CouponDiscount;
+          // Apply to total.
+          total = subTotal - codeDiscount - couponDiscount + shippingCost + applicableTaxes;
+          // Set meta data for Stripe transaction.
+          stCreditTransactionMetaValue = new Dictionary<string, string>();
+          stCreditTransactionMetaValue.Add("ProductOrderId", order.Id.ToString());
+          stCreditTransactionMetaValue.Add("UserIdentityName", User.Identity.Name);
+          // Create and initialize a Stripe charge creation options object.
+          stChargeCreateOptions = new ChargeCreateOptions()
+          {
+            Amount = (long?)total * 100, // Stripe encodes dollar amounts as a nullable long.
+            Currency = "usd",
+            Description = "Total charges for an XO Skin customer order #XO" +
+              (order.Id + 10000).ToString() +
+              ". Customer: " + User.Identity.Name + ".",
+            Metadata = stCreditTransactionMetaValue,
+            ReceiptEmail = User.Identity.Name,
+            Customer = stCustomer.Id
+          };
+          // Create and initialize Stripe charge service.
+          stChargeService = new Stripe.ChargeService();
+          stCharge = stChargeService.Create(stChargeCreateOptions);
+          // If charge to cc succeeded.
+          if (stCharge.Status.Equals("succeeded"))
+          {
+            // Set values to persist to db.
+            order.StripeChargeId = stCharge.Id;
+            order.StripeChargeStatus = stCharge.Status;
+            Model.BilledOn = stCharge.Created;
+          }
+          else
+          {
+            // Pass the appropriate flags to the UI.
+            Model.CardDeclined = true;
+            Model.CalculatedShippingAndTaxes = true;
+            return RedirectToAction("CalculateShippingCostAndTaxes", Model);
+          }
+
+          // Populate Stripe customer object using data stored in the db.
+          stCustomer = stCustomerService.Get(_context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.StripeCustomerId).FirstOrDefault());
+          // If the object has been correctly initialized.
+          if (stCustomer.Sources != null)
+          {
+            // Create and initiaze Stripe "source" (financial instrument) service.
+            stSourceService = new SourceService();
+            foreach (Source s in stCustomer.Sources)
+            {
+              // Done with all sources so we detach them.
+              stSourceService.Detach(stCustomer.Id, s.Id);
+            }
+          }
+        }
+        catch
+        {
+          // Any errors related to the transaction return the following flags to the UI.
+          Model.CardDeclined = true;
+          Model.CalculatedShippingAndTaxes = true;
+          return RedirectToAction("CalculateShippingCostAndTaxes", Model);
+        }
+
+        // At this point the order has been charged to the customer-specified instrument.
+        // we now proceed to record all the information related to the transaction
+        // to both our db and Shopify.
+
+        // Create and add shipping line (shipping data) to Shopify order object.
+        shOrder.ShippingLines = new List<ShippingLine>()
+          {
+            new ShippingLine()
+            {
+              PriceSet = new PriceSet()
+              {
+                PresentmentMoney = new ShopifySharp.Price()
+                {
+                  Amount = shippingCost,
+                  CurrencyCode = stCharge.Currency
+                },
+                ShopMoney = new ShopifySharp.Price()
+                {
+                  Amount = shippingCost,
+                  CurrencyCode = stCharge.Currency
+                }
+              },
+              Title = _option.Value.ShopifyShippingLineTitle,
+              Code = _option.Value.ShopifyShippingLineCode,
+              Source = _option.Value.ShopifyShippingLineSource,
+              Price = shippingCost
+            }
+          };
+        // Set tax information to the Shopify object.
+        shOrder.EstimatedTaxes = false;
+        shOrder.TotalTax = applicableTaxes;
+        shOrder.TotalTaxSet = new PriceSet()
+        {
+          PresentmentMoney = new ShopifySharp.Price()
+          {
+            Amount = applicableTaxes,
+            CurrencyCode = stCharge.Currency
+          },
+          ShopMoney = new ShopifySharp.Price()
+          {
+            Amount = applicableTaxes,
+            CurrencyCode = stCharge.Currency
+          }
+        };
+        // Create and add tax line (shipping data) to Shopify order object.
+        shOrder.TaxLines = new List<TaxLine>()
+          {
+            new TaxLine()
+            {
+              Price = applicableTaxes,
+              PriceSet = new PriceSet()
+              {
+                PresentmentMoney = new ShopifySharp.Price()
+                {
+                  Amount = applicableTaxes,
+                  CurrencyCode = stCharge.Currency
+                },
+                ShopMoney = new ShopifySharp.Price()
+                {
+                  Amount = applicableTaxes,
+                  CurrencyCode = stCharge.Currency
+                }
+              },
+              Rate = applicableTaxes,
+              Title = "Sales tax calculation performed by Taxjar."
+            }
+          };
+        // Add payment processor information to Shopify order object.
+        shOrder.PaymentGatewayNames = new List<string>()
+          {
+            "Stripe"
+          };
+        shOrder.ProcessingMethod = "Stripe payment gateway.";
+        shOrder.SubtotalPrice = subTotal;
+        shOrder.SubtotalPriceSet = new PriceSet()
+        {
+          PresentmentMoney = new ShopifySharp.Price()
+          {
+            Amount = subTotal,
+            CurrencyCode = stCharge.Currency
+          },
+          ShopMoney = new ShopifySharp.Price()
+          {
+            Amount = subTotal,
+            CurrencyCode = stCharge.Currency
+          }
+        };
+        // Add line item totals to Shopify order object.
+        shOrder.TotalLineItemsPrice = subTotal;
+        shOrder.TotalLineItemsPriceSet = new PriceSet()
+        {
+          PresentmentMoney = new ShopifySharp.Price()
+          {
+            Amount = subTotal,
+            CurrencyCode = stCharge.Currency
+          },
+          ShopMoney = new ShopifySharp.Price()
+          {
+            Amount = subTotal,
+            CurrencyCode = stCharge.Currency
+          }
+        };
+        // Do the same for total price.
+        shOrder.TotalPrice = total;
+        shOrder.TotalPriceSet = new PriceSet()
+        {
+          PresentmentMoney = new ShopifySharp.Price()
+          {
+            Amount = total,
+            CurrencyCode = stCharge.Currency
+          },
+          ShopMoney = new ShopifySharp.Price()
+          {
+            Amount = total,
+            CurrencyCode = stCharge.Currency
+          }
+        };
+        // And shipping price.
+        shOrder.TotalShippingPriceSet = new PriceSet()
+        {
+          PresentmentMoney = new ShopifySharp.Price
+          {
+            Amount = shippingCost,
+            CurrencyCode = stCharge.Currency
+          },
+          ShopMoney = new ShopifySharp.Price()
+          {
+            Amount = shippingCost,
+            CurrencyCode = stCharge.Currency
+          }
+        };
+
+        // Add coupon discount information to Shopify order object.
+        if (Model.CouponDiscount != null && Model.CouponDiscount > 0)
+        {
+          discountCode = new List<ShopifySharp.DiscountCode>();
+          discountCode.Add(new ShopifySharp.DiscountCode()
+          {
+            Amount = ((decimal)Model.CouponDiscount).ToString(),
+            Code = Model.DiscountCouponId.ToString(),
+            Type = "Discount Coupon Id"
+          });
+          shOrder.DiscountCodes = discountCode;
+          shOrder.TotalDiscounts = Model.CouponDiscount;
+          shOrder.TotalDiscountsSet = new PriceSet()
+          {
+            PresentmentMoney = new ShopifySharp.Price()
+            {
+              Amount = Model.CouponDiscount,
+              CurrencyCode = stCharge.Currency
+            },
+            ShopMoney = new ShopifySharp.Price()
+            {
+              Amount = Model.CouponDiscount,
+              CurrencyCode = stCharge.Currency
+            }
+          };
+        }
+        // Add code discount information to Shopify order object.
+        else if (Model.CodeDiscount != null && Model.CodeDiscount > 0)
+        {
+          discountCode = new List<ShopifySharp.DiscountCode>();
+          discountCode.Add(new ShopifySharp.DiscountCode()
+          {
+            Amount = ((decimal)Model.CodeDiscount).ToString(),
+            Code = Model.DiscountCode,
+            Type = "Discount Code"
+          });
+          shOrder.DiscountCodes = discountCode;
+          shOrder.TotalDiscounts = Model.CodeDiscount;
+          shOrder.TotalDiscountsSet = new PriceSet()
+          {
+            PresentmentMoney = new ShopifySharp.Price()
+            {
+              Amount = Model.CodeDiscount,
+              CurrencyCode = stCharge.Currency
+            },
+            ShopMoney = new ShopifySharp.Price()
+            {
+              Amount = Model.CodeDiscount,
+              CurrencyCode = stCharge.Currency
+            }
+          };
+        }
+
+        // Set remaining properties of the Shopify order object prior to submitting data to 
+        // Shopify.
+        shOrder.PresentmentCurrency = stCharge.Currency.ToUpper();
+        shOrder.Currency = stCharge.Currency.ToUpper();
+        shOrder.Name = "#XO" + (order.Id + 10000).ToString();
+        shOrder.OrderStatusUrl = _option.Value.ShopifyOrderStatusUrl + order.Id.ToString();
+        shOrder.CreatedAt = DateTime.UtcNow;
+        shOrder.LineItems = ShLineItemList;
+        shOrder.Test = false;
+        shOrder.TaxesIncluded = false;
+        shOrder.Test = false;  // Switch to "true" for testing against a production store.
+        shOrder.Customer = await shCustomerService.GetAsync((long)_context.AspNetUsers.Where(
+          x => x.Email.Equals(User.Identity.Name)).Select(x => x.ShopifyCustomerId).FirstOrDefault());
+        shOrder.FinancialStatus = "pending";
+        shOrder.Transactions = new List<Transaction>()
+          {
+            new Transaction()
+            {
+              Amount = total,
+              Kind = "authorization",
+              Status = "success",
+              CreatedAt = stCharge.Created,
+              Currency = stCharge.Currency.ToUpper(),
+              DeviceId = shOrder.DeviceId.ToString(),
+              Gateway = shOrder.PaymentGatewayNames.FirstOrDefault(),
+              LocationId = shOrder.LocationId,
+              MaximumRefundable = subTotal + applicableTaxes,
+              Message = "Transaction authorized by Stripe on behalf of XO Skin.",
+              Source = shOrder.SourceName,
+              Authorization = stCharge.AuthorizationCode
+            }
+          };
+        // Store the customer's ip address for future reference.
+        shOrder.BrowserIp = clientIpAddress;
+        // Set Shopify order billing address for the order.
+        shOrder.BillingAddress = new ShopifySharp.Address()
+        {
+          Address1 = stCharge.BillingDetails.Address.Line1 == null ? string.Empty :
+            stCharge.BillingDetails.Address.Line1,
+          Address2 = stCharge.BillingDetails.Address.Line2 == null ? string.Empty :
+            stCharge.BillingDetails.Address.Line2,
+          City = stCharge.BillingDetails.Address.City == null ? string.Empty :
+            stCharge.BillingDetails.Address.City,
+          Country = stCharge.BillingDetails.Address.Country == null ? string.Empty :
+            stCharge.BillingDetails.Address.Country,
+          Name = stCharge.BillingDetails.Name == null ? string.Empty : stCharge.BillingDetails.Name,
+          Phone = stCharge.BillingDetails.Phone == null ? string.Empty : stCharge.BillingDetails.Phone,
+          Province = stCharge.BillingDetails.Address.State == null ? string.Empty :
+            stCharge.BillingDetails.Address.State,
+          Zip = stCharge.BillingDetails.Address.PostalCode == null ? string.Empty :
+            stCharge.BillingDetails.Address.PostalCode
+        };
+        // Set Shopify order shipping address for the order.
+        shOrder.ShippingAddress = new ShopifySharp.Address()
+        {
+          Address1 = Model.ShippingAddressSame ? Model.BillingAddress1 : Model.ShippingAddress1,
+          Address2 = Model.ShippingAddressSame ? Model.BillingAddress2 : Model.ShippingAddress2,
+          City = Model.ShippingAddressSame ? Model.BillingCity : Model.ShippingCity,
+          Country = Model.ShippingAddressSame ? Model.BillingCountry : Model.ShippingCountry,
+          Name = Model.ShippingAddressSame ? Model.BillingName : Model.ShippingName,
+          Phone = _context.AspNetUsers.Where(
+            x => x.Email.Equals(
+              User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault() == null ?
+            string.Empty : _context.AspNetUsers.Where(
+            x => x.Email.Equals(User.Identity.Name)).Select(x => x.PhoneNumber).FirstOrDefault(),
+          Province = Model.ShippingAddressSame ? Model.BillingState : Model.ShippingState,
+          Zip = Model.ShippingAddressSame ? Model.BillingPostalCode : Model.ShippingPostalCode
+        };
+        // Submit order to Shopify.
+        shOrder = await shOrderService.CreateAsync(shOrder);
+
+        // Get the Shopify order id from the Shopify order object and save it to persist it to the db.
+        order.ShopifyId = shOrder.Id;
+        // Get the Shopify order transactions from the Shopify transaction service.
+        shOrderTransactions = shTransactionService.ListAsync((long)shOrder.Id).Result.ToList();
+        // Create a new Shopify transaction object using information from the Shopify order transaction object,
+        // and other Shopify objects.
+        shTransaction = new Transaction()
+        {
+          Kind = "capture",
+          Gateway = "manual",
+          Amount = total,
+          ParentId = shOrderTransactions.FirstOrDefault().Id,
+          Status = "success",
+          Currency = stCharge.Currency.ToUpper(),
+          Authorization = stCharge.AuthorizationCode,
+          CreatedAt = stCharge.Created,
+          DeviceId = shOrderTransactions.FirstOrDefault().DeviceId,
+          LocationId = shOrder.LocationId,
+          MaximumRefundable = subTotal + applicableTaxes,
+          Message = "Transaction captured by Stripe on behalf of XO Skin.",
+          OrderId = shOrder.Id,
+          Source = shOrderTransactions.FirstOrDefault().Source,
+        };
+        // Populate Shopify transaction object with data obtained from the Shopify transaction service.
+        shTransaction = await shTransactionService.CreateAsync((long)shOrder.Id, shTransaction);
+      }
+      catch (Exception ex)
+      {
+        // This will be caught by the parent catch.
+        throw new Exception("An error was encountered while writing order to Shopify.", ex);
+      }
+      // Populated order db object fields.
+      order.DatePlaced = DateTime.UtcNow;
+      order.Subtotal = subTotal;
+      order.ApplicableTaxes = applicableTaxes;
+      order.CodeDiscount = codeDiscount;
+      order.CouponDiscount = couponDiscount;
+      order.GiftOrder = Model.IsGift;
+      order.ShippingCost = shippingCost;
+      order.Total = total;
+      order.Completed = true;
+      // Flag order data to be written the db.
+      _context.ProductOrders.Update(order);
+      // Write flagged order data to the db.
+      _context.SaveChanges();
+    }
+
+    private void PopulateUIModelWithShopifyDataAndInitializeLineItems(ref Models.CheckoutViewModel Model, 
+      ref ORM.ProductOrder Order, ref ShopifySharp.Order ShOrder)
+    {
+      // Populate the ui model with data obtained from Shopify. 
+      Model.OrderId = Order.Id;
+      Model.ShopifyId = (long)ShOrder.Id;
+      // Initialize ui model line items.
+      Model.LineItem = new List<XOSkinWebApp.Models.ShoppingCartLineItemViewModel>();
+    }
+
+    private async Task<XOSkinWebApp.Models.CheckoutViewModel> PersistOrderLineItemsToDatabase(
       ProductOrder Order, ORM.Product Product, 
       long OriginalProductStock, ShopifySharp.Product ShProduct, 
       ProductVariant ShProductVariant, ShopifySharp.ProductService ShProductService,
