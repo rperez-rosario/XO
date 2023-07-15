@@ -2,6 +2,8 @@
 This private project repository houses source code and project documents for the XO Skin Project. 
 Including, but not limited to, the electronic commerce web application.
 
+<img width="1825" alt="XOSkinWebApp Dependency Graph" src="https://github.com/rperez-rosario/XO/assets/24212098/ad4adbdc-24ef-464a-90ea-638d1bc0ea97">
+
 # Getting Started
 1.	Installation process:
 
