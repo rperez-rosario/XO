@@ -59,8 +59,3 @@ entities as needed.
 4. Web or folder deploy to IIS or Azure Cloud App (.NET Core 5.0 application pool), 
 configure appsettings.json as needed.
 5. Access using a web browser or build and execute Visual Studio solution.
-
-# Contribute
-You can review the existing codebase at any time and point out any discrepancies to 
-rperezrosario@outlook.com. There is a ProjectDocuments folder that can be used as a general 
-private repository for project documents accessible to all team members.
