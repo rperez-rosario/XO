@@ -1,5 +1,5 @@
 # Introduction 
-An e-commerce web application built using SQL Server, EF, ASP. NET Core MVC, C#, Javascript and an assortment of libraries and web services.
+An e-commerce web application built using SQL Server, EF, ASP. NET Core MVC, C#, Javascript and an assortment of other libraries and web services.
 
 Data Entity Relationship Diagram
 <img width="2003" alt="XO Skin Web Commerce App ER Diagram" src="https://github.com/rperez-rosario/XO/assets/24212098/d28323fe-9f93-4088-b1fe-fd4ee1752e6e">
